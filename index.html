@@ -36,7 +36,32 @@
             padding: 25px 15px;
         }
 
-        .app-container { width: 100%; max-width: 750px; position: relative; }
+        .app-container { width: 100%; max-width: 800px; position: relative; }
+
+        .header-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .lang-select-container {
+            position: absolute;
+            right: 0;
+            top: 5px;
+        }
+
+        .lang-select {
+            background: rgba(28, 37, 65, 0.8);
+            border: 1px solid var(--folder-border);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+        }
 
         .screen { display: none; animation: fadeIn 0.3s ease-in-out; }
         .screen.active { display: block; }
@@ -50,10 +75,9 @@
             font-size: 28px;
             font-weight: 700;
             color: var(--text-main);
-            margin-bottom: 25px;
             text-align: center;
-            padding-top: 10px;
             letter-spacing: 0.5px;
+            flex-grow: 1;
         }
 
         .glass-box {
@@ -237,42 +261,97 @@
         @keyframes spin { to { transform: rotate(360deg); } }
 
         .folder-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 25px; }
-        .list-item { background: rgba(11, 19, 43, 0.7); border: 1px solid var(--folder-border); border-radius: 16px; padding: 18px; margin-bottom: 15px; }
-        .list-header { display: flex; justify-content: space-between; align-items: center; }
-        .list-title { font-size: 16px; font-weight: 600; color: var(--accent-glow); }
-        .list-date { font-size: 12px; color: var(--text-sub); }
-        .thumb-group { display: flex; gap: 12px; margin-top: 14px; }
-        .thumb-group img { width: 130px; aspect-ratio: 16/9; border-radius: 8px; object-fit: cover; cursor: pointer; border: 1px solid rgba(255,255,255,0.15); }
+        
+        .list-item { 
+            background: rgba(11, 19, 43, 0.85); 
+            border: 1px solid var(--folder-border); 
+            border-radius: 20px; 
+            padding: 22px; 
+            margin-bottom: 25px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+        }
+        .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .list-title { font-size: 20px; font-weight: 700; color: var(--accent-glow); }
+        .list-date { font-size: 13px; color: var(--text-sub); }
+        
+        .large-thumb-group { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 16px; 
+            margin-top: 15px; 
+            margin-bottom: 15px;
+        }
+        .large-thumb-group img { 
+            width: 100%; 
+            max-height: 400px;
+            border-radius: 14px; 
+            object-fit: cover; 
+            cursor: pointer; 
+            border: 2px solid rgba(255,255,255,0.15); 
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+        .large-thumb-group img:hover {
+            transform: scale(1.02);
+            border-color: var(--accent-glow);
+        }
 
-        .item-actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
-        .btn-action { padding: 8px 14px; border-radius: 8px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; }
+        .item-actions { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        .btn-action { padding: 10px 16px; border-radius: 10px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-action-copy { background: #2a9d8f; color: #fff; }
         .btn-action-download { background: var(--primary-blue); color: #fff; }
         .btn-action-delete { background: var(--danger-red); color: #fff; }
 
-        .image-viewer-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.9); z-index: 10000; display: none; align-items: center; justify-content: center; flex-direction: column; padding: 20px; }
-        .image-viewer-modal img { max-width: 95%; max-height: 85vh; border-radius: 12px; object-fit: contain; }
+        .image-viewer-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.95); z-index: 10000; display: none; align-items: center; justify-content: center; flex-direction: column; padding: 20px; }
+        .image-viewer-modal img { max-width: 98%; max-height: 90vh; border-radius: 12px; object-fit: contain; }
         .image-viewer-close { position: absolute; top: 20px; right: 25px; color: #fff; font-size: 30px; background: rgba(255,255,255,0.2); border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; }
 
-        /* ЭКИ ПАПКА ЖАНА ИЗДӨӨ ЖӨНҮНДӨ СТИЛДЕР */
         .folder-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
         .tab-btn { flex: 1; padding: 12px; background: rgba(11, 19, 43, 0.6); border: 1px solid var(--folder-border); border-radius: 12px; color: var(--text-sub); font-weight: 600; cursor: pointer; text-align: center; transition: all 0.2s; }
         .tab-btn.active { background: var(--primary-blue); color: #fff; border-color: var(--primary-blue); }
 
-        .search-container { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .search-input { flex: 2; min-width: 200px; padding: 12px 16px; background: rgba(11, 19, 43, 0.6); border: 1px solid var(--folder-border); border-radius: 12px; color: var(--text-main); font-size: 14px; outline: none; }
-        .search-select { flex: 1; min-width: 150px; padding: 12px 16px; background: rgba(11, 19, 43, 0.6); border: 1px solid var(--folder-border); border-radius: 12px; color: var(--text-main); font-size: 14px; outline: none; }
+        .search-container { display: flex; gap: 10px; margin-bottom: 15px; }
+        .search-input { width: 100%; padding: 14px 18px; background: rgba(11, 19, 43, 0.6); border: 1px solid var(--folder-border); border-radius: 12px; color: var(--text-main); font-size: 15px; outline: none; }
 
-        .excel-table-container { overflow-x: auto; background: rgba(11, 19, 43, 0.6); border: 1px solid var(--folder-border); border-radius: 12px; }
+        /* ИМПОРТТОЛГОН ТОЛУК EXCEL ТАБЛИЦА СИСТЕМАСЫ */
+        .excel-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(28, 37, 65, 0.8);
+            padding: 12px 18px;
+            border-radius: 12px 12px 0 0;
+            border: 1px solid var(--folder-border);
+            border-bottom: none;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .excel-table-container { 
+            overflow-x: auto; 
+            background: rgba(11, 19, 43, 0.8); 
+            border: 1px solid var(--folder-border); 
+            border-radius: 0 0 12px 12px; 
+        }
+
         .excel-table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; }
-        .excel-table th, .excel-table td { padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .excel-table th { background: rgba(28, 37, 65, 0.9); color: var(--accent-glow); font-weight: 600; }
-        .excel-table tr:hover { background: rgba(255,255,255,0.03); }
-        .mini-thumb { width: 45px; height: 30px; object-fit: cover; border-radius: 4px; cursor: pointer; }
+        .excel-table th, .excel-table td { padding: 14px 18px; border: 1px solid rgba(255,255,255,0.08); }
+        .excel-table th { 
+            background: rgba(28, 37, 65, 0.95); 
+            color: var(--accent-glow); 
+            font-weight: 600; 
+            cursor: pointer; 
+            user-select: none;
+        }
+        .excel-table th:hover { background: var(--folder-hover); }
+        .excel-table tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+        .excel-table tr:hover { background: rgba(58, 134, 255, 0.1); }
+
+        .copy-all-btn { width: 100%; background: #2a9d8f; color: #fff; border: none; padding: 14px; border-radius: 12px; font-weight: 600; cursor: pointer; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; }
+        .copy-all-btn:hover { background: #218377; }
     </style>
 </head>
 <body>
 
-    <!-- SVG ИКОНКАЛАР -->
     <svg style="display: none;">
         <symbol id="icon-folder" viewBox="0 0 24 24">
             <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
@@ -290,38 +369,47 @@
 
     <div class="app-container">
 
+        <!-- ЖОГОРКУ БАШКЫ ТИЛ ТАНДОО БӨЛҮМҮ -->
+        <div class="header-top-bar">
+            <h1 class="header-title" id="txtMainAppTitle">Байту закат</h1>
+            <div class="lang-select-container">
+                <select id="langSelector" class="lang-select" onchange="changeLanguage(this.value)">
+                    <option value="ky">Кыргызча</option>
+                    <option value="ru">Русский</option>
+                </select>
+            </div>
+        </div>
+
         <!-- 0-ЭКРАН: БАШКЫ ЭКРАН -->
         <div id="screenMainMenu" class="screen">
-            <h1 class="header-title">Байту закат</h1>
             <div class="main-menu-layout">
                 <div>
-                    <div class="hero-folder-title-outer">Байту закатка съемка</div>
+                    <div class="hero-folder-title-outer" id="txtHeroSub">Байту закатка съемка</div>
                     <div class="hero-folder-card" onclick="navigateTo('screenRegName')">
                         <svg class="hero-folder-icon" style="fill: #3a86ff;"><use href="#icon-folder"/></svg>
-                        <div class="hero-folder-name">Каттоо</div>
+                        <div class="hero-folder-name" id="txtRegisterBtn">Каттоо</div>
                     </div>
                 </div>
 
                 <div class="bottom-nav-bar">
                     <button class="nav-btn-item" onclick="accessAdminPanel()">
                         <svg class="nav-btn-icon"><use href="#icon-admin"/></svg>
-                        <span>Админ</span>
+                        <span id="txtAdminBtn">Админ</span>
                     </button>
                     <a href="https://wa.me/996999114003" target="_blank" class="nav-btn-item whatsapp">
                         <svg class="nav-btn-icon"><use href="#icon-phone"/></svg>
-                        <span>Куратор менен байланышуу</span>
+                        <span id="txtCuratorBtn">Куратор менен байланышуу</span>
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- 1-ЭКРАН: БАЛАНЫН Ф.И.О. КИРГИЗҮҮ -->
+        <!-- 1-ЭКРАН: Ф.И.О. КИРГИЗҮҮ -->
         <div id="screenRegName" class="screen">
-            <h2 class="header-title">Каттоо</h2>
             <div class="glass-box">
-                <h3 style="margin-bottom: 20px; font-weight: 500;">Маалымат киргизүү</h3>
+                <h3 style="margin-bottom: 20px; font-weight: 500;" id="txtInputTitle">Маалымат киргизүү</h3>
                 <div class="input-group">
-                    <label>Баланын Ф.И.О.:</label>
+                    <label id="lblChildName">Баланын Ф.И.О.:</label>
                     <input type="text" id="childNameInput" placeholder="Ф.И.О. жазыңыз..." autocomplete="off">
                 </div>
                 <button id="nameNextBtn" class="btn btn-blue" onclick="proceedToInstructionStep()">Улантуу →</button>
@@ -333,26 +421,25 @@
 
         <!-- 1.5-ЭКРАН: СҮРӨТ ТАРТУУ НУСКАМАСЫ -->
         <div id="screenRegInstruction" class="screen">
-            <h2 class="header-title">Сүрөт тартуу эрежеси</h2>
             <div class="glass-box" style="text-align: center;">
-                <p style="font-size: 14px; margin-bottom: 15px; color: var(--text-main);">
+                <p style="font-size: 14px; margin-bottom: 15px; color: var(--text-main);" id="txtInstructionHeader">
                     Сүрөттөрдү туура тартуу үчүн төмөндөгү эрежени сактаңыз:
                 </p>
                 <div class="instruction-grid">
                     <div class="instruction-card bad">
                         <div class="phone-mockup-frame vertical"><div class="phone-screen-fill"></div></div>
-                        <div class="instruction-badge bad-badge">❌ Мынтип тартпаңыз</div>
-                        <div class="instruction-desc">Тигинен (вертикалдуу) тартууга болбойт</div>
+                        <div class="instruction-badge bad-badge" id="badgeBad">❌ Мынтип тартпаңыз</div>
+                        <div class="instruction-desc" id="descBad">Тигинен (вертикалдуу) тартууга болбойт</div>
                     </div>
                     <div class="instruction-card good">
                         <div class="phone-mockup-frame horizontal"><div class="phone-screen-fill"></div></div>
-                        <div class="instruction-badge good-badge">✅ Ушунтип тартыңыз</div>
-                        <div class="instruction-desc">Туурасынан (горизонталдуу) тартыңыз</div>
+                        <div class="instruction-badge good-badge" id="badgeGood">✅ Ушунтип тартыңыз</div>
+                        <div class="instruction-desc" id="descGood">Туурасынан (горизонталдуу) тартыңыз</div>
                     </div>
                 </div>
                 <label class="checkbox-container" for="understandCheckbox">
                     <input type="checkbox" id="understandCheckbox" onchange="toggleInstructionBtn()">
-                    <span class="checkbox-label">Тартуу эрежесин түшүндүм</span>
+                    <span class="checkbox-label" id="lblUnderstand">Тартуу эрежесин түшүндүм</span>
                 </label>
                 <button id="instructionNextBtn" class="btn btn-blue" disabled onclick="proceedToPhotoStepFinal()">Улантуу →</button>
             </div>
@@ -362,7 +449,7 @@
         <div id="screenRegPhoto" class="screen">
             <div class="glass-box">
                 <h3 id="displayName" style="color: var(--accent-glow); margin-bottom: 8px; font-weight: 600;"></h3>
-                <p style="font-size: 13px; color: var(--text-sub);">
+                <p style="font-size: 13px; color: var(--text-sub);" id="txtPhotoRule">
                     Сүрөттөрдү <b>горизонталдуу (туурасынан)</b> тартыңыз: белинен өйдө жана толук бою түшкөн болушу керек.
                 </p>
 
@@ -370,7 +457,7 @@
                     <div id="photoCard1" class="photo-slot-card" onclick="triggerCamera(1)">
                         <div class="photo-slot-box" id="box1"><div class="photo-slot-plus" id="icon1">+</div></div>
                         <div class="photo-slot-info">
-                            <div class="photo-slot-title">Белинен өйдө түшкөн</div>
+                            <div class="photo-slot-title" id="lblPhoto1Title">Белинен өйдө түшкөн</div>
                             <div class="photo-slot-status" id="status1" style="margin-top:4px;">ⓘ Сүрөт кошуу &gt;</div>
                         </div>
                     </div>
@@ -378,7 +465,7 @@
                     <div id="photoCard2" class="photo-slot-card" onclick="triggerCamera(2)">
                         <div class="photo-slot-box" id="box2"><div class="photo-slot-plus" id="icon2">+</div></div>
                         <div class="photo-slot-info">
-                            <div class="photo-slot-title">Толук бою түшкөн</div>
+                            <div class="photo-slot-title" id="lblPhoto2Title">Толук бою түшкөн</div>
                             <div class="photo-slot-status" id="status2" style="margin-top:4px;">ⓘ Сүрөт кошуу &gt;</div>
                         </div>
                     </div>
@@ -386,7 +473,7 @@
 
                 <div id="photoErrorWhatsAppContainer" style="display: none; margin-bottom: 15px; text-align: center;">
                     <p id="photoErrorMessageText" style="font-size: 13px; color: var(--danger-red); margin-bottom: 10px;"></p>
-                    <a href="https://wa.me/996999114003" target="_blank" class="btn btn-whatsapp">💬 Кантип туура тартса болорун билүү үчүн куратордон сураңыз</a>
+                    <a href="https://wa.me/996999114003" target="_blank" class="btn btn-whatsapp" id="btnAskCurator">💬 Кантип туура тартса болорун билүү үчүн куратордон сураңыз</a>
                 </div>
 
                 <button id="saveRegBtn" class="btn-yellow-main" style="opacity: 0.4; cursor: not-allowed;" disabled onclick="saveRegistration()">Каттоо</button>
@@ -396,94 +483,105 @@
         <!-- 3-ЭКРАН: АДМИН МЕНЮСУ -->
         <div id="screenAdminMenu" class="screen">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h2 class="header-title" style="margin: 0; text-align: left;">Администратор Панели</h2>
-                <button class="btn-action btn-action-delete" onclick="adminLogout()" style="padding: 10px 16px; font-size: 13px;">🚪 Чыгуу</button>
+                <h2 style="margin: 0; text-align: left;" id="txtAdminPanelTitle">Администратор Панели</h2>
+                <button class="btn-action btn-action-delete" onclick="adminLogout()" style="padding: 10px 16px; font-size: 13px;" id="btnLogout">🚪 Чыгуу</button>
             </div>
             
             <div class="folder-grid">
                 <div class="folder-card" style="flex-direction: column; align-items: flex-start;" onclick="navigateTo('screenAdminRegistered')">
                     <svg class="folder-svg-icon" style="fill: #00f5d4;"><use href="#icon-folder"/></svg>
                     <div>
-                        <div class="folder-name">Катталгандар</div>
-                        <div class="folder-desc">Катталган колдонуучулар</div>
+                        <div class="folder-name" id="folderRegTitle">Катталгандар</div>
+                        <div class="folder-desc" id="folderRegDesc">Катталган колдонуучулар</div>
                     </div>
                 </div>
 
                 <div class="folder-card" style="flex-direction: column; align-items: flex-start;" onclick="navigateTo('screenAdminSettings')">
                     <svg class="folder-svg-icon" style="fill: #ffb703;"><use href="#icon-folder"/></svg>
                     <div>
-                        <div class="folder-name">Жөндөөлөр</div>
-                        <div class="folder-desc">Системалык жөндөөлөр</div>
+                        <div class="folder-name" id="folderSetTitle">Жөндөөлөр</div>
+                        <div class="folder-desc" id="folderSetDesc">Системалык жөндөөлөр</div>
                     </div>
                 </div>
 
                 <div class="folder-card" style="flex-direction: column; align-items: flex-start;" onclick="navigateTo('screenAdminCurators')">
                     <svg class="folder-svg-icon" style="fill: #4cc9f0;"><use href="#icon-folder"/></svg>
                     <div>
-                        <div class="folder-name">Кураторлор</div>
-                        <div class="folder-desc">Кураторлордун тизмеси</div>
+                        <div class="folder-name" id="folderCurTitle">Кураторлор</div>
+                        <div class="folder-desc" id="folderCurDesc">Кураторлордун тизмеси</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 4-ЭКРАН: КАТТАЛГАНДАР (ЖАҢЫЛАМАСЫ: ИЗДӨӨ ЖАНА 2 ПАПКА БЕНЕН) -->
+        <!-- 4-ЭКРАН: КАТТАЛГАНДАР (ТОЛУК EXCEL СИСТЕМАСЫ ЖАНА КӨЧҮРҮҮ ЖӨНДӨӨСҮ МЕНЕН) -->
         <div id="screenAdminRegistered" class="screen">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 id="totalRegisteredHeader" style="margin: 0;">Катталгандар тизмеси</h3>
+                <h3 id="totalRegisteredHeader" style="margin: 0; font-size: 22px;">Катталгандар тизмеси</h3>
             </div>
 
-            <!-- ИЗДӨӨ ФИЛЬТРЛЕРИ -->
+            <!-- БАРДЫК АТТАРДЫ БИР ЭЛЕ ЧЫКЫЛДАТУУ МЕНЕН КОПИРОВАТЬ КЫЛУУ БАСКЫЧЫ -->
+            <button class="copy-all-btn" id="btnCopyAll" onclick="copyAllNames()">📋 Бардык ысымдарды көчүрүү (тизме катары)</button>
+
+            <!-- ИЗДӨӨ ТИЛКЕСИ -->
             <div class="search-container">
                 <input type="text" id="searchInput" class="search-input" placeholder="🔍 Аты-жөнү боюнча издөө..." oninput="applyFilters()">
-                <select id="imageFilterSelect" class="search-select" onchange="applyFilters()">
-                    <option value="all">Бардыгы (Сүрөт боюнча)</option>
-                    <option value="with_img">Сүрөтү барлар</option>
-                    <option value="no_img">Сүрөтү жоктор</option>
-                </select>
             </div>
 
             <!-- ЭКИ ПАПКА (ӨТМӨКТӨР) -->
             <div class="folder-tabs">
-                <button id="tabExcel" class="tab-btn active" onclick="switchFolder('excel')">📁 1. Тизме (Excel форматында)</button>
+                <button id="tabExcel" class="tab-btn active" onclick="switchFolder('excel')">📁 1. Тизме (Excel системасы)</button>
                 <button id="tabCards" class="tab-btn" onclick="switchFolder('cards')">📁 2. Сүрөттөр менен</button>
             </div>
 
-            <!-- ПАПКА 1: EXCEL ТАБЛИЦА -->
+            <!-- ПАПКА 1: ТОЛУК СИСТЕМАЛЫК EXCEL ТАБЛИЦА (СҮРӨТСҮЗ, ЫҢГАЙЛУУ) -->
             <div id="folderViewExcel">
+                <div class="excel-toolbar">
+                    <span style="font-size: 13px; color: var(--text-sub);" id="txtExcelBarInfo">📊 Иреттөө үчүн тилкелерди басыңыз</span>
+                    <button class="btn-action btn-action-copy" onclick="sortDataByName()" style="font-size:12px; padding:6px 12px;">🔤 Алфавит боюнча</button>
+                </div>
                 <div class="excel-table-container">
                     <table class="excel-table">
                         <thead>
                             <tr>
-                                <th>№</th>
-                                <th>Ф.И.О.</th>
-                                <th>Дата</th>
-                                <th>Сүрөт 1</th>
-                                <th>Сүрөт 2</th>
-                                <th>Аракеттер</th>
+                                <th style="width: 50px;">№</th>
+                                <th onclick="sortDataByName()" id="thName">Ф.И.О. ⇳</th>
+                                <th onclick="sortDataByDate()" id="thDate">Катталган күнү/убактысы ⇳</th>
+                                <th style="text-align: right;" id="thActions">Аракеттер</th>
                             </tr>
                         </thead>
                         <tbody id="excelTableBody">
-                            <!-- Бул жерге маалыматтар динамикалуу жүктөлөт -->
+                            <!-- Маалыматтар динамикалуу жүктөлөт -->
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- ПАПКА 2: МУРУНКУДАЙ КАРТОЧКАЛАР -->
+            <!-- ПАПКА 2: КАРТОЧКАЛАР (СҮРӨТТӨР МЕНЕН) -->
             <div id="folderViewCards" style="display: none;">
                 <div id="siteRegisteredList"></div>
             </div>
         </div>
 
-        <!-- 5-ЭКРАН: ЖӨНДӨӨЛӨР -->
+        <!-- 5-ЭКРАН: ЖӨНДӨӨЛӨР (КӨЧҮРҮҮ ФУНКЦИЯСЫ МЕНЕН) -->
         <div id="screenAdminSettings" class="screen">
-            <h3 style="margin-bottom: 20px;">Жөндөөлөр</h3>
+            <h3 style="margin-bottom: 20px;" id="txtSettingsTitle">Жөндөөлөр</h3>
             <div class="glass-box">
                 <div class="setting-item">
                     <div>
-                        <div class="setting-info">Көчүрүп алуу функциясы</div>
-                        <div class="setting-desc">Тизмеден сүрөттөрдү жүктөө/көчүрүү баскычы</div>
+                        <div class="setting-info" id="txtSetCopyTitle">Көчүрүп алуу (Копировать) функциясы</div>
+                        <div class="setting-desc" id="txtSetCopyDesc">Тизмедеги «Көчүрүү» баскычын күйгүзүү же өчүрүү</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="settingCopyToggle" onchange="saveSettings()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-info" id="txtSetDownloadTitle">Сүрөттөрдү жүктөө функциясы</div>
+                        <div class="setting-desc" id="txtSetDownloadDesc">Тизмеден сүрөттөрдү жүктөө баскычы</div>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="settingDownloadToggle" onchange="saveSettings()">
@@ -493,8 +591,8 @@
 
                 <div class="setting-item">
                     <div>
-                        <div class="setting-info">Өчүрүү функциясы</div>
-                        <div class="setting-desc">Тизмеден маалыматты өчүрүү баскычы</div>
+                        <div class="setting-info" id="txtSetDeleteTitle">Өчүрүү функциясы</div>
+                        <div class="setting-desc" id="txtSetDeleteDesc">Тизмеден маалыматты өчүрүү баскычы</div>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="settingDeleteToggle" onchange="saveSettings()">
@@ -503,7 +601,7 @@
                 </div>
 
                 <div style="margin-top: 20px;">
-                    <div class="setting-info" style="margin-bottom: 8px;">Админ паролун өзгөртүү</div>
+                    <div class="setting-info" style="margin-bottom: 8px;" id="txtSetPassTitle">Админ паролун өзгөртүү</div>
                     <div class="input-group">
                         <div class="password-wrapper">
                             <input type="password" id="newAdminPasswordInput" placeholder="Пароль жазыңыз..." autocomplete="off">
@@ -512,17 +610,17 @@
                             </button>
                         </div>
                     </div>
-                    <button class="btn btn-blue" onclick="changeAdminPassword()">Паролду сактоо</button>
+                    <button class="btn btn-blue" onclick="changeAdminPassword()" id="btnSavePass">Паролду сактоо</button>
                 </div>
             </div>
         </div>
 
         <!-- 6-ЭКРАН: КУРАТОРЛОР -->
         <div id="screenAdminCurators" class="screen">
-            <h3 style="margin-bottom: 20px;">Кураторлор тизмеси</h3>
+            <h3 style="margin-bottom: 20px;" id="txtCuratorsTitle">Кураторлор тизмеси</h3>
             <div class="glass-box">
                 <div class="list-item">
-                    <div class="list-title">Башкы Куратор</div>
+                    <div class="list-title" id="txtMainCurator">Башкы Куратор</div>
                     <div class="list-date" style="margin-top: 5px; font-size: 14px;">Тел: +996 999 114 003</div>
                 </div>
             </div>
@@ -530,11 +628,9 @@
 
     </div>
 
-    <!-- ТҮЗ КАМЕРАНЫ АЧУУЧУ НАТИВДИК ИНПУТТАР -->
     <input type="file" id="nativeCam1" accept="image/*" capture="environment" onchange="handlePhotoUpload(1, event)" style="display:none;">
     <input type="file" id="nativeCam2" accept="image/*" capture="environment" onchange="handlePhotoUpload(2, event)" style="display:none;">
 
-    <!-- ЧОҢ СҮРӨТ КӨРҮҮ МОДАЛЫ -->
     <div id="imageViewerModal" class="image-viewer-modal">
         <button class="image-viewer-close" onclick="closeImageViewer()">✕</button>
         <img id="enlargedImg" src="" alt="Сүрөт">
@@ -556,10 +652,147 @@
 
         let currentChildName = "";
         let capturedPhotos = { 1: null, 2: null };
-        let allRegistrations = []; // Маалыматтарды фильтрлөө үчүн глобалдык массив
+        let allRegistrations = []; 
+        let currentFilteredRegistrations = [];
+        let sortAscending = true;
+        let currentLang = 'ky';
+
+        const translations = {
+            ky: {
+                mainTitle: "Байту закат",
+                heroSub: "Байту закатка съемка",
+                regBtn: "Каттоо",
+                adminBtn: "Админ",
+                curatorBtn: "Куратор менен байланышуу",
+                inputTitle: "Маалымат киргизүү",
+                lblChild: "Баланын Ф.И.О.:",
+                phName: "Ф.И.О. жазыңыз...",
+                next: "Улантуу →",
+                instructionHeader: "Сүрөттөрдү туура тартуу үчүн төмөндөгү эрежени сактаңыз:",
+                badgeBad: "❌ Мынтип тартпаңыз",
+                descBad: "Тигинен (вертикалдуу) тартууга болбойт",
+                badgeGood: "✅ Ушунтип тартыңыз",
+                descGood: "Туурасынан (горизонталдуу) тартыңыз",
+                understand: "Тартуу эрежесин түшүндүм",
+                photoRule: "Сүрөттөрдү <b>горизонталдуу (туурасынан)</b> тартыңыз: белинен өйдө жана толук бою түшкөн болушу керек.",
+                photo1: "Белинен өйдө түшкөн",
+                photo2: "Толук бою түшкөн",
+                askCurator: "💬 Кантип туура тартса болорун билүү үчүн куратордон сураңыз",
+                saveReg: "Каттоо",
+                adminPanel: "Администратор Панели",
+                logout: "🚪 Чыгуу",
+                folderReg: "Катталгандар",
+                folderRegDesc: "Катталган колдонуучулар",
+                folderSet: "Жөндөөлөр",
+                folderSetDesc: "Системалык жөндөөлөр",
+                folderCur: "Кураторлор",
+                folderCurDesc: "Кураторлордун тизмеси",
+                copyAll: "📋 Бардык ысымдарды көчүрүү (тизме катары)",
+                searchPh: "🔍 Аты-жөнү боюнча издөө...",
+                tabExcel: "📁 1. Тизме (Excel системасы)",
+                tabCards: "📁 2. Сүрөттөр менен",
+                setCopy: "Көчүрүп алуу (Копировать) функциясы",
+                setCopyDesc: "Тизмедеги «Көчүрүү» баскычын күйгүзүү же өчүрүү",
+                setDown: "Сүрөттөрдү жүктөө функциясы",
+                setDownDesc: "Тизмеден сүрөттөрдү жүктөө баскычы",
+                setDel: "Өчүрүү функциясы",
+                setDelDesc: "Тизмеден маалыматты өчүрүү баскычы",
+                setPass: "Админ паролун өзгөртүү",
+                savePass: "Паролду сактоо"
+            },
+            ru: {
+                mainTitle: "Байту закат",
+                heroSub: "Съемка для Байту закат",
+                regBtn: "Регистрация",
+                adminBtn: "Админ",
+                curatorBtn: "Связаться с куратором",
+                inputTitle: "Ввод данных",
+                lblChild: "Ф.И.О. ребенка:",
+                phName: "Введите Ф.И.О...",
+                next: "Продолжить →",
+                instructionHeader: "Для правильной съемки соблюдайте следующие правила:",
+                badgeBad: "❌ Так не снимать",
+                descBad: "Вертикальная съемка запрещена",
+                badgeGood: "✅ Снимайте так",
+                descGood: "Снимайте горизонтально",
+                understand: "Я понял(а) правила съемки",
+                photoRule: "Снимайте фото <b>горизонтально</b>: по пояс и в полный рост.",
+                photo1: "Фото по пояс",
+                photo2: "Фото в полный рост",
+                askCurator: "💬 Спросить у куратора, как снять правильно",
+                saveReg: "Зарегистрировать",
+                adminPanel: "Панель администратора",
+                logout: "🚪 Выйти",
+                folderReg: "Зарегистрированные",
+                folderRegDesc: "Список зарегистрированных",
+                folderSet: "Настройки",
+                folderSetDesc: "Системные настройки",
+                folderCur: "Кураторы",
+                folderCurDesc: "Список кураторов",
+                copyAll: "📋 Копировать все имена (списком)",
+                searchPh: "🔍 Поиск по Ф.И.О...",
+                tabExcel: "📁 1. Список (Система Excel)",
+                tabCards: "📁 2. С фото",
+                setCopy: "Функция копирования",
+                setCopyDesc: "Включить или отключить кнопку «Копировать»",
+                setDown: "Функция скачивания фото",
+                setDownDesc: "Кнопка скачивания фото из списка",
+                setDel: "Функция удаления",
+                setDelDesc: "Кнопка удаления данных из списка",
+                setPass: "Изменить пароль админа",
+                savePass: "Сохранить пароль"
+            }
+        };
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            const t = translations[lang];
+
+            document.getElementById('txtMainAppTitle').innerText = t.mainTitle;
+            document.getElementById('txtHeroSub').innerText = t.heroSub;
+            document.getElementById('txtRegisterBtn').innerText = t.regBtn;
+            document.getElementById('txtAdminBtn').innerText = t.adminBtn;
+            document.getElementById('txtCuratorBtn').innerText = t.curatorBtn;
+            document.getElementById('txtInputTitle').innerText = t.inputTitle;
+            document.getElementById('lblChildName').innerText = t.lblChild;
+            document.getElementById('childNameInput').placeholder = t.phName;
+            document.getElementById('nameNextBtn').innerText = t.next;
+            document.getElementById('txtInstructionHeader').innerText = t.instructionHeader;
+            document.getElementById('badgeBad').innerText = t.badgeBad;
+            document.getElementById('descBad').innerText = t.descBad;
+            document.getElementById('badgeGood').innerText = t.badgeGood;
+            document.getElementById('descGood').innerText = t.descGood;
+            document.getElementById('lblUnderstand').innerText = t.understand;
+            document.getElementById('txtPhotoRule').innerHTML = t.photoRule;
+            document.getElementById('lblPhoto1Title').innerText = t.photo1;
+            document.getElementById('lblPhoto2Title').innerText = t.photo2;
+            document.getElementById('btnAskCurator').innerText = t.askCurator;
+            document.getElementById('saveRegBtn').innerText = t.saveReg;
+            document.getElementById('txtAdminPanelTitle').innerText = t.adminPanel;
+            document.getElementById('btnLogout').innerText = t.logout;
+            document.getElementById('folderRegTitle').innerText = t.folderReg;
+            document.getElementById('folderRegDesc').innerText = t.folderRegDesc;
+            document.getElementById('folderSetTitle').innerText = t.folderSet;
+            document.getElementById('folderSetDesc').innerText = t.folderSetDesc;
+            document.getElementById('folderCurTitle').innerText = t.folderCur;
+            document.getElementById('folderCurDesc').innerText = t.folderCurDesc;
+            document.getElementById('btnCopyAll').innerText = t.copyAll;
+            document.getElementById('searchInput').placeholder = t.searchPh;
+            document.getElementById('tabExcel').innerText = t.tabExcel;
+            document.getElementById('tabCards').innerText = t.tabCards;
+            document.getElementById('txtSetCopyTitle').innerText = t.setCopy;
+            document.getElementById('txtSetCopyDesc').innerText = t.setCopyDesc;
+            document.getElementById('txtSetDownloadTitle').innerText = t.setDown;
+            document.getElementById('txtSetDownloadDesc').innerText = t.setDownDesc;
+            document.getElementById('txtSetDeleteTitle').innerText = t.setDel;
+            document.getElementById('txtSetDeleteDesc').innerText = t.setDelDesc;
+            document.getElementById('txtSetPassTitle').innerText = t.setPass;
+            document.getElementById('btnSavePass').innerText = t.savePass;
+        }
 
         function getAppSettings() {
             return {
+                allowCopy: localStorage.getItem('setting_copy') !== 'false',
                 allowDownload: localStorage.getItem('setting_download') !== 'false',
                 allowDelete: localStorage.getItem('setting_delete') !== 'false',
                 adminPass: localStorage.getItem('admin_password') || '1245'
@@ -573,6 +806,7 @@
 
         function initSettingsUI() {
             const settings = getAppSettings();
+            document.getElementById('settingCopyToggle').checked = settings.allowCopy;
             document.getElementById('settingDownloadToggle').checked = settings.allowDownload;
             document.getElementById('settingDeleteToggle').checked = settings.allowDelete;
             
@@ -582,11 +816,15 @@
         }
 
         function saveSettings() {
+            const allowCopy = document.getElementById('settingCopyToggle').checked;
             const allowDownload = document.getElementById('settingDownloadToggle').checked;
             const allowDelete = document.getElementById('settingDeleteToggle').checked;
             
+            localStorage.setItem('setting_copy', allowCopy);
             localStorage.setItem('setting_download', allowDownload);
             localStorage.setItem('setting_delete', allowDelete);
+
+            renderData(currentFilteredRegistrations);
         }
 
         function togglePasswordVisibility() {
@@ -598,11 +836,11 @@
             const inputField = document.getElementById('newAdminPasswordInput');
             const newPass = inputField.value.trim();
             if (!newPass) {
-                alert("Пароль бош болбошу керек!");
+                alert(currentLang === 'ky' ? "Пароль бош болбошу керек!" : "Пароль не должен быть пустым!");
                 return;
             }
             localStorage.setItem('admin_password', newPass);
-            alert("Админ паролу ийгиликтүү өзгөртүлдү!");
+            alert(currentLang === 'ky' ? "Админ паролу ийгиликтүү өзгөртүлдү!" : "Пароль админа успешно изменен!");
         }
 
         window.addEventListener('popstate', function(event) {
@@ -636,7 +874,7 @@
             const errText = document.getElementById('errorMessageText');
 
             if (!input) {
-                errText.innerText = "Сураныч, баланын Ф.И.О. киргизиңиз!";
+                errText.innerText = currentLang === 'ky' ? "Сураныч, баланын Ф.И.О. киргизиңиз!" : "Пожалуйста, введите Ф.И.О. ребенка!";
                 errContainer.style.display = 'block';
                 return;
             }
@@ -680,7 +918,7 @@
                     if (img.width < img.height) {
                         const errContainer = document.getElementById('photoErrorWhatsAppContainer');
                         const errText = document.getElementById('photoErrorMessageText');
-                        errText.innerText = "❌ Сүрөт вертикалдуу (тигинен) тартылган! Телефонду туурасынан (горизонталдуу) буруп кайра тартыңыз.";
+                        errText.innerText = currentLang === 'ky' ? "❌ Сүрөт вертикалдуу (тигинен) тартылган! Телефонду туурасынан буруп кайра тартыңыз." : "❌ Фото сделано вертикально! Поверните телефон горизонтально.";
                         errContainer.style.display = 'block';
                         return;
                     }
@@ -717,7 +955,7 @@
                     card.classList.add('done');
                     box.innerHTML = `<img src="${resizedBase64}" class="photo-slot-img" alt="Сүрөт ${slotIndex}">`;
                     status.classList.add('done');
-                    status.innerText = "✓ Сүрөт кошулду";
+                    status.innerText = currentLang === 'ky' ? "✓ Сүрөт кошулду" : "✓ Фото добавлено";
 
                     checkSaveButtonState();
                 };
@@ -755,24 +993,24 @@
 
             db.collection("registrations").add(docData)
                 .then(() => {
-                    alert("Каттоо ийгиликтүү аяктады!");
+                    alert(currentLang === 'ky' ? "Каттоо ийгиликтүү аяктады!" : "Регистрация успешно завершена!");
                     currentChildName = "";
                     capturedPhotos = { 1: null, 2: null };
                     document.getElementById('childNameInput').value = "";
                     
-                    resetPhotoCard(1, "Белинен өйдө түшкөн");
-                    resetPhotoCard(2, "Толук бою түшкөн");
+                    resetPhotoCard(1, translations[currentLang].photo1);
+                    resetPhotoCard(2, translations[currentLang].photo2);
 
-                    btn.innerHTML = "Каттоо";
+                    btn.innerHTML = translations[currentLang].saveReg;
                     checkSaveButtonState();
 
                     navigateTo('screenMainMenu');
                 })
                 .catch((error) => {
                     console.error("Ката чыкты: ", error);
-                    alert("Маалыматты сактоодо ката чыкты. Кайра аракет кылыңыз.");
+                    alert("Маалыматты сактоодо ката чыкты.");
                     btn.disabled = false;
-                    btn.innerHTML = "Каттоо";
+                    btn.innerHTML = translations[currentLang].saveReg;
                 });
         }
 
@@ -789,11 +1027,11 @@
 
         function accessAdminPanel() {
             const settings = getAppSettings();
-            const pass = prompt("Администратор сыр сөзүн киргизиңиз:");
+            const pass = prompt(currentLang === 'ky' ? "Администратор сыр сөзүн киргизиңиз:" : "Введите пароль администратора:");
             if (pass === settings.adminPass) {
                 navigateTo('screenAdminMenu');
             } else if (pass !== null) {
-                alert("Сыр сөз туура эмес!");
+                alert(currentLang === 'ky' ? "Сыр сөз туура эмес!" : "Неверный пароль!");
             }
         }
 
@@ -801,14 +1039,13 @@
             navigateTo('screenMainMenu');
         }
 
-        // КАТТАЛГАНДАРДЫ ЖҮКТӨӨ ЖАНА БАШКАРУУ
         function loadRegisteredList() {
             const listContainer = document.getElementById('siteRegisteredList');
             const excelTableBody = document.getElementById('excelTableBody');
             const header = document.getElementById('totalRegisteredHeader');
 
             listContainer.innerHTML = `<div style="text-align:center; padding: 20px;"><span class="spinner"></span> Жүктөлүүдө...</div>`;
-            excelTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;"><span class="spinner"></span> Жүктөлүүдө...</td></tr>`;
+            excelTableBody.innerHTML = `<tr><td colspan="4" style="text-align:center;"><span class="spinner"></span> Жүктөлүүдө...</td></tr>`;
 
             db.collection("registrations").orderBy("createdAt", "desc").get()
                 .then((querySnapshot) => {
@@ -824,17 +1061,16 @@
                         });
                     });
 
-                    header.innerText = `Катталгандар тизмеси (${allRegistrations.length})`;
+                    header.innerText = `${translations[currentLang].folderReg} (${allRegistrations.length})`;
                     applyFilters();
                 })
                 .catch((error) => {
                     console.error("Тизмени алууда ката: ", error);
                     listContainer.innerHTML = `<div class="glass-box" style="color:var(--danger-red); text-align:center;">Маалыматты жүктөөдө ката чыкты.</div>`;
-                    excelTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--danger-red);">Ката чыкты.</td></tr>`;
+                    excelTableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--danger-red);">Ката чыкты.</td></tr>`;
                 });
         }
 
-        // ПАПКАЛАРДЫ АЛМАШТЫРУУ (EXCEL КӨРҮНҮШҮ ЖАНА КАРТОЧКА КӨРҮНҮШҮ)
         function switchFolder(folderType) {
             const tabExcel = document.getElementById('tabExcel');
             const tabCards = document.getElementById('tabCards');
@@ -854,28 +1090,37 @@
             }
         }
 
-        // ИЗДӨӨ ЖАНА ЧЫПКАЛОО ФУНКЦИЯСЫ
         function applyFilters() {
             const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
-            const imageFilter = document.getElementById('imageFilterSelect').value;
 
-            const filtered = allRegistrations.filter(item => {
-                const nameMatches = item.fullName.toLowerCase().includes(searchText);
-                let imageMatches = true;
-
-                if (imageFilter === 'with_img') {
-                    imageMatches = !!(item.photo1 && item.photo2);
-                } else if (imageFilter === 'no_img') {
-                    imageMatches = !(item.photo1 && item.photo2);
-                }
-
-                return nameMatches && imageMatches;
+            currentFilteredRegistrations = allRegistrations.filter(item => {
+                return item.fullName.toLowerCase().includes(searchText);
             });
 
-            renderData(filtered);
+            renderData(currentFilteredRegistrations);
         }
 
-        // ДАТАНЫ РЕНДЕРДӨӨ
+        // ТОЛУК EXCEL СОРТИРОВКА СИСТЕМАСЫ
+        function sortDataByName() {
+            sortAscending = !sortAscending;
+            currentFilteredRegistrations.sort((a, b) => {
+                return sortAscending 
+                    ? a.fullName.localeCompare(b.fullName)
+                    : b.fullName.localeCompare(a.fullName);
+            });
+            renderData(currentFilteredRegistrations);
+        }
+
+        function sortDataByDate() {
+            sortAscending = !sortAscending;
+            currentFilteredRegistrations.sort((a, b) => {
+                const t1 = a.createdAt ? a.createdAt.seconds : 0;
+                const t2 = b.createdAt ? b.createdAt.seconds : 0;
+                return sortAscending ? t1 - t2 : t2 - t1;
+            });
+            renderData(currentFilteredRegistrations);
+        }
+
         function renderData(dataList) {
             const settings = getAppSettings();
             const listContainer = document.getElementById('siteRegisteredList');
@@ -883,7 +1128,7 @@
 
             if (dataList.length === 0) {
                 listContainer.innerHTML = `<div class="glass-box" style="text-align:center; color: var(--text-sub);">Эч нерсе табылган жок.</div>`;
-                excelTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-sub);">Эч нерсе табылган жок.</td></tr>`;
+                excelTableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-sub);">Эч нерсе табылган жок.</td></tr>`;
                 return;
             }
 
@@ -897,40 +1142,42 @@
                     dateStr = d.toLocaleDateString('ru-RU') + " " + d.toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'});
                 }
 
+                let copyNameBtn = settings.allowCopy ? `<button class="btn-action btn-action-copy" onclick="copyName('${escapeQuotes(item.fullName)}')">📋 Көчүрүү</button>` : '';
+
                 let downloadBtn = settings.allowDownload && item.photo1 && item.photo2 ? 
-                    `<button class="btn-action btn-action-download" onclick="downloadPhotos('${item.id}', '${escapeQuotes(item.fullName)}', '${item.photo1}', '${item.photo2}')">📥 Көчүрүү</button>` : '';
+                    `<button class="btn-action btn-action-download" onclick="downloadPhotos('${item.id}', '${escapeQuotes(item.fullName)}', '${item.photo1}', '${item.photo2}')">📥 Сүрөттөр</button>` : '';
 
                 let deleteBtn = settings.allowDelete ? 
                     `<button class="btn-action btn-action-delete" onclick="deleteRegistration('${item.id}')">🗑 Өчүрүү</button>` : '';
 
-                // 1. КАРТОЧКА АБДАН ТҮЗҮЛҮШҮ (2-ПАПКА)
+                // 1. КАРТОЧКА КӨРҮНҮШҮ (2-ПАПКА - СҮРӨТТӨРҮ МЕНЕН)
                 cardsHtml += `
                     <div class="list-item" id="doc-${item.id}">
                         <div class="list-header">
                             <div class="list-title">${escapeQuotes(item.fullName)}</div>
                             <div class="list-date">${dateStr}</div>
                         </div>
-                        <div class="thumb-group">
-                            ${item.photo1 ? `<img src="${item.photo1}" alt="Фото 1" onclick="openImageViewer('${item.photo1}')">` : '<span style="color:var(--text-sub); font-size:12px;">Сүрөт жок</span>'}
-                            ${item.photo2 ? `<img src="${item.photo2}" alt="Фото 2" onclick="openImageViewer('${item.photo2}')">` : ''}
+                        <div class="large-thumb-group">
+                            ${item.photo1 ? `<img src="${item.photo1}" alt="Фото 1" onclick="openImageViewer('${item.photo1}')">` : '<div style="color:var(--text-sub); font-size:13px; padding:20px; background:rgba(0,0,0,0.2); border-radius:10px;">Сүрөт 1 жок</div>'}
+                            ${item.photo2 ? `<img src="${item.photo2}" alt="Фото 2" onclick="openImageViewer('${item.photo2}')">` : '<div style="color:var(--text-sub); font-size:13px; padding:20px; background:rgba(0,0,0,0.2); border-radius:10px;">Сүрөт 2 жок</div>'}
                         </div>
                         <div class="item-actions">
+                            ${copyNameBtn}
                             ${downloadBtn}
                             ${deleteBtn}
                         </div>
                     </div>
                 `;
 
-                // 2. EXCEL ТАБЛИЦАСЫ (1-ПАПКА)
+                // 2. EXCEL ТАБЛИЦА СИСТЕМАСЫ (СҮРӨТСҮЗ, ТАЗА ТАБЛИЦА)
                 excelHtml += `
                     <tr id="row-${item.id}">
-                        <td>${index + 1}</td>
+                        <td style="font-weight:bold; color:var(--accent-glow);">${index + 1}</td>
                         <td style="font-weight:600; color:var(--text-main);">${escapeQuotes(item.fullName)}</td>
-                        <td style="font-size:12px; color:var(--text-sub);">${dateStr}</td>
-                        <td>${item.photo1 ? `<img src="${item.photo1}" class="mini-thumb" onclick="openImageViewer('${item.photo1}')">` : 'Жок'}</td>
-                        <td>${item.photo2 ? `<img src="${item.photo2}" class="mini-thumb" onclick="openImageViewer('${item.photo2}')">` : 'Жок'}</td>
-                        <td>
-                            <div style="display:flex; gap:5px;">
+                        <td style="font-size:13px; color:var(--text-sub);">${dateStr}</td>
+                        <td style="text-align: right;">
+                            <div style="display:inline-flex; gap:6px; justify-content:flex-end;">
+                                ${copyNameBtn}
                                 ${downloadBtn}
                                 ${deleteBtn}
                             </div>
@@ -941,6 +1188,32 @@
 
             listContainer.innerHTML = cardsHtml;
             excelTableBody.innerHTML = excelHtml;
+        }
+
+        function copyName(name) {
+            navigator.clipboard.writeText(name).then(() => {
+                alert(`"${name}" көчүрүлдү!`);
+            }).catch(err => {
+                console.error("Көчүрүүдө ката: ", err);
+            });
+        }
+
+        function copyAllNames() {
+            if (!currentFilteredRegistrations || currentFilteredRegistrations.length === 0) {
+                alert("Көчүрө турган эч кандай маалымат жок!");
+                return;
+            }
+
+            let textList = currentLang === 'ky' ? "Катталгандар тизмеси:\n" : "Список зарегистрированных:\n";
+            currentFilteredRegistrations.forEach((item, index) => {
+                textList += `${index + 1}. ${item.fullName}\n`;
+            });
+
+            navigator.clipboard.writeText(textList).then(() => {
+                alert(currentLang === 'ky' ? `Бардыгы болуп ${currentFilteredRegistrations.length} адамдын аты-жөнү көчүрүлдү!` : `Успешно скопировано ${currentFilteredRegistrations.length} имен!`);
+            }).catch(err => {
+                console.error("Көчүрүүдө ката: ", err);
+            });
         }
 
         function escapeQuotes(str) {
@@ -979,13 +1252,13 @@
         }
 
         function deleteRegistration(id) {
-            if (!confirm("Бул колдонуучуну өчүрүүнү каалайсызбы?")) return;
+            if (!confirm(currentLang === 'ky' ? "Бул колдонуучуну өчүрүүнү каалайсызбы?" : "Вы действительно хотите удалить запись?")) return;
 
             db.collection("registrations").doc(id).delete()
                 .then(() => {
                     allRegistrations = allRegistrations.filter(item => item.id !== id);
                     applyFilters();
-                    alert("Маалымат өчүрүлдү.");
+                    alert(currentLang === 'ky' ? "Маалымат өчүрүлдү." : "Данные удалены.");
                 })
                 .catch((error) => {
                     console.error("Өчүрүүдө ката: ", error);
