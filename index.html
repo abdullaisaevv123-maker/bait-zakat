@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="ky">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Байту закат</title>
+    
+    <!-- FIREBASE КИТЕПКАНАЛАРЫ -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #0b132b;
+            --folder-bg: rgba(28, 37, 65, 0.7);
+            --folder-border: rgba(91, 192, 190, 0.25);
+            --folder-hover: #1c2541;
+            --primary-blue: #3a86ff;
+            --accent-glow: #00f5d4;
+            --accent-yellow: #ffd600;
+            --text-main: #edf2f4;
+            --text-sub: #8d99ae;
+            --danger-red: #ff4d4d;
+            --whatsapp-green: #25D366;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+        body {
+            background: radial-gradient(circle at top left, #1c2541, #0b132b);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 25px 15px;
+        }
+
+        .app-container { width: 100%; max-width: 650px; position: relative; }
+
+        .screen { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .screen.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 25px;
+            text-align: center;
+            padding-top: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .glass-box {
+            background: var(--folder-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--folder-border);
+            border-radius: 18px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+        }
+
+        .back-nav-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-sub);
+            padding: 0;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 20px;
+            transition: color 0.2s ease;
+        }
+        .back-nav-btn:hover {
+            color: var(--accent-glow);
+        }
+
+        .main-menu-layout {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 450px;
+        }
+
+        .hero-folder-title-outer {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-glow);
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 10px rgba(0, 245, 212, 0.2);
+        }
+
+        .hero-folder-card {
+            background: var(--folder-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--folder-border);
+            border-radius: 24px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 0 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-folder-card:hover {
+            background: var(--folder-hover);
+            border-color: rgba(58, 134, 255, 0.8);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(58, 134, 255, 0.25);
+        }
+
+        .hero-folder-icon {
+            width: 100px;
+            height: 85px;
+            margin-bottom: 12px;
+        }
+
+        .hero-folder-name {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .bottom-nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding: 0 10px;
+            gap: 15px;
+        }
+
+        .nav-btn-item {
+            background: rgba(28, 37, 65, 0.8);
+            border: 1px solid var(--folder-border);
+            border-radius: 16px;
+            padding: 14px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-main);
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.25s ease;
+            flex: 1;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .nav-btn-item:hover {
+            background: var(--folder-hover);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+        }
+
+        .nav-btn-icon {
+            width: 28px;
+            height: 28px;
+            fill: var(--text-sub);
+            transition: fill 0.2s;
+        }
+
+        .nav-btn-item:hover .nav-btn-icon {
+            fill: #fff;
+        }
+
+        .nav-btn-item.whatsapp .nav-btn-icon {
+            fill: var(--whatsapp-green);
+        }
+
+        .nav-btn-item.whatsapp:hover {
+            border-color: rgba(37, 211, 102, 0.5);
+            box-shadow: 0 0 15px rgba(37, 211, 102, 0.3);
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-sub);
+        }
+
+        .input-group input {
+            width: 100%; padding: 14px 18px; font-size: 15px;
+            background: rgba(11, 19, 43, 0.6); border: 1px solid var(--folder-border);
+            border-radius: 12px; color: var(--text-main); outline: none;
+        }
+
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .password-wrapper input {
+            padding-right: 45px;
+        }
+        .eye-btn {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            color: var(--text-sub);
+        }
+        .eye-btn:hover {
+            color: var(--text-main);
+        }
+
+        .folder-card {
+            background: var(--folder-bg); backdrop-filter: blur(12px);
+            border: 1px solid var(--folder-border); border-radius: 18px;
+            padding: 24px; cursor: pointer; transition: all 0.25s ease;
+            display: flex; align-items: center; gap: 18px;
+        }
+
+        .folder-card:hover { background: var(--folder-hover); border-color: rgba(58, 134, 255, 0.6); }
+        .folder-svg-icon { width: 48px; height: 42px; flex-shrink: 0; }
+        .folder-name { font-size: 18px; font-weight: 600; margin-bottom: 2px; }
+        .folder-desc { font-size: 13px; color: var(--text-sub); }
+
+        .instruction-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }
+        .instruction-card {
+            background: rgba(11, 19, 43, 0.6); border: 1px solid var(--folder-border);
+            border-radius: 16px; padding: 18px 10px; display: flex; flex-direction: column; align-items: center; gap: 12px;
+        }
+        .instruction-card.bad { border-color: rgba(255, 77, 77, 0.4); }
+        .instruction-card.good { border-color: rgba(0, 245, 212, 0.4); }
+
+        .phone-mockup-frame { border-radius: 8px; background: #000; position: relative; display: flex; align-items: center; justify-content: center; }
+        .phone-mockup-frame.vertical { width: 45px; height: 80px; border: 3px solid var(--danger-red); }
+        .phone-mockup-frame.horizontal { width: 85px; height: 48px; border: 3px solid var(--accent-glow); margin: 0 auto; }
+        .phone-screen-fill { width: 75%; height: 75%; background: rgba(255, 255, 255, 0.15); border-radius: 4px; margin: 0 auto;}
+
+        .instruction-badge { font-size: 13px; font-weight: 700; padding: 6px 10px; border-radius: 20px; text-align: center; }
+        .bad-badge { background: rgba(255, 77, 77, 0.15); color: var(--danger-red); }
+        .good-badge { background: rgba(0, 245, 212, 0.15); color: var(--accent-glow); }
+        .instruction-desc { font-size: 11px; color: var(--text-sub); text-align: center; }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0 10px 0;
+            background: rgba(11, 19, 43, 0.5);
+            padding: 12px 15px;
+            border-radius: 12px;
+            border: 1px dashed var(--folder-border);
+            cursor: pointer;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--accent-glow);
+            cursor: pointer;
+        }
+
+        .checkbox-label {
+            font-size: 13px;
+            color: var(--text-main);
+            font-weight: 500;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 12px;
+        }
+        .setting-info {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+        .setting-desc {
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-top: 2px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #1e2436;
+            transition: .3s;
+            border-radius: 26px;
+            border: 1px solid var(--folder-border);
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        .photo-slot-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 20px 0; }
+        .photo-slot-card {
+            background: #141824; border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px; padding: 12px; display: flex; flex-direction: column; cursor: pointer;
+        }
+        .photo-slot-box {
+            width: 100%; aspect-ratio: 16 / 9; background: #1e2436; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;
+        }
+        .photo-slot-plus {
+            width: 42px; height: 42px; border-radius: 50%; background: rgba(255, 255, 255, 0.08);
+            color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 22px;
+        }
+        .photo-slot-card.done .photo-slot-plus { background: var(--accent-glow); color: #0b132b; font-weight: bold; }
+        .photo-slot-img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
+        .photo-slot-info { margin-top: 10px; text-align: left; }
+        .photo-slot-title { font-size: 15px; font-weight: 600; color: #ffffff; margin-bottom: 4px; }
+        .photo-slot-status { font-size: 12px; color: #ff4d4d; font-weight: 500; }
+        .photo-slot-status.done { color: var(--accent-glow); }
+
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 10px; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; text-align: center; }
+        .btn-blue { background: linear-gradient(135deg, #3a86ff, #2563eb); color: #fff; }
+        .btn-whatsapp { background: var(--whatsapp-green); color: #fff; font-weight: 700; font-size: 13px; padding: 12px; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(1); }
+
+        .btn-yellow-main {
+            width: 100%; padding: 16px; background: var(--accent-yellow); color: #000;
+            font-size: 16px; font-weight: 700; border: none; border-radius: 14px; cursor: pointer; margin-top: 15px;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-yellow-main:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+
+        .spinner-dark {
+            border: 3px solid rgba(0, 0, 0, 0.2);
+            border-top-color: #000;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .folder-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 25px; }
+        .list-item { background: rgba(11, 19, 43, 0.7); border: 1px solid var(--folder-border); border-radius: 16px; padding: 18px; margin-bottom: 15px; }
+        .list-header { display: flex; justify-content: space-between; align-items: center; }
+        .list-title { font-size: 16px; font-weight: 600; color: var(--accent-glow); }
+        .list-date { font-size: 12px; color: var(--text-sub); }
+        .thumb-group { display: flex; gap: 12px; margin-top: 14px; }
+        .thumb-group img { width: 130px; aspect-ratio: 16/9; border-radius: 8px; object-fit: cover; cursor: pointer; border: 1px solid rgba(255,255,255,0.15); }
+
+        .item-actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+        .btn-action { padding: 8px 14px; border-radius: 8px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; }
+        .btn-action-download { background: var(--primary-blue); color: #fff; }
+        .btn-action-delete { background: var(--danger-red); color: #fff; }
+
+        .image-viewer-modal {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.9); z-index: 10000; display: none; align-items: center; justify-content: center; flex-direction: column; padding: 20px;
+        }
+        .image-viewer-modal img { max-width: 95%; max-height: 85vh; border-radius: 12px; object-fit: contain; }
+        .image-viewer-close { position: absolute; top: 20px; right: 25px; color: #fff; font-size: 30px; background: rgba(255,255,255,0.2); border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <!-- SVG ИКОНКАЛАР -->
+    <svg style="display: none;">
+        <symbol id="icon-folder" viewBox="0 0 24 24">
+            <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+        </symbol>
+        <symbol id="icon-admin" viewBox="0 0 24 24">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+        </symbol>
+        <symbol id="icon-phone" viewBox="0 0 24 24">
+            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+        </symbol>
+        <symbol id="icon-eye" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+        </symbol>
+    </svg>
+
+    <div class="app-container">
+
+        <!-- 0-ЭКРАН: БАШКЫ ЭКРАН -->
+        <div id="screenMainMenu" class="screen">
+            <h1 class="header-title">Байту закат</h1>
+            
+            <div class="main-menu-layout">
+                <div>
+                    <div class="hero-folder-title-outer">Байту закатка съемка</div>
+
+                    <div class="hero-folder-card" onclick="navigateTo('screenRegName')">
+                        <svg class="hero-folder-icon" style="fill: #3a86ff;"><use href="#icon-folder"/></svg>
+                        <div class="hero-folder-name">Каттоо</div>
+                    </div>
+                </div>
+
+                <div class="bottom-nav-bar">
+                    <button class="nav-btn-item" onclick="accessAdminPanel()">
+                        <svg class="nav-btn-icon"><use href="#icon-admin"/></svg>
+                        <span>Админ</span>
+                    </button>
+
+                    <a href="https://wa.me/996999114003" target="_blank" class="nav-btn-item whatsapp">
+                        <svg class="nav-btn-icon"><use href="#icon-phone"/></svg>
+                        <span>Куратор менен байланышуу</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1-ЭКРАН: БАЛАНЫН Ф.И.О. КИРГИЗҮҮ -->
+        <div id="screenRegName" class="screen">
+            <button class="back-nav-btn" onclick="navigateTo('screenMainMenu')">← Артка</button>
+            <h2 class="header-title">Каттоо</h2>
+            <div class="glass-box">
+                <h3 style="margin-bottom: 20px; font-weight: 500;">Маалымат киргизүү</h3>
+                <div class="input-group">
+                    <label>Баланын Ф.И.О.:</label>
+                    <input type="text" id="childNameInput" placeholder="Ф.И.О. жазыңыз..." autocomplete="off">
+                </div>
+                <button id="nameNextBtn" class="btn btn-blue" onclick="proceedToInstructionStep()">Улантуу →</button>
+                
+                <!-- Окшош бала табылганда ЖӨН ГАНА КАТА БИЛДИРҮҮСҮ (WhatsApp кнопкасыз) -->
+                <div id="errorTextContainer" style="display: none; margin-top: 15px; text-align: center;">
+                    <p id="errorMessageText" style="font-size: 13px; color: var(--danger-red); margin-bottom: 5px;"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1.5-ЭКРАН: СҮРӨТ ТАРТУУ НУСКАМАСЫ -->
+        <div id="screenRegInstruction" class="screen">
+            <button class="back-nav-btn" onclick="navigateTo('screenRegName')">← Артка</button>
+            <h2 class="header-title">Сүрөт тартуу эрежеси</h2>
+            <div class="glass-box" style="text-align: center;">
+                <p style="font-size: 14px; margin-bottom: 15px; color: var(--text-main);">
+                    Сүрөттөрдү туура тартуу үчүн төмөндөгү эрежени сактаңыз:
+                </p>
+
+                <div class="instruction-grid">
+                    <div class="instruction-card bad">
+                        <div class="phone-mockup-frame vertical">
+                            <div class="phone-screen-fill"></div>
+                        </div>
+                        <div class="instruction-badge bad-badge">❌ Мынтип тартпаңыз</div>
+                        <div class="instruction-desc">Тигинен (вертикалдуу) тартууга болбойт</div>
+                    </div>
+
+                    <div class="instruction-card good">
+                        <div class="phone-mockup-frame horizontal">
+                            <div class="phone-screen-fill"></div>
+                        </div>
+                        <div class="instruction-badge good-badge">✅ Ушунтип тартыңыз</div>
+                        <div class="instruction-desc">Туурасынан (горизонталдуу) тартыңыз</div>
+                    </div>
+                </div>
+
+                <label class="checkbox-container" for="understandCheckbox">
+                    <input type="checkbox" id="understandCheckbox" onchange="toggleInstructionBtn()">
+                    <span class="checkbox-label">Тартуу эрежесин түшүндүм</span>
+                </label>
+
+                <button id="instructionNextBtn" class="btn btn-blue" disabled onclick="proceedToPhotoStepFinal()">Улантуу →</button>
+            </div>
+        </div>
+
+        <!-- 2-ЭКРАН: СҮРӨТКӨ ТАРТУУ -->
+        <div id="screenRegPhoto" class="screen">
+            <button class="back-nav-btn" onclick="navigateTo('screenRegInstruction')">← Артка</button>
+            <div class="glass-box">
+                <h3 id="displayName" style="color: var(--accent-glow); margin-bottom: 8px; font-weight: 600;"></h3>
+                <p style="font-size: 13px; color: var(--text-sub);">
+                    Сүрөттөрдү <b>горизонталдуу (туурасынан)</b> тартыңыз: белинен өйдө жана толук бою түшкөн болушу керек.
+                </p>
+
+                <div class="photo-slot-grid">
+                    <div id="photoCard1" class="photo-slot-card" onclick="triggerCamera(1)">
+                        <div class="photo-slot-box" id="box1">
+                            <div class="photo-slot-plus" id="icon1">+</div>
+                        </div>
+                        <div class="photo-slot-info">
+                            <div class="photo-slot-title">Белинен өйдө түшкөн</div>
+                            <div class="photo-slot-status" id="status1" style="margin-top:4px;">ⓘ Сүрөт кошуу &gt;</div>
+                        </div>
+                    </div>
+
+                    <div id="photoCard2" class="photo-slot-card" onclick="triggerCamera(2)">
+                        <div class="photo-slot-box" id="box2">
+                            <div class="photo-slot-plus" id="icon2">+</div>
+                        </div>
+                        <div class="photo-slot-info">
+                            <div class="photo-slot-title">Толук бою түшкөн</div>
+                            <div class="photo-slot-status" id="status2" style="margin-top:4px;">ⓘ Сүрөт кошуу &gt;</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- СҮРӨТТҮ КАТА ТАРТКАНДА ЧЫГУУЧУ WHATSAPP КАСКАДЫ -->
+                <div id="photoErrorWhatsAppContainer" style="display: none; margin-bottom: 15px; text-align: center;">
+                    <p id="photoErrorMessageText" style="font-size: 13px; color: var(--danger-red); margin-bottom: 10px;"></p>
+                    <a href="https://wa.me/996999114003" target="_blank" class="btn btn-whatsapp">
+                        💬 Кантип туура тартса болорун билүү үчүн куратордон сураңыз
+                    </a>
+                </div>
+
+                <button id="saveRegBtn" class="btn-yellow-main" style="opacity: 0.4; cursor: not-allowed;" disabled onclick="saveRegistration()">Каттоо</button>
+            </div>
+        </div>
+
+        <!-- 3-ЭКРАН: АДМИН МЕНЮСУ -->
+        <div id="screenAdminMenu" class="screen">
+            <button class="back-nav-btn" onclick="navigateTo('screenMainMenu')">← Башкы бетке</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 class="header-title" style="margin: 0; text-align: left;">Администратор Панели</h2>
+                <button class="btn-action btn-action-delete" onclick="adminLogout()" style="padding: 10px 16px; font-size: 13px;">🚪 Чыгуу</button>
+            </div>
+            
+            <div class="folder-grid">
+                <div class="folder-card" style="flex-direction: column; align-items: flex-start;" onclick="navigateTo('screenAdminRegistered')">
+                    <svg class="folder-svg-icon" style="fill: #00f5d4;"><use href="#icon-folder"/></svg>
+                    <div>
+                        <div class="folder-name">Катталгандар</div>
+                        <div class="folder-desc">Катталган колдонуучулар</div>
+                    </div>
+                </div>
+
+                <div class="folder-card" style="flex-direction: column; align-items: flex-start;" onclick="navigateTo('screenAdminSettings')">
+                    <svg class="folder-svg-icon" style="fill: #ffb703;"><use href="#icon-folder"/></svg>
+                    <div>
+                        <div class="folder-name">Жөндөөлөр</div>
+                        <div class="folder-desc">Системалык жөндөөлөр</div>
+                    </div>
+                </div>
+
+                <div class="folder-card" style="flex-direction: column; align-items: flex-start;" onclick="navigateTo('screenAdminCurators')">
+                    <svg class="folder-svg-icon" style="fill: #4cc9f0;"><use href="#icon-folder"/></svg>
+                    <div>
+                        <div class="folder-name">Кураторлор</div>
+                        <div class="folder-desc">Кураторлордун тизмеси</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4-ЭКРАН: КАТТАЛГАНДАР -->
+        <div id="screenAdminRegistered" class="screen">
+            <button class="back-nav-btn" onclick="navigateTo('screenAdminMenu')">← Админ меню</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 id="totalRegisteredHeader" style="margin: 0;">Катталгандар тизмеси</h3>
+            </div>
+            <div id="siteRegisteredList"></div>
+        </div>
+
+        <!-- 5-ЭКРАН: ЖӨНДӨӨЛӨР -->
+        <div id="screenAdminSettings" class="screen">
+            <button class="back-nav-btn" onclick="navigateTo('screenAdminMenu')">← Админ меню</button>
+            <h3 style="margin-bottom: 20px;">Жөндөөлөр</h3>
+            <div class="glass-box">
+                <!-- 1. КОЧУРУП АЛУУ -->
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-info">Көчүрүп алуу функциясы</div>
+                        <div class="setting-desc">Тизмеден сүрөттөрдү жүктөө/көчүрүү баскычы</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="settingDownloadToggle" onchange="saveSettings()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <!-- 2. ӨЧҮРҮҮ -->
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-info">Өчүрүү функциясы</div>
+                        <div class="setting-desc">Тизмеден маалыматты өчүрүү баскычы</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="settingDeleteToggle" onchange="saveSettings()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <!-- 3. ПАРОЛЬ ӨЗГӨРТҮҮ -->
+                <div style="margin-top: 20px;">
+                    <div class="setting-info" style="margin-bottom: 8px;">Админ паролун өзгөртүү</div>
+                    <div class="input-group">
+                        <div class="password-wrapper">
+                            <input type="password" id="newAdminPasswordInput" placeholder="Пароль жазыңыз..." autocomplete="off">
+                            <button type="button" class="eye-btn" onclick="togglePasswordVisibility()">
+                                <svg style="width: 22px; height: 22px;"><use href="#icon-eye"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="btn btn-blue" onclick="changeAdminPassword()">Паролду сактоо</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6-ЭКРАН: КУРАТОРЛОР -->
+        <div id="screenAdminCurators" class="screen">
+            <button class="back-nav-btn" onclick="navigateTo('screenAdminMenu')">← Админ меню</button>
+            <h3 style="margin-bottom: 20px;">Кураторлор тизмеси</h3>
+            <div class="glass-box">
+                <div class="list-item">
+                    <div class="list-title">Башкы Куратор</div>
+                    <div class="list-date" style="margin-top: 5px; font-size: 14px;">Тел: +996 999 114 003</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ТҮЗ КАМЕРАНЫ АЧУУЧУ НАТИВДИК ИНПУТТАР -->
+    <input type="file" id="nativeCam1" accept="image/*" capture="environment" onchange="handlePhotoUpload(1, event)" style="display:none;">
+    <input type="file" id="nativeCam2" accept="image/*" capture="environment" onchange="handlePhotoUpload(2, event)" style="display:none;">
+
+    <!-- ЧОҢ СҮРӨТ КӨРҮҮ МОДАЛЫ -->
+    <div id="imageViewerModal" class="image-viewer-modal">
+        <button class="image-viewer-close" onclick="closeImageViewer()">✕</button>
+        <img id="enlargedImg" src="" alt="Сүрөт">
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDqFqR92LsaIROHMYRVY4jmEGWwP56OLRU",
+            authDomain: "bait-zakat-804f5.firebaseapp.com",
+            projectId: "bait-zakat-804f5",
+            storageBucket: "bait-zakat-804f5.firebasestorage.app",
+            messagingSenderId: "746636836589",
+            appId: "1:746636836589:web:de9ddc03633f5acebdd6e4",
+            measurementId: "G-L5LTBBRB41"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let currentChildName = "";
+        let capturedPhotos = { 1: null, 2: null };
+
+        function getAppSettings() {
+            return {
+                allowDownload: localStorage.getItem('setting_download') !== 'false',
+                allowDelete: localStorage.getItem('setting_delete') !== 'false',
+                adminPass: localStorage.getItem('admin_password') || '1245'
+            };
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            let savedScreen = localStorage.getItem('currentActiveScreen') || 'screenMainMenu';
+            navigateTo(savedScreen, false);
+            initSettingsUI();
+        });
+
+        function initSettingsUI() {
+            const settings = getAppSettings();
+            document.getElementById('settingDownloadToggle').checked = settings.allowDownload;
+            document.getElementById('settingDeleteToggle').checked = settings.allowDelete;
+            
+            const passInput = document.getElementById('newAdminPasswordInput');
+            passInput.value = settings.adminPass;
+            passInput.type = 'password';
+        }
+
+        function saveSettings() {
+            const allowDownload = document.getElementById('settingDownloadToggle').checked;
+            const allowDelete = document.getElementById('settingDeleteToggle').checked;
+            
+            localStorage.setItem('setting_download', allowDownload);
+            localStorage.setItem('setting_delete', allowDelete);
+        }
+
+        function togglePasswordVisibility() {
+            const input = document.getElementById('newAdminPasswordInput');
+            if (input.type === 'password') {
+                input.type = 'text';
+            } else {
+                input.type = 'password';
+            }
+        }
+
+        function changeAdminPassword() {
+            const inputField = document.getElementById('newAdminPasswordInput');
+            const newPass = inputField.value.trim();
+            if (!newPass) {
+                alert("Пароль бош болбошу керек!");
+                return;
+            }
+            localStorage.setItem('admin_password', newPass);
+            alert("Админ паролу ийгиликтүү өзгөртүлдү!");
+        }
+
+        window.addEventListener('popstate', function(event) {
+            const screenId = event.state ? event.state.screen : 'screenMainMenu';
+            showScreenUI(screenId);
+        });
+
+        function navigateTo(screenId, pushHistory = true) {
+            if (pushHistory) {
+                history.pushState({ screen: screenId }, '', '#' + screenId);
+            }
+            localStorage.setItem('currentActiveScreen', screenId);
+            showScreenUI(screenId);
+        }
+
+        function showScreenUI(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(screenId) || document.getElementById('screenMainMenu');
+            target.classList.add('active');
+
+            if (screenId === 'screenRegName') {
+                document.getElementById('errorTextContainer').style.display = 'none';
+            }
+            if (screenId === 'screenRegPhoto') {
+                document.getElementById('photoErrorWhatsAppContainer').style.display = 'none';
+            }
+
+            if (screenId === 'screenAdminRegistered') loadSiteRegistered();
+            if (screenId === 'screenAdminSettings') initSettingsUI();
+        }
+
+        function accessAdminPanel() {
+            if (sessionStorage.getItem('isAdminUnlocked') === 'true') {
+                navigateTo('screenAdminMenu');
+            } else {
+                let code = prompt("Админ панелдин кодун киргизиңиз:");
+                const settings = getAppSettings();
+                if (code === settings.adminPass) {
+                    sessionStorage.setItem('isAdminUnlocked', 'true');
+                    navigateTo('screenAdminMenu');
+                } else if (code !== null) {
+                    alert("Ката код!");
+                }
+            }
+        }
+
+        function adminLogout() {
+            sessionStorage.removeItem('isAdminUnlocked');
+            navigateTo('screenMainMenu');
+        }
+
+        function proceedToInstructionStep() {
+            const name = document.getElementById('childNameInput').value.trim();
+            const errorContainer = document.getElementById('errorTextContainer');
+            const errorText = document.getElementById('errorMessageText');
+
+            errorContainer.style.display = 'none';
+
+            if (!name) {
+                errorText.textContent = "Сураныч, баланын Ф.И.О. киргизиңиз!";
+                errorContainer.style.display = 'block';
+                return;
+            }
+
+            const btn = document.getElementById('nameNextBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner"></div> Текшерилүүдө...';
+
+            db.collection("records").get().then((querySnapshot) => {
+                const list = [];
+                querySnapshot.forEach((doc) => { list.push(doc.data()); });
+                
+                const isDuplicate = list.some(item => item.name.trim().toLowerCase() === name.toLowerCase());
+
+                if (isDuplicate) {
+                    errorText.textContent = "Сиз ийгиликтүү катталгансыз, кайра катталуу кажет эмес 🙂";
+                    errorContainer.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerHTML = 'Улантуу →';
+                    return;
+                }
+
+                currentChildName = name;
+                document.getElementById('understandCheckbox').checked = false;
+                document.getElementById('instructionNextBtn').disabled = true;
+                
+                btn.disabled = false;
+                btn.innerHTML = 'Улантуу →';
+                navigateTo('screenRegInstruction');
+            }).catch(error => {
+                errorText.textContent = "Интернет байланышын текшериңиз: " + error.message;
+                errorContainer.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = 'Улантуу →';
+            });
+        }
+
+        function toggleInstructionBtn() {
+            const isChecked = document.getElementById('understandCheckbox').checked;
+            document.getElementById('instructionNextBtn').disabled = !isChecked;
+        }
+
+        function proceedToPhotoStepFinal() {
+            const btn = document.getElementById('instructionNextBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner"></div> Жүктөлүүдө...';
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = 'Улантуу →';
+                document.getElementById('displayName').textContent = currentChildName;
+                document.getElementById('photoErrorWhatsAppContainer').style.display = 'none';
+                navigateTo('screenRegPhoto');
+            }, 300);
+        }
+
+        function triggerCamera(index) {
+            document.getElementById(`nativeCam${index}`).click();
+        }
+
+        function handlePhotoUpload(index, event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const errorContainer = document.getElementById('photoErrorWhatsAppContainer');
+                    const errorText = document.getElementById('photoErrorMessageText');
+
+                    if (img.height >= img.width) {
+                        errorText.textContent = "🚫 Селфи же тигинен тартылган сүрөт кабыл алынбайт!";
+                        errorContainer.style.display = 'block';
+                        event.target.value = '';
+                        return;
+                    }
+
+                    // Туура тартылса катаны жашыруу
+                    errorContainer.style.display = 'none';
+
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = 1280;
+                    canvas.height = 720;
+
+                    let scale = Math.max(1280 / img.width, 720 / img.height);
+                    let drawW = img.width * scale;
+                    let drawH = img.height * scale;
+                    let offsetX = (1280 - drawW) / 2;
+                    let offsetY = (720 - drawH) / 2;
+
+                    ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
+                    const imgData = canvas.toDataURL('image/jpeg', 0.85);
+
+                    applyCapturedPhoto(index, imgData);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function applyCapturedPhoto(index, imgData) {
+            capturedPhotos[index] = imgData;
+
+            const card = document.getElementById(`photoCard${index}`);
+            const box = document.getElementById(`box${index}`);
+            const status = document.getElementById(`status${index}`);
+
+            card.classList.add('done');
+            status.classList.add('done');
+            status.innerHTML = "✓ Горизонталдуу кошулду";
+
+            let prevImg = box.querySelector('.photo-slot-img');
+            if (prevImg) prevImg.remove();
+
+            const img = document.createElement('img');
+            img.src = imgData;
+            img.className = 'photo-slot-img';
+            box.appendChild(img);
+
+            validateSaveButton();
+        }
+
+        function validateSaveButton() {
+            const btn = document.getElementById('saveRegBtn');
+            if (capturedPhotos[1] && capturedPhotos[2]) {
+                btn.style.opacity = '1';
+                btn.disabled = false;
+                btn.style.cursor = 'pointer';
+            }
+        }
+
+        function saveRegistration() {
+            if (!capturedPhotos[1] || !capturedPhotos[2]) {
+                alert("Белинен өйдө жана толук бою түшкөн сүрөттөрдү тең тартыңыз!");
+                return;
+            }
+
+            const btn = document.getElementById('saveRegBtn');
+            btn.disabled = true;
+            btn.style.opacity = '0.7';
+            btn.innerHTML = '<div class="spinner spinner-dark"></div> Сакталууда...';
+
+            const recordId = Date.now();
+            const record = {
+                id: recordId,
+                name: currentChildName,
+                date: new Date().toLocaleString('ru-RU'),
+                photos: [capturedPhotos[1], capturedPhotos[2]],
+                source: 'site'
+            };
+
+            db.collection("records").doc(String(recordId)).set(record)
+                .then(() => {
+                    alert("Маалымат онлайн серверге ийгиликтүү катталды!");
+                    resetRegForm();
+                    navigateTo('screenMainMenu');
+                })
+                .catch((error) => {
+                    alert("Сактоодо ката кетти: " + error.message);
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.innerHTML = 'Каттоо';
+                });
+        }
+
+        function resetRegForm() {
+            document.getElementById('childNameInput').value = '';
+            capturedPhotos = { 1: null, 2: null };
+            [1, 2].forEach(i => {
+                const card = document.getElementById(`photoCard${i}`);
+                const box = document.getElementById(`box${i}`);
+                const status = document.getElementById(`status${i}`);
+
+                card.classList.remove('done');
+                status.classList.remove('done');
+                status.innerHTML = "ⓘ Сүрөт кошуу &gt;";
+
+                const img = box.querySelector('.photo-slot-img');
+                if (img) img.remove();
+                document.getElementById(`nativeCam${i}`).value = '';
+            });
+            const btn = document.getElementById('saveRegBtn');
+            btn.style.opacity = '0.4';
+            btn.disabled = true;
+            btn.innerHTML = 'Каттоо';
+        }
+
+        function loadSiteRegistered() {
+            const container = document.getElementById('siteRegisteredList');
+            const headerTitle = document.getElementById('totalRegisteredHeader');
+            container.innerHTML = '<p style="text-align:center; color: var(--text-sub);">Маалыматтар жүктөлүүдө...</p>';
+
+            const settings = getAppSettings();
+
+            db.collection("records").get().then((querySnapshot) => {
+                container.innerHTML = '';
+                const list = [];
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    if (data.source === 'site') {
+                        list.push(data);
+                    }
+                });
+
+                headerTitle.textContent = `Катталгандар тизмеси (Жалпы: ${list.length} бала)`;
+
+                if (list.length === 0) {
+                    container.innerHTML = '<p style="text-align:center; color: var(--text-sub);">Маалымат жок</p>';
+                    return;
+                }
+
+                list.sort((a, b) => b.id - a.id);
+
+                list.forEach((item, index) => {
+                    let itemNumber = list.length - index; 
+
+                    const div = document.createElement('div');
+                    div.className = 'list-item';
+
+                    let downloadBtnHTML = settings.allowDownload ? `<button class="btn-action btn-action-download" onclick="downloadAllPhotos('${item.name}', '${item.photos[0]}', '${item.photos[1]}')">📥 Баарын жүктөө</button>` : '';
+                    let deleteBtnHTML = settings.allowDelete ? `<button class="btn-action btn-action-delete" onclick="deleteRecord('${item.id}')">🗑️ Өчүрүү</button>` : '';
+
+                    div.innerHTML = `
+                        <div class="list-header">
+                            <span class="list-title">${itemNumber}. ${item.name}</span>
+                            <span class="list-date">${item.date}</span>
+                        </div>
+                        <div class="thumb-group">
+                            <img src="${item.photos[0]}" title="Белинен өйдө түшкөн" onclick="openImageViewer('${item.photos[0]}')">
+                            <img src="${item.photos[1]}" title="Толук бою түшкөн" onclick="openImageViewer('${item.photos[1]}')">
+                        </div>
+                        <div class="item-actions">
+                            ${downloadBtnHTML}
+                            ${deleteBtnHTML}
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            }).catch(error => {
+                container.innerHTML = `<p style="text-align:center; color: var(--danger-red);">Ката кетти: ${error.message}</p>`;
+            });
+        }
+
+        function openImageViewer(url) {
+            document.getElementById('enlargedImg').src = url;
+            document.getElementById('imageViewerModal').style.display = 'flex';
+        }
+
+        function closeImageViewer() {
+            document.getElementById('imageViewerModal').style.display = 'none';
+        }
+
+        function downloadAllPhotos(name, photo1, photo2) {
+            const settings = getAppSettings();
+            if (!settings.allowDownload) {
+                alert("Көчүрүп алуу функциясы жөндөөлөрдөн өчүрүлгөн!");
+                return;
+            }
+
+            [ {url: photo1, suffix: '_1_beli_oiden'}, {url: photo2, suffix: '_2_toluk_boyu'} ].forEach((item, idx) => {
+                setTimeout(() => {
+                    const a = document.createElement('a');
+                    a.href = item.url;
+                    a.download = `${name}${item.suffix}.jpg`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }, idx * 400);
+            });
+        }
+
+        function deleteRecord(id) {
+            const settings = getAppSettings();
+            if (!settings.allowDelete) {
+                alert("Өчүрүү функциясы жөндөөлөрдөн өчүрүлгөн!");
+                return;
+            }
+
+            if (confirm("Бул маалыматты өчүрүүнү каалайсызбы?")) {
+                db.collection("records").doc(String(id)).delete().then(() => {
+                    loadSiteRegistered();
+                }).catch(error => {
+                    alert("Өчүрүүдө ката кетти: " + error.message);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
