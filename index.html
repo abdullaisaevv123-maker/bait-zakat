@@ -36,7 +36,7 @@
             padding: 25px 15px;
         }
 
-        .app-container { width: 100%; max-width: 650px; position: relative; }
+        .app-container { width: 100%; max-width: 750px; position: relative; }
 
         .screen { display: none; animation: fadeIn 0.3s ease-in-out; }
         .screen.active { display: block; }
@@ -107,17 +107,8 @@
             box-shadow: 0 10px 30px rgba(58, 134, 255, 0.25);
         }
 
-        .hero-folder-icon {
-            width: 100px;
-            height: 85px;
-            margin-bottom: 12px;
-        }
-
-        .hero-folder-name {
-            font-size: 26px;
-            font-weight: 700;
-            color: var(--text-main);
-        }
+        .hero-folder-icon { width: 100px; height: 85px; margin-bottom: 12px; }
+        .hero-folder-name { font-size: 26px; font-weight: 700; color: var(--text-main); }
 
         .bottom-nav-bar {
             display: flex;
@@ -154,59 +145,23 @@
             transform: translateY(-3px);
         }
 
-        .nav-btn-icon {
-            width: 28px;
-            height: 28px;
-            fill: var(--text-sub);
-            transition: fill 0.2s;
-        }
+        .nav-btn-icon { width: 28px; height: 28px; fill: var(--text-sub); transition: fill 0.2s; }
+        .nav-btn-item:hover .nav-btn-icon { fill: #fff; }
+        .nav-btn-item.whatsapp .nav-btn-icon { fill: var(--whatsapp-green); }
+        .nav-btn-item.whatsapp:hover { border-color: rgba(37, 211, 102, 0.5); box-shadow: 0 0 15px rgba(37, 211, 102, 0.3); }
 
-        .nav-btn-item:hover .nav-btn-icon {
-            fill: #fff;
-        }
-
-        .nav-btn-item.whatsapp .nav-btn-icon {
-            fill: var(--whatsapp-green);
-        }
-
-        .nav-btn-item.whatsapp:hover {
-            border-color: rgba(37, 211, 102, 0.5);
-            box-shadow: 0 0 15px rgba(37, 211, 102, 0.3);
-        }
-
-        .input-group {
-            margin-bottom: 15px;
-        }
-        .input-group label {
-            display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-sub);
-        }
-
-        .input-group input {
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-sub); }
+        .input-group input, .input-group select {
             width: 100%; padding: 14px 18px; font-size: 15px;
             background: rgba(11, 19, 43, 0.6); border: 1px solid var(--folder-border);
             border-radius: 12px; color: var(--text-main); outline: none;
         }
 
-        .password-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-        .password-wrapper input {
-            padding-right: 45px;
-        }
-        .eye-btn {
-            position: absolute;
-            right: 12px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 18px;
-            color: var(--text-sub);
-        }
-        .eye-btn:hover {
-            color: var(--text-main);
-        }
+        .password-wrapper { position: relative; display: flex; align-items: center; }
+        .password-wrapper input { padding-right: 45px; }
+        .eye-btn { position: absolute; right: 12px; background: none; border: none; cursor: pointer; font-size: 18px; color: var(--text-sub); }
+        .eye-btn:hover { color: var(--text-main); }
 
         .folder-card {
             background: var(--folder-bg); backdrop-filter: blur(12px);
@@ -239,105 +194,29 @@
         .instruction-desc { font-size: 11px; color: var(--text-sub); text-align: center; }
 
         .checkbox-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin: 20px 0 10px 0;
-            background: rgba(11, 19, 43, 0.5);
-            padding: 12px 15px;
-            border-radius: 12px;
-            border: 1px dashed var(--folder-border);
-            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            margin: 20px 0 10px 0; background: rgba(11, 19, 43, 0.5); padding: 12px 15px;
+            border-radius: 12px; border: 1px dashed var(--folder-border); cursor: pointer;
         }
 
-        .checkbox-container input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            accent-color: var(--accent-glow);
-            cursor: pointer;
-        }
+        .checkbox-container input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--accent-glow); cursor: pointer; }
+        .checkbox-label { font-size: 13px; color: var(--text-main); font-weight: 500; cursor: pointer; user-select: none; }
 
-        .checkbox-label {
-            font-size: 13px;
-            color: var(--text-main);
-            font-weight: 500;
-            cursor: pointer;
-            user-select: none;
-        }
+        .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 12px; }
+        .setting-info { font-size: 15px; font-weight: 600; color: var(--text-main); }
+        .setting-desc { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
 
-        .setting-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            margin-bottom: 12px;
-        }
-        .setting-info {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text-main);
-        }
-        .setting-desc {
-            font-size: 12px;
-            color: var(--text-sub);
-            margin-top: 2px;
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 26px;
-            flex-shrink: 0;
-        }
-        .switch input { 
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #1e2436;
-            transition: .3s;
-            border-radius: 26px;
-            border: 1px solid var(--folder-border);
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .3s;
-            border-radius: 50%;
-        }
-        input:checked + .slider {
-            background-color: var(--primary-blue);
-            border-color: var(--primary-blue);
-        }
-        input:checked + .slider:before {
-            transform: translateX(24px);
-        }
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; flex-shrink: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #1e2436; transition: .3s; border-radius: 26px; border: 1px solid var(--folder-border); }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary-blue); border-color: var(--primary-blue); }
+        input:checked + .slider:before { transform: translateX(24px); }
 
         .photo-slot-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 20px 0; }
-        .photo-slot-card {
-            background: #141824; border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 18px; padding: 12px; display: flex; flex-direction: column; cursor: pointer;
-        }
-        .photo-slot-box {
-            width: 100%; aspect-ratio: 16 / 9; background: #1e2436; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;
-        }
-        .photo-slot-plus {
-            width: 42px; height: 42px; border-radius: 50%; background: rgba(255, 255, 255, 0.08);
-            color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 22px;
-        }
+        .photo-slot-card { background: #141824; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; padding: 12px; display: flex; flex-direction: column; cursor: pointer; }
+        .photo-slot-box { width: 100%; aspect-ratio: 16 / 9; background: #1e2436; border-radius: 12px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        .photo-slot-plus { width: 42px; height: 42px; border-radius: 50%; background: rgba(255, 255, 255, 0.08); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 22px; }
         .photo-slot-card.done .photo-slot-plus { background: var(--accent-glow); color: #0b132b; font-weight: bold; }
         .photo-slot-img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
         .photo-slot-info { margin-top: 10px; text-align: left; }
@@ -350,34 +229,12 @@
         .btn-whatsapp { background: var(--whatsapp-green); color: #fff; font-weight: 700; font-size: 13px; padding: 12px; }
         .btn:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(1); }
 
-        .btn-yellow-main {
-            width: 100%; padding: 16px; background: var(--accent-yellow); color: #000;
-            font-size: 16px; font-weight: 700; border: none; border-radius: 14px; cursor: pointer; margin-top: 15px;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-        }
-        .btn-yellow-main:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+        .btn-yellow-main { width: 100%; padding: 16px; background: var(--accent-yellow); color: #000; font-size: 16px; font-weight: 700; border: none; border-radius: 14px; cursor: pointer; margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-yellow-main:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .spinner {
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            display: inline-block;
-        }
-
-        .spinner-dark {
-            border: 3px solid rgba(0, 0, 0, 0.2);
-            border-top-color: #000;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        .spinner { width: 20px; height: 20px; border: 3px solid rgba(255, 255, 255, 0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; }
+        .spinner-dark { border: 3px solid rgba(0, 0, 0, 0.2); border-top-color: #000; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         .folder-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 25px; }
         .list-item { background: rgba(11, 19, 43, 0.7); border: 1px solid var(--folder-border); border-radius: 16px; padding: 18px; margin-bottom: 15px; }
@@ -392,12 +249,25 @@
         .btn-action-download { background: var(--primary-blue); color: #fff; }
         .btn-action-delete { background: var(--danger-red); color: #fff; }
 
-        .image-viewer-modal {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.9); z-index: 10000; display: none; align-items: center; justify-content: center; flex-direction: column; padding: 20px;
-        }
+        .image-viewer-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.9); z-index: 10000; display: none; align-items: center; justify-content: center; flex-direction: column; padding: 20px; }
         .image-viewer-modal img { max-width: 95%; max-height: 85vh; border-radius: 12px; object-fit: contain; }
         .image-viewer-close { position: absolute; top: 20px; right: 25px; color: #fff; font-size: 30px; background: rgba(255,255,255,0.2); border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; }
+
+        /* ЭКИ ПАПКА ЖАНА ИЗДӨӨ ЖӨНҮНДӨ СТИЛДЕР */
+        .folder-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tab-btn { flex: 1; padding: 12px; background: rgba(11, 19, 43, 0.6); border: 1px solid var(--folder-border); border-radius: 12px; color: var(--text-sub); font-weight: 600; cursor: pointer; text-align: center; transition: all 0.2s; }
+        .tab-btn.active { background: var(--primary-blue); color: #fff; border-color: var(--primary-blue); }
+
+        .search-container { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .search-input { flex: 2; min-width: 200px; padding: 12px 16px; background: rgba(11, 19, 43, 0.6); border: 1px solid var(--folder-border); border-radius: 12px; color: var(--text-main); font-size: 14px; outline: none; }
+        .search-select { flex: 1; min-width: 150px; padding: 12px 16px; background: rgba(11, 19, 43, 0.6); border: 1px solid var(--folder-border); border-radius: 12px; color: var(--text-main); font-size: 14px; outline: none; }
+
+        .excel-table-container { overflow-x: auto; background: rgba(11, 19, 43, 0.6); border: 1px solid var(--folder-border); border-radius: 12px; }
+        .excel-table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; }
+        .excel-table th, .excel-table td { padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .excel-table th { background: rgba(28, 37, 65, 0.9); color: var(--accent-glow); font-weight: 600; }
+        .excel-table tr:hover { background: rgba(255,255,255,0.03); }
+        .mini-thumb { width: 45px; height: 30px; object-fit: cover; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -423,11 +293,9 @@
         <!-- 0-ЭКРАН: БАШКЫ ЭКРАН -->
         <div id="screenMainMenu" class="screen">
             <h1 class="header-title">Байту закат</h1>
-            
             <div class="main-menu-layout">
                 <div>
                     <div class="hero-folder-title-outer">Байту закатка съемка</div>
-
                     <div class="hero-folder-card" onclick="navigateTo('screenRegName')">
                         <svg class="hero-folder-icon" style="fill: #3a86ff;"><use href="#icon-folder"/></svg>
                         <div class="hero-folder-name">Каттоо</div>
@@ -439,7 +307,6 @@
                         <svg class="nav-btn-icon"><use href="#icon-admin"/></svg>
                         <span>Админ</span>
                     </button>
-
                     <a href="https://wa.me/996999114003" target="_blank" class="nav-btn-item whatsapp">
                         <svg class="nav-btn-icon"><use href="#icon-phone"/></svg>
                         <span>Куратор менен байланышуу</span>
@@ -458,7 +325,6 @@
                     <input type="text" id="childNameInput" placeholder="Ф.И.О. жазыңыз..." autocomplete="off">
                 </div>
                 <button id="nameNextBtn" class="btn btn-blue" onclick="proceedToInstructionStep()">Улантуу →</button>
-                
                 <div id="errorTextContainer" style="display: none; margin-top: 15px; text-align: center;">
                     <p id="errorMessageText" style="font-size: 13px; color: var(--danger-red); margin-bottom: 5px;"></p>
                 </div>
@@ -472,30 +338,22 @@
                 <p style="font-size: 14px; margin-bottom: 15px; color: var(--text-main);">
                     Сүрөттөрдү туура тартуу үчүн төмөндөгү эрежени сактаңыз:
                 </p>
-
                 <div class="instruction-grid">
                     <div class="instruction-card bad">
-                        <div class="phone-mockup-frame vertical">
-                            <div class="phone-screen-fill"></div>
-                        </div>
+                        <div class="phone-mockup-frame vertical"><div class="phone-screen-fill"></div></div>
                         <div class="instruction-badge bad-badge">❌ Мынтип тартпаңыз</div>
                         <div class="instruction-desc">Тигинен (вертикалдуу) тартууга болбойт</div>
                     </div>
-
                     <div class="instruction-card good">
-                        <div class="phone-mockup-frame horizontal">
-                            <div class="phone-screen-fill"></div>
-                        </div>
+                        <div class="phone-mockup-frame horizontal"><div class="phone-screen-fill"></div></div>
                         <div class="instruction-badge good-badge">✅ Ушунтип тартыңыз</div>
                         <div class="instruction-desc">Туурасынан (горизонталдуу) тартыңыз</div>
                     </div>
                 </div>
-
                 <label class="checkbox-container" for="understandCheckbox">
                     <input type="checkbox" id="understandCheckbox" onchange="toggleInstructionBtn()">
                     <span class="checkbox-label">Тартуу эрежесин түшүндүм</span>
                 </label>
-
                 <button id="instructionNextBtn" class="btn btn-blue" disabled onclick="proceedToPhotoStepFinal()">Улантуу →</button>
             </div>
         </div>
@@ -510,9 +368,7 @@
 
                 <div class="photo-slot-grid">
                     <div id="photoCard1" class="photo-slot-card" onclick="triggerCamera(1)">
-                        <div class="photo-slot-box" id="box1">
-                            <div class="photo-slot-plus" id="icon1">+</div>
-                        </div>
+                        <div class="photo-slot-box" id="box1"><div class="photo-slot-plus" id="icon1">+</div></div>
                         <div class="photo-slot-info">
                             <div class="photo-slot-title">Белинен өйдө түшкөн</div>
                             <div class="photo-slot-status" id="status1" style="margin-top:4px;">ⓘ Сүрөт кошуу &gt;</div>
@@ -520,9 +376,7 @@
                     </div>
 
                     <div id="photoCard2" class="photo-slot-card" onclick="triggerCamera(2)">
-                        <div class="photo-slot-box" id="box2">
-                            <div class="photo-slot-plus" id="icon2">+</div>
-                        </div>
+                        <div class="photo-slot-box" id="box2"><div class="photo-slot-plus" id="icon2">+</div></div>
                         <div class="photo-slot-info">
                             <div class="photo-slot-title">Толук бою түшкөн</div>
                             <div class="photo-slot-status" id="status2" style="margin-top:4px;">ⓘ Сүрөт кошуу &gt;</div>
@@ -532,9 +386,7 @@
 
                 <div id="photoErrorWhatsAppContainer" style="display: none; margin-bottom: 15px; text-align: center;">
                     <p id="photoErrorMessageText" style="font-size: 13px; color: var(--danger-red); margin-bottom: 10px;"></p>
-                    <a href="https://wa.me/996999114003" target="_blank" class="btn btn-whatsapp">
-                        💬 Кантип туура тартса болорун билүү үчүн куратордон сураңыз
-                    </a>
+                    <a href="https://wa.me/996999114003" target="_blank" class="btn btn-whatsapp">💬 Кантип туура тартса болорун билүү үчүн куратордон сураңыз</a>
                 </div>
 
                 <button id="saveRegBtn" class="btn-yellow-main" style="opacity: 0.4; cursor: not-allowed;" disabled onclick="saveRegistration()">Каттоо</button>
@@ -575,19 +427,59 @@
             </div>
         </div>
 
-        <!-- 4-ЭКРАН: КАТТАЛГАНДАР -->
+        <!-- 4-ЭКРАН: КАТТАЛГАНДАР (ЖАҢЫЛАМАСЫ: ИЗДӨӨ ЖАНА 2 ПАПКА БЕНЕН) -->
         <div id="screenAdminRegistered" class="screen">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h3 id="totalRegisteredHeader" style="margin: 0;">Катталгандар тизмеси</h3>
             </div>
-            <div id="siteRegisteredList"></div>
+
+            <!-- ИЗДӨӨ ФИЛЬТРЛЕРИ -->
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Аты-жөнү боюнча издөө..." oninput="applyFilters()">
+                <select id="imageFilterSelect" class="search-select" onchange="applyFilters()">
+                    <option value="all">Бардыгы (Сүрөт боюнча)</option>
+                    <option value="with_img">Сүрөтү барлар</option>
+                    <option value="no_img">Сүрөтү жоктор</option>
+                </select>
+            </div>
+
+            <!-- ЭКИ ПАПКА (ӨТМӨКТӨР) -->
+            <div class="folder-tabs">
+                <button id="tabExcel" class="tab-btn active" onclick="switchFolder('excel')">📁 1. Тизме (Excel форматында)</button>
+                <button id="tabCards" class="tab-btn" onclick="switchFolder('cards')">📁 2. Сүрөттөр менен</button>
+            </div>
+
+            <!-- ПАПКА 1: EXCEL ТАБЛИЦА -->
+            <div id="folderViewExcel">
+                <div class="excel-table-container">
+                    <table class="excel-table">
+                        <thead>
+                            <tr>
+                                <th>№</th>
+                                <th>Ф.И.О.</th>
+                                <th>Дата</th>
+                                <th>Сүрөт 1</th>
+                                <th>Сүрөт 2</th>
+                                <th>Аракеттер</th>
+                            </tr>
+                        </thead>
+                        <tbody id="excelTableBody">
+                            <!-- Бул жерге маалыматтар динамикалуу жүктөлөт -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ПАПКА 2: МУРУНКУДАЙ КАРТОЧКАЛАР -->
+            <div id="folderViewCards" style="display: none;">
+                <div id="siteRegisteredList"></div>
+            </div>
         </div>
 
         <!-- 5-ЭКРАН: ЖӨНДӨӨЛӨР -->
         <div id="screenAdminSettings" class="screen">
             <h3 style="margin-bottom: 20px;">Жөндөөлөр</h3>
             <div class="glass-box">
-                <!-- 1. КОЧУРУП АЛУУ -->
                 <div class="setting-item">
                     <div>
                         <div class="setting-info">Көчүрүп алуу функциясы</div>
@@ -599,7 +491,6 @@
                     </label>
                 </div>
 
-                <!-- 2. ӨЧҮРҮҮ -->
                 <div class="setting-item">
                     <div>
                         <div class="setting-info">Өчүрүү функциясы</div>
@@ -611,7 +502,6 @@
                     </label>
                 </div>
 
-                <!-- 3. ПАРОЛЬ ӨЗГӨРТҮҮ -->
                 <div style="margin-top: 20px;">
                     <div class="setting-info" style="margin-bottom: 8px;">Админ паролун өзгөртүү</div>
                     <div class="input-group">
@@ -666,6 +556,7 @@
 
         let currentChildName = "";
         let capturedPhotos = { 1: null, 2: null };
+        let allRegistrations = []; // Маалыматтарды фильтрлөө үчүн глобалдык массив
 
         function getAppSettings() {
             return {
@@ -675,7 +566,6 @@
             };
         }
 
-        // Шилтемеден киргенде ДАЙЫМА БАШКЫ БЕТТЕН башталат. Эс тутум тазаланат.
         window.addEventListener('DOMContentLoaded', () => {
             navigateTo('screenMainMenu', false);
             initSettingsUI();
@@ -701,11 +591,7 @@
 
         function togglePasswordVisibility() {
             const input = document.getElementById('newAdminPasswordInput');
-            if (input.type === 'password') {
-                input.type = 'text';
-            } else {
-                input.type = 'password';
-            }
+            input.type = input.type === 'password' ? 'text' : 'password';
         }
 
         function changeAdminPassword() {
@@ -738,105 +624,52 @@
 
             if (screenId === 'screenRegName') {
                 document.getElementById('errorTextContainer').style.display = 'none';
+                document.getElementById('childNameInput').value = currentChildName;
+            } else if (screenId === 'screenAdminRegistered') {
+                loadRegisteredList();
             }
-            if (screenId === 'screenRegPhoto') {
-                document.getElementById('photoErrorWhatsAppContainer').style.display = 'none';
-            }
-
-            if (screenId === 'screenAdminRegistered') loadSiteRegistered();
-            if (screenId === 'screenAdminSettings') initSettingsUI();
-        }
-
-        function accessAdminPanel() {
-            if (sessionStorage.getItem('isAdminUnlocked') === 'true') {
-                navigateTo('screenAdminMenu');
-            } else {
-                let code = prompt("Админ панелдин кодун киргизиңиз:");
-                const settings = getAppSettings();
-                if (code === settings.adminPass) {
-                    sessionStorage.setItem('isAdminUnlocked', 'true');
-                    navigateTo('screenAdminMenu');
-                } else if (code !== null) {
-                    alert("Ката код!");
-                }
-            }
-        }
-
-        function adminLogout() {
-            sessionStorage.removeItem('isAdminUnlocked');
-            navigateTo('screenMainMenu');
         }
 
         function proceedToInstructionStep() {
-            const name = document.getElementById('childNameInput').value.trim();
-            const errorContainer = document.getElementById('errorTextContainer');
-            const errorText = document.getElementById('errorMessageText');
+            const input = document.getElementById('childNameInput').value.trim();
+            const errContainer = document.getElementById('errorTextContainer');
+            const errText = document.getElementById('errorMessageText');
 
-            errorContainer.style.display = 'none';
-
-            if (!name) {
-                errorText.textContent = "Сураныч, баланын Ф.И.О. киргизиңиз!";
-                errorContainer.style.display = 'block';
+            if (!input) {
+                errText.innerText = "Сураныч, баланын Ф.И.О. киргизиңиз!";
+                errContainer.style.display = 'block';
                 return;
             }
 
-            const btn = document.getElementById('nameNextBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<div class="spinner"></div> Текшерилүүдө...';
+            errContainer.style.display = 'none';
+            currentChildName = input;
+            
+            document.getElementById('understandCheckbox').checked = false;
+            document.getElementById('instructionNextBtn').disabled = true;
 
-            db.collection("records").get().then((querySnapshot) => {
-                const list = [];
-                querySnapshot.forEach((doc) => { list.push(doc.data()); });
-                
-                const isDuplicate = list.some(item => item.name.trim().toLowerCase() === name.toLowerCase());
-
-                if (isDuplicate) {
-                    errorText.textContent = "Сиз ийгиликтүү катталгансыз, кайра катталуу кажет эмес 🙂";
-                    errorContainer.style.display = 'block';
-                    btn.disabled = false;
-                    btn.innerHTML = 'Улантуу →';
-                    return;
-                }
-
-                currentChildName = name;
-                document.getElementById('understandCheckbox').checked = false;
-                document.getElementById('instructionNextBtn').disabled = true;
-                
-                btn.disabled = false;
-                btn.innerHTML = 'Улантуу →';
-                navigateTo('screenRegInstruction');
-            }).catch(error => {
-                errorText.textContent = "Интернет байланышын текшериңиз: " + error.message;
-                errorContainer.style.display = 'block';
-                btn.disabled = false;
-                btn.innerHTML = 'Улантуу →';
-            });
+            navigateTo('screenRegInstruction');
         }
 
         function toggleInstructionBtn() {
-            const isChecked = document.getElementById('understandCheckbox').checked;
-            document.getElementById('instructionNextBtn').disabled = !isChecked;
+            const checked = document.getElementById('understandCheckbox').checked;
+            document.getElementById('instructionNextBtn').disabled = !checked;
         }
 
         function proceedToPhotoStepFinal() {
-            const btn = document.getElementById('instructionNextBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<div class="spinner"></div> Жүктөлүүдө...';
-
-            setTimeout(() => {
-                btn.disabled = false;
-                btn.innerHTML = 'Улантуу →';
-                document.getElementById('displayName').textContent = currentChildName;
-                document.getElementById('photoErrorWhatsAppContainer').style.display = 'none';
-                navigateTo('screenRegPhoto');
-            }, 300);
+            document.getElementById('displayName').innerText = currentChildName;
+            document.getElementById('photoErrorWhatsAppContainer').style.display = 'none';
+            navigateTo('screenRegPhoto');
         }
 
-        function triggerCamera(index) {
-            document.getElementById(`nativeCam${index}`).click();
+        function triggerCamera(slotIndex) {
+            const input = document.getElementById('nativeCam' + slotIndex);
+            if (input) {
+                input.value = '';
+                input.click();
+            }
         }
 
-        function handlePhotoUpload(index, event) {
+        function handlePhotoUpload(slotIndex, event) {
             const file = event.target.files[0];
             if (!file) return;
 
@@ -844,224 +677,320 @@
             reader.onload = function(e) {
                 const img = new Image();
                 img.onload = function() {
-                    const errorContainer = document.getElementById('photoErrorWhatsAppContainer');
-                    const errorText = document.getElementById('photoErrorMessageText');
-
-                    if (img.height >= img.width) {
-                        errorText.textContent = "🚫 Селфи же тигинен тартылган сүрөт кабыл алынбайт!";
-                        errorContainer.style.display = 'block';
-                        event.target.value = '';
+                    if (img.width < img.height) {
+                        const errContainer = document.getElementById('photoErrorWhatsAppContainer');
+                        const errText = document.getElementById('photoErrorMessageText');
+                        errText.innerText = "❌ Сүрөт вертикалдуу (тигинен) тартылган! Телефонду туурасынан (горизонталдуу) буруп кайра тартыңыз.";
+                        errContainer.style.display = 'block';
                         return;
                     }
 
-                    errorContainer.style.display = 'none';
-
+                    document.getElementById('photoErrorWhatsAppContainer').style.display = 'none';
+                    
                     const canvas = document.createElement('canvas');
+                    const maxDim = 1000;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxDim || height > maxDim) {
+                        if (width > height) {
+                            height = Math.round((height * maxDim) / width);
+                            width = maxDim;
+                        } else {
+                            width = Math.round((width * maxDim) / height);
+                            height = maxDim;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
                     const ctx = canvas.getContext('2d');
-                    canvas.width = 1280;
-                    canvas.height = 720;
+                    ctx.drawImage(img, 0, 0, width, height);
 
-                    let scale = Math.max(1280 / img.width, 720 / img.height);
-                    let drawW = img.width * scale;
-                    let drawH = img.height * scale;
-                    let offsetX = (1280 - drawW) / 2;
-                    let offsetY = (720 - drawH) / 2;
+                    const resizedBase64 = canvas.toDataURL('image/jpeg', 0.75);
+                    capturedPhotos[slotIndex] = resizedBase64;
 
-                    ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
-                    const imgData = canvas.toDataURL('image/jpeg', 0.85);
+                    const card = document.getElementById('photoCard' + slotIndex);
+                    const box = document.getElementById('box' + slotIndex);
+                    const status = document.getElementById('status' + slotIndex);
 
-                    applyCapturedPhoto(index, imgData);
+                    card.classList.add('done');
+                    box.innerHTML = `<img src="${resizedBase64}" class="photo-slot-img" alt="Сүрөт ${slotIndex}">`;
+                    status.classList.add('done');
+                    status.innerText = "✓ Сүрөт кошулду";
+
+                    checkSaveButtonState();
                 };
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
         }
 
-        function applyCapturedPhoto(index, imgData) {
-            capturedPhotos[index] = imgData;
-
-            const card = document.getElementById(`photoCard${index}`);
-            const box = document.getElementById(`box${index}`);
-            const status = document.getElementById(`status${index}`);
-
-            card.classList.add('done');
-            status.classList.add('done');
-            status.innerHTML = "✓ Горизонталдуу кошулду";
-
-            let prevImg = box.querySelector('.photo-slot-img');
-            if (prevImg) prevImg.remove();
-
-            const img = document.createElement('img');
-            img.src = imgData;
-            img.className = 'photo-slot-img';
-            box.appendChild(img);
-
-            validateSaveButton();
-        }
-
-        function validateSaveButton() {
+        function checkSaveButtonState() {
             const btn = document.getElementById('saveRegBtn');
             if (capturedPhotos[1] && capturedPhotos[2]) {
-                btn.style.opacity = '1';
                 btn.disabled = false;
+                btn.style.opacity = '1';
                 btn.style.cursor = 'pointer';
+            } else {
+                btn.disabled = true;
+                btn.style.opacity = '0.4';
+                btn.style.cursor = 'not-allowed';
             }
         }
 
         function saveRegistration() {
-            if (!capturedPhotos[1] || !capturedPhotos[2]) {
-                alert("Белинен өйдө жана толук бою түшкөн сүрөттөрдү тең тартыңыз!");
-                return;
-            }
+            if (!capturedPhotos[1] || !capturedPhotos[2]) return;
 
             const btn = document.getElementById('saveRegBtn');
             btn.disabled = true;
-            btn.style.opacity = '0.7';
-            btn.innerHTML = '<div class="spinner spinner-dark"></div> Сакталууда...';
+            btn.innerHTML = `<span class="spinner spinner-dark"></span> Сакталууда...`;
 
-            const recordId = Date.now();
-            const record = {
-                id: recordId,
-                name: currentChildName,
-                date: new Date().toLocaleString('ru-RU'),
-                photos: [capturedPhotos[1], capturedPhotos[2]],
-                source: 'site'
+            const docData = {
+                fullName: currentChildName,
+                photo1: capturedPhotos[1],
+                photo2: capturedPhotos[2],
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            db.collection("records").doc(String(recordId)).set(record)
+            db.collection("registrations").add(docData)
                 .then(() => {
-                    alert("Маалымат онлайн серверге ийгиликтүү катталды!");
-                    resetRegForm();
+                    alert("Каттоо ийгиликтүү аяктады!");
+                    currentChildName = "";
+                    capturedPhotos = { 1: null, 2: null };
+                    document.getElementById('childNameInput').value = "";
+                    
+                    resetPhotoCard(1, "Белинен өйдө түшкөн");
+                    resetPhotoCard(2, "Толук бою түшкөн");
+
+                    btn.innerHTML = "Каттоо";
+                    checkSaveButtonState();
+
                     navigateTo('screenMainMenu');
                 })
                 .catch((error) => {
-                    alert("Сактоодо ката кетти: " + error.message);
+                    console.error("Ката чыкты: ", error);
+                    alert("Маалыматты сактоодо ката чыкты. Кайра аракет кылыңыз.");
                     btn.disabled = false;
-                    btn.style.opacity = '1';
-                    btn.innerHTML = 'Каттоо';
+                    btn.innerHTML = "Каттоо";
                 });
         }
 
-        function resetRegForm() {
-            document.getElementById('childNameInput').value = '';
-            capturedPhotos = { 1: null, 2: null };
-            [1, 2].forEach(i => {
-                const card = document.getElementById(`photoCard${i}`);
-                const box = document.getElementById(`box${i}`);
-                const status = document.getElementById(`status${i}`);
+        function resetPhotoCard(index, title) {
+            const card = document.getElementById('photoCard' + index);
+            const box = document.getElementById('box' + index);
+            const status = document.getElementById('status' + index);
 
-                card.classList.remove('done');
-                status.classList.remove('done');
-                status.innerHTML = "ⓘ Сүрөт кошуу &gt;";
-
-                const img = box.querySelector('.photo-slot-img');
-                if (img) img.remove();
-                document.getElementById(`nativeCam${i}`).value = '';
-            });
-            const btn = document.getElementById('saveRegBtn');
-            btn.style.opacity = '0.4';
-            btn.disabled = true;
-            btn.innerHTML = 'Каттоо';
+            card.classList.remove('done');
+            box.innerHTML = `<div class="photo-slot-plus" id="icon${index}">+</div>`;
+            status.classList.remove('done');
+            status.innerText = "ⓘ Сүрөт кошуу >";
         }
 
-        function loadSiteRegistered() {
-            const container = document.getElementById('siteRegisteredList');
-            const headerTitle = document.getElementById('totalRegisteredHeader');
-            container.innerHTML = '<p style="text-align:center; color: var(--text-sub);">Маалыматтар жүктөлүүдө...</p>';
-
+        function accessAdminPanel() {
             const settings = getAppSettings();
+            const pass = prompt("Администратор сыр сөзүн киргизиңиз:");
+            if (pass === settings.adminPass) {
+                navigateTo('screenAdminMenu');
+            } else if (pass !== null) {
+                alert("Сыр сөз туура эмес!");
+            }
+        }
 
-            db.collection("records").get().then((querySnapshot) => {
-                container.innerHTML = '';
-                const list = [];
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    if (data.source === 'site') {
-                        list.push(data);
-                    }
+        function adminLogout() {
+            navigateTo('screenMainMenu');
+        }
+
+        // КАТТАЛГАНДАРДЫ ЖҮКТӨӨ ЖАНА БАШКАРУУ
+        function loadRegisteredList() {
+            const listContainer = document.getElementById('siteRegisteredList');
+            const excelTableBody = document.getElementById('excelTableBody');
+            const header = document.getElementById('totalRegisteredHeader');
+
+            listContainer.innerHTML = `<div style="text-align:center; padding: 20px;"><span class="spinner"></span> Жүктөлүүдө...</div>`;
+            excelTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;"><span class="spinner"></span> Жүктөлүүдө...</td></tr>`;
+
+            db.collection("registrations").orderBy("createdAt", "desc").get()
+                .then((querySnapshot) => {
+                    allRegistrations = [];
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        allRegistrations.push({
+                            id: doc.id,
+                            fullName: data.fullName || '',
+                            photo1: data.photo1 || null,
+                            photo2: data.photo2 || null,
+                            createdAt: data.createdAt
+                        });
+                    });
+
+                    header.innerText = `Катталгандар тизмеси (${allRegistrations.length})`;
+                    applyFilters();
+                })
+                .catch((error) => {
+                    console.error("Тизмени алууда ката: ", error);
+                    listContainer.innerHTML = `<div class="glass-box" style="color:var(--danger-red); text-align:center;">Маалыматты жүктөөдө ката чыкты.</div>`;
+                    excelTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--danger-red);">Ката чыкты.</td></tr>`;
                 });
+        }
 
-                headerTitle.textContent = `Катталгандар тизмеси (Жалпы: ${list.length} бала)`;
+        // ПАПКАЛАРДЫ АЛМАШТЫРУУ (EXCEL КӨРҮНҮШҮ ЖАНА КАРТОЧКА КӨРҮНҮШҮ)
+        function switchFolder(folderType) {
+            const tabExcel = document.getElementById('tabExcel');
+            const tabCards = document.getElementById('tabCards');
+            const folderExcel = document.getElementById('folderViewExcel');
+            const folderCards = document.getElementById('folderViewCards');
 
-                if (list.length === 0) {
-                    container.innerHTML = '<p style="text-align:center; color: var(--text-sub);">Маалымат жок</p>';
-                    return;
+            if (folderType === 'excel') {
+                tabExcel.classList.add('active');
+                tabCards.classList.remove('active');
+                folderExcel.style.display = 'block';
+                folderCards.style.display = 'none';
+            } else {
+                tabCards.classList.add('active');
+                tabExcel.classList.remove('active');
+                folderCards.style.display = 'block';
+                folderExcel.style.display = 'none';
+            }
+        }
+
+        // ИЗДӨӨ ЖАНА ЧЫПКАЛОО ФУНКЦИЯСЫ
+        function applyFilters() {
+            const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
+            const imageFilter = document.getElementById('imageFilterSelect').value;
+
+            const filtered = allRegistrations.filter(item => {
+                const nameMatches = item.fullName.toLowerCase().includes(searchText);
+                let imageMatches = true;
+
+                if (imageFilter === 'with_img') {
+                    imageMatches = !!(item.photo1 && item.photo2);
+                } else if (imageFilter === 'no_img') {
+                    imageMatches = !(item.photo1 && item.photo2);
                 }
 
-                list.sort((a, b) => b.id - a.id);
-
-                list.forEach((item, index) => {
-                    let itemNumber = list.length - index; 
-
-                    const div = document.createElement('div');
-                    div.className = 'list-item';
-
-                    let downloadBtnHTML = settings.allowDownload ? `<button class="btn-action btn-action-download" onclick="downloadAllPhotos('${item.name}', '${item.photos[0]}', '${item.photos[1]}')">📥 Баарын жүктөө</button>` : '';
-                    let deleteBtnHTML = settings.allowDelete ? `<button class="btn-action btn-action-delete" onclick="deleteRecord('${item.id}')">🗑️ Өчүрүү</button>` : '';
-
-                    div.innerHTML = `
-                        <div class="list-header">
-                            <span class="list-title">${itemNumber}. ${item.name}</span>
-                            <span class="list-date">${item.date}</span>
-                        </div>
-                        <div class="thumb-group">
-                            <img src="${item.photos[0]}" title="Белинен өйдө түшкөн" onclick="openImageViewer('${item.photos[0]}')">
-                            <img src="${item.photos[1]}" title="Толук бою түшкөн" onclick="openImageViewer('${item.photos[1]}')">
-                        </div>
-                        <div class="item-actions">
-                            ${downloadBtnHTML}
-                            ${deleteBtnHTML}
-                        </div>
-                    `;
-                    container.appendChild(div);
-                });
-            }).catch(error => {
-                container.innerHTML = `<p style="text-align:center; color: var(--danger-red);">Ката кетти: ${error.message}</p>`;
+                return nameMatches && imageMatches;
             });
+
+            renderData(filtered);
         }
 
-        function openImageViewer(url) {
-            document.getElementById('enlargedImg').src = url;
-            document.getElementById('imageViewerModal').style.display = 'flex';
+        // ДАТАНЫ РЕНДЕРДӨӨ
+        function renderData(dataList) {
+            const settings = getAppSettings();
+            const listContainer = document.getElementById('siteRegisteredList');
+            const excelTableBody = document.getElementById('excelTableBody');
+
+            if (dataList.length === 0) {
+                listContainer.innerHTML = `<div class="glass-box" style="text-align:center; color: var(--text-sub);">Эч нерсе табылган жок.</div>`;
+                excelTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-sub);">Эч нерсе табылган жок.</td></tr>`;
+                return;
+            }
+
+            let cardsHtml = "";
+            let excelHtml = "";
+
+            dataList.forEach((item, index) => {
+                let dateStr = "Жаңы";
+                if (item.createdAt && item.createdAt.toDate) {
+                    const d = item.createdAt.toDate();
+                    dateStr = d.toLocaleDateString('ru-RU') + " " + d.toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'});
+                }
+
+                let downloadBtn = settings.allowDownload && item.photo1 && item.photo2 ? 
+                    `<button class="btn-action btn-action-download" onclick="downloadPhotos('${item.id}', '${escapeQuotes(item.fullName)}', '${item.photo1}', '${item.photo2}')">📥 Көчүрүү</button>` : '';
+
+                let deleteBtn = settings.allowDelete ? 
+                    `<button class="btn-action btn-action-delete" onclick="deleteRegistration('${item.id}')">🗑 Өчүрүү</button>` : '';
+
+                // 1. КАРТОЧКА АБДАН ТҮЗҮЛҮШҮ (2-ПАПКА)
+                cardsHtml += `
+                    <div class="list-item" id="doc-${item.id}">
+                        <div class="list-header">
+                            <div class="list-title">${escapeQuotes(item.fullName)}</div>
+                            <div class="list-date">${dateStr}</div>
+                        </div>
+                        <div class="thumb-group">
+                            ${item.photo1 ? `<img src="${item.photo1}" alt="Фото 1" onclick="openImageViewer('${item.photo1}')">` : '<span style="color:var(--text-sub); font-size:12px;">Сүрөт жок</span>'}
+                            ${item.photo2 ? `<img src="${item.photo2}" alt="Фото 2" onclick="openImageViewer('${item.photo2}')">` : ''}
+                        </div>
+                        <div class="item-actions">
+                            ${downloadBtn}
+                            ${deleteBtn}
+                        </div>
+                    </div>
+                `;
+
+                // 2. EXCEL ТАБЛИЦАСЫ (1-ПАПКА)
+                excelHtml += `
+                    <tr id="row-${item.id}">
+                        <td>${index + 1}</td>
+                        <td style="font-weight:600; color:var(--text-main);">${escapeQuotes(item.fullName)}</td>
+                        <td style="font-size:12px; color:var(--text-sub);">${dateStr}</td>
+                        <td>${item.photo1 ? `<img src="${item.photo1}" class="mini-thumb" onclick="openImageViewer('${item.photo1}')">` : 'Жок'}</td>
+                        <td>${item.photo2 ? `<img src="${item.photo2}" class="mini-thumb" onclick="openImageViewer('${item.photo2}')">` : 'Жок'}</td>
+                        <td>
+                            <div style="display:flex; gap:5px;">
+                                ${downloadBtn}
+                                ${deleteBtn}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            listContainer.innerHTML = cardsHtml;
+            excelTableBody.innerHTML = excelHtml;
+        }
+
+        function escapeQuotes(str) {
+            return (str || '').replace(/'/g, "\\'").replace(/"/g, "&quot;");
+        }
+
+        function openImageViewer(src) {
+            const modal = document.getElementById('imageViewerModal');
+            const img = document.getElementById('enlargedImg');
+            img.src = src;
+            modal.style.display = 'flex';
         }
 
         function closeImageViewer() {
             document.getElementById('imageViewerModal').style.display = 'none';
         }
 
-        function downloadAllPhotos(name, photo1, photo2) {
-            const settings = getAppSettings();
-            if (!settings.allowDownload) {
-                alert("Көчүрүп алуу функциясы жөндөөлөрдөн өчүрүлгөн!");
-                return;
-            }
+        function downloadPhotos(id, name, p1, p2) {
+            const cleanName = name.replace(/[^a-zA-Zа-яА-Я0-9]/g, "_");
+            
+            const a1 = document.createElement('a');
+            a1.href = p1;
+            a1.download = `${cleanName}_белинен.jpg`;
+            document.body.appendChild(a1);
+            a1.click();
+            document.body.removeChild(a1);
 
-            [ {url: photo1, suffix: '_1_beli_oiden'}, {url: photo2, suffix: '_2_toluk_boyu'} ].forEach((item, idx) => {
-                setTimeout(() => {
-                    const a = document.createElement('a');
-                    a.href = item.url;
-                    a.download = `${name}${item.suffix}.jpg`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                }, idx * 400);
-            });
+            setTimeout(() => {
+                const a2 = document.createElement('a');
+                a2.href = p2;
+                a2.download = `${cleanName}_толук_бою.jpg`;
+                document.body.appendChild(a2);
+                a2.click();
+                document.body.removeChild(a2);
+            }, 400);
         }
 
-        function deleteRecord(id) {
-            const settings = getAppSettings();
-            if (!settings.allowDelete) {
-                alert("Өчүрүү функциясы жөндөөлөрдөн өчүрүлгөн!");
-                return;
-            }
+        function deleteRegistration(id) {
+            if (!confirm("Бул колдонуучуну өчүрүүнү каалайсызбы?")) return;
 
-            if (confirm("Бул маалыматты өчүрүүнү каалайсызбы?")) {
-                db.collection("records").doc(String(id)).delete().then(() => {
-                    loadSiteRegistered();
-                }).catch(error => {
-                    alert("Өчүрүүдө ката кетти: " + error.message);
+            db.collection("registrations").doc(id).delete()
+                .then(() => {
+                    allRegistrations = allRegistrations.filter(item => item.id !== id);
+                    applyFilters();
+                    alert("Маалымат өчүрүлдү.");
+                })
+                .catch((error) => {
+                    console.error("Өчүрүүдө ката: ", error);
+                    alert("Өчүрүүдө ката чыкты.");
                 });
-            }
         }
     </script>
 </body>
