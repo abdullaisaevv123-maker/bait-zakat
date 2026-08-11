@@ -1,0 +1,1803 @@
+<!DOCTYPE html>
+<html lang="ky">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Байту закат</title>
+    
+    <!-- FIREBASE КИТЕПКАНАЛАРЫ -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #0b132b;
+            --folder-bg: rgba(28, 37, 65, 0.7);
+            --folder-border: rgba(91, 192, 190, 0.25);
+            --folder-hover: #1c2541;
+            --primary-blue: #3a86ff;
+            --accent-glow: #00f5d4;
+            --accent-yellow: #ffd600;
+            --text-main: #edf2f4;
+            --text-sub: #8d99ae;
+            --danger-red: #ff4d4d;
+            --whatsapp-green: #25D366;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+        body {
+            background: radial-gradient(circle at top left, #1c2541, #0b132b);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 25px 15px;
+        }
+
+        .app-container { width: 100%; max-width: 800px; position: relative; }
+
+        .header-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .lang-select-container {
+            position: absolute;
+            right: 0;
+            top: 5px;
+        }
+
+        .lang-select {
+            background: rgba(28, 37, 65, 0.8);
+            border: 1px solid var(--folder-border);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .screen { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .screen.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-main);
+            text-align: center;
+            letter-spacing: 0.5px;
+            flex-grow: 1;
+        }
+
+        .glass-box {
+            background: var(--folder-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--folder-border);
+            border-radius: 18px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+        }
+
+        .main-menu-layout {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 450px;
+        }
+
+        .hero-folder-title-outer {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-glow);
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 10px rgba(0, 245, 212, 0.2);
+        }
+
+        .hero-folder-card {
+            background: var(--folder-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--folder-border);
+            border-radius: 24px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 0 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-folder-card:hover {
+            background: var(--folder-hover);
+            border-color: rgba(58, 134, 255, 0.8);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(58, 134, 255, 0.25);
+        }
+
+        .hero-folder-icon { width: 100px; height: 85px; margin-bottom: 12px; }
+        .hero-folder-name { font-size: 26px; font-weight: 700; color: var(--text-main); }
+
+        .bottom-nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding: 0 10px;
+            gap: 15px;
+        }
+
+        .nav-btn-item {
+            background: rgba(28, 37, 65, 0.8);
+            border: 1px solid var(--folder-border);
+            border-radius: 16px;
+            padding: 14px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-main);
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.25s ease;
+            flex: 1;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .nav-btn-item:hover {
+            background: var(--folder-hover);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+        }
+
+        .nav-btn-icon { width: 28px; height: 28px; fill: var(--text-sub); transition: fill 0.2s; }
+        .nav-btn-item:hover .nav-btn-icon { fill: #fff; }
+        .nav-btn-item.whatsapp .nav-btn-icon { fill: var(--whatsapp-green); }
+        .nav-btn-item.whatsapp:hover { border-color: rgba(37, 211, 102, 0.5); box-shadow: 0 0 15px rgba(37, 211, 102, 0.3); }
+
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-sub); }
+        .input-group input, .input-group select {
+            width: 100%; padding: 14px 18px; font-size: 15px;
+            background: rgba(11, 19, 43, 0.6); border: 1px solid var(--folder-border);
+            border-radius: 12px; color: var(--text-main); outline: none;
+        }
+
+        .password-wrapper { position: relative; display: flex; align-items: center; }
+        .password-wrapper input { padding-right: 45px; }
+        .eye-btn { position: absolute; right: 12px; background: none; border: none; cursor: pointer; font-size: 18px; color: var(--text-sub); }
+        .eye-btn:hover { color: var(--text-main); }
+
+        .folder-card {
+            background: var(--folder-bg); backdrop-filter: blur(12px);
+            border: 1px solid var(--folder-border); border-radius: 18px;
+            padding: 24px; cursor: pointer; transition: all 0.25s ease;
+            display: flex; align-items: center; gap: 18px;
+        }
+
+        .folder-card:hover { background: var(--folder-hover); border-color: rgba(58, 134, 255, 0.6); }
+        .folder-svg-icon { width: 48px; height: 42px; flex-shrink: 0; }
+        .folder-name { font-size: 18px; font-weight: 600; margin-bottom: 2px; }
+        .folder-desc { font-size: 13px; color: var(--text-sub); }
+
+        .instruction-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }
+        .instruction-card {
+            background: rgba(11, 19, 43, 0.6); border: 1px solid var(--folder-border);
+            border-radius: 16px; padding: 18px 10px; display: flex; flex-direction: column; align-items: center; gap: 12px;
+        }
+        .instruction-card.bad { border-color: rgba(255, 77, 77, 0.4); }
+        .instruction-card.good { border-color: rgba(0, 245, 212, 0.4); }
+
+        .phone-mockup-frame { border-radius: 8px; background: #000; position: relative; display: flex; align-items: center; justify-content: center; }
+        .phone-mockup-frame.vertical { width: 45px; height: 80px; border: 3px solid var(--danger-red); }
+        .phone-mockup-frame.horizontal { width: 85px; height: 48px; border: 3px solid var(--accent-glow); margin: 0 auto; }
+        .phone-screen-fill { width: 75%; height: 75%; background: rgba(255, 255, 255, 0.15); border-radius: 4px; margin: 0 auto;}
+
+        .instruction-badge { font-size: 13px; font-weight: 700; padding: 6px 10px; border-radius: 20px; text-align: center; }
+        .bad-badge { background: rgba(255, 77, 77, 0.15); color: var(--danger-red); }
+        .good-badge { background: rgba(0, 245, 212, 0.15); color: var(--accent-glow); }
+        .instruction-desc { font-size: 11px; color: var(--text-sub); text-align: center; }
+
+        .checkbox-container {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            margin: 20px 0 10px 0; background: rgba(11, 19, 43, 0.5); padding: 12px 15px;
+            border-radius: 12px; border: 1px dashed var(--folder-border); cursor: pointer;
+        }
+
+        .checkbox-container input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--accent-glow); cursor: pointer; }
+        .checkbox-label { font-size: 13px; color: var(--text-main); font-weight: 500; cursor: pointer; user-select: none; }
+
+        .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 12px; }
+        .setting-info { font-size: 15px; font-weight: 600; color: var(--text-main); }
+        .setting-desc { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
+
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; flex-shrink: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #1e2436; transition: .3s; border-radius: 26px; border: 1px solid var(--folder-border); }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary-blue); border-color: var(--primary-blue); }
+        input:checked + .slider:before { transform: translateX(24px); }
+
+        .photo-slot-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 20px 0; }
+        .photo-slot-card { background: #141824; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; padding: 12px; display: flex; flex-direction: column; cursor: pointer; }
+        .photo-slot-box { width: 100%; aspect-ratio: 16 / 9; background: #1e2436; border-radius: 12px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        .photo-slot-plus { width: 42px; height: 42px; border-radius: 50%; background: rgba(255, 255, 255, 0.08); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+        .photo-slot-card.done .photo-slot-plus { background: var(--accent-glow); color: #0b132b; font-weight: bold; }
+        .photo-slot-img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
+        .photo-slot-info { margin-top: 10px; text-align: left; }
+        .photo-slot-title { font-size: 15px; font-weight: 600; color: #ffffff; margin-bottom: 4px; }
+        .photo-slot-status { font-size: 12px; color: #ff4d4d; font-weight: 500; }
+        .photo-slot-status.done { color: var(--accent-glow); }
+
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 10px; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; text-align: center; }
+        .btn-blue { background: linear-gradient(135deg, #3a86ff, #2563eb); color: #fff; }
+        .btn-whatsapp { background: var(--whatsapp-green); color: #fff; font-weight: 700; font-size: 13px; padding: 12px; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(1); }
+
+        .btn-yellow-main { width: 100%; padding: 16px; background: var(--accent-yellow); color: #000; font-size: 16px; font-weight: 700; border: none; border-radius: 14px; cursor: pointer; margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-yellow-main:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .spinner { width: 20px; height: 20px; border: 3px solid rgba(255, 255, 255, 0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; }
+        .spinner-dark { border: 3px solid rgba(0, 0, 0, 0.2); border-top-color: #000; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .folder-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 25px; }
+        
+        .list-item { 
+            background: rgba(11, 19, 43, 0.85); 
+            border: 1px solid var(--folder-border); 
+            border-radius: 20px; 
+            padding: 22px; 
+            margin-bottom: 25px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+        }
+        .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .list-title { font-size: 20px; font-weight: 700; color: var(--accent-glow); }
+        .list-date { font-size: 13px; color: var(--text-sub); }
+        
+        .large-thumb-group { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 16px; 
+            margin-top: 15px; 
+            margin-bottom: 15px;
+        }
+        .large-thumb-group img { 
+            width: 100%; 
+            max-height: 400px;
+            border-radius: 14px; 
+            object-fit: cover; 
+            cursor: pointer; 
+            border: 2px solid rgba(255,255,255,0.15); 
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+        .large-thumb-group img:hover {
+            transform: scale(1.02);
+            border-color: var(--accent-glow);
+        }
+
+        .item-actions { display: flex; gap: 7px; margin-top: 15px; flex-wrap: wrap; align-items:center; }
+        .btn-action { padding: 10px 16px; border-radius: 10px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content:center; gap: 6px; }
+        .btn-icon-only { width: 34px; height: 34px; padding: 0 !important; border-radius: 8px; font-size: 16px !important; line-height: 1; }
+        .btn-whatsapp-icon { width:34px; height:34px; padding:0; border:0; border-radius:8px; background:#25D366; color:#fff; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; text-decoration:none; }
+        .btn-whatsapp-icon svg { width:20px; height:20px; display:block; }
+        .btn-whatsapp-icon:hover { filter:brightness(1.08); transform:translateY(-1px); }
+        .phone-edit-btn { width:28px; height:28px; padding:0; border:0; border-radius:7px; background:rgba(255,183,3,.16); color:#ffb703; cursor:pointer; font-size:14px; display:inline-flex; align-items:center; justify-content:center; }
+        .phone-edit-btn svg { width:15px; height:15px; }
+        .phone-cell { white-space: nowrap; }
+        .phone-value { display:inline-flex; align-items:center; gap:7px; }
+        .phone-edit-btn:hover { filter:brightness(1.15); }
+
+        .btn-action-copy { background: #2a9d8f; color: #fff; }
+        .btn-action-download { background: var(--primary-blue); color: #fff; }
+        .btn-action-delete { background: var(--danger-red); color: #fff; }
+
+        .image-viewer-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.95); z-index: 10000; display: none; align-items: center; justify-content: center; flex-direction: column; padding: 20px; }
+        .image-viewer-modal img { max-width: 98%; max-height: 90vh; border-radius: 12px; object-fit: contain; }
+        .image-viewer-close { position: absolute; top: 20px; right: 25px; color: #fff; font-size: 30px; background: rgba(255,255,255,0.2); border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; }
+        .success-modal { position:fixed; inset:0; background:rgba(0,0,0,.72); z-index:12000; display:none; align-items:center; justify-content:center; padding:20px; }
+        .success-modal.open { display:flex; }
+        .success-box { width:min(430px,100%); background:linear-gradient(180deg,#182442,#0f1830); border:1px solid rgba(0,245,212,.35); border-radius:22px; padding:30px 24px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.5); }
+        .success-icon { width:70px; height:70px; margin:0 auto 16px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:rgba(0,245,212,.12); color:var(--accent-glow); font-size:40px; font-weight:800; }
+        .success-box h3 { color:var(--accent-glow); font-size:24px; margin-bottom:10px; }
+        .success-box p { color:var(--text-main); line-height:1.55; margin-bottom:20px; }
+        .success-ok { width:100%; border:0; border-radius:12px; padding:13px 18px; background:var(--primary-blue); color:#fff; font-size:15px; font-weight:700; cursor:pointer; }
+
+        .folder-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tab-btn { flex: 1; padding: 12px; background: rgba(11, 19, 43, 0.6); border: 1px solid var(--folder-border); border-radius: 12px; color: var(--text-sub); font-weight: 600; cursor: pointer; text-align: center; transition: all 0.2s; }
+        .tab-btn.active { background: var(--primary-blue); color: #fff; border-color: var(--primary-blue); }
+
+        .search-container { display: flex; gap: 10px; margin-bottom: 15px; }
+        .search-input { width: 100%; padding: 14px 18px; background: rgba(11, 19, 43, 0.6); border: 1px solid var(--folder-border); border-radius: 12px; color: var(--text-main); font-size: 15px; outline: none; }
+
+        /* ИМПОРТТОЛГОН ТОЛУК EXCEL ТАБЛИЦА СИСТЕМАСЫ */
+        .excel-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(28, 37, 65, 0.8);
+            padding: 12px 18px;
+            border-radius: 12px 12px 0 0;
+            border: 1px solid var(--folder-border);
+            border-bottom: none;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .excel-table-container { 
+            overflow-x: auto; 
+            background: rgba(11, 19, 43, 0.8); 
+            border: 1px solid var(--folder-border); 
+            border-radius: 0 0 12px 12px; 
+        }
+
+        .excel-table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; }
+        .excel-table th, .excel-table td { padding: 14px 18px; border: 1px solid rgba(255,255,255,0.08); }
+        .excel-table th { 
+            background: rgba(28, 37, 65, 0.95); 
+            color: var(--accent-glow); 
+            font-weight: 600; 
+            cursor: pointer; 
+            user-select: none;
+        }
+        .excel-table th:hover { background: var(--folder-hover); }
+        .excel-table tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+        .excel-table tr:hover { background: rgba(58, 134, 255, 0.1); }
+
+        .copy-all-btn { width: 100%; background: #2a9d8f; color: #fff; border: none; padding: 14px; border-radius: 12px; font-weight: 600; cursor: pointer; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; }
+        .copy-all-btn:hover { background: #218377; }
+
+        /* === ЖАҢЫ ФУНКЦИЯЛАР === */
+        .phone-row { display:grid; grid-template-columns: 115px 1fr; gap:10px; }
+        .phone-prefix { width:100%; }
+        .phone-help { font-size:11px; color:var(--text-sub); margin-top:6px; }
+        .language-menu { position:absolute; right:0; top:3px; z-index:20; }
+        .language-toggle {
+            border:1px solid var(--folder-border); background:rgba(28,37,65,.82);
+            color:var(--text-main); border-radius:999px; padding:5px 9px; font-size:11px;
+            cursor:pointer; min-width:48px; backdrop-filter:blur(10px);
+        }
+        .language-options {
+            display:none; position:absolute; right:0; top:34px; background:#141b31;
+            border:1px solid var(--folder-border); border-radius:10px; padding:4px;
+            box-shadow:0 10px 25px rgba(0,0,0,.35); min-width:105px;
+        }
+        .language-menu.open .language-options { display:flex; flex-direction:column; }
+        .language-options button {
+            background:transparent; color:var(--text-main); border:0; border-radius:7px;
+            padding:7px 9px; font-size:11px; text-align:left; cursor:pointer;
+        }
+        .language-options button:hover { background:var(--folder-hover); }
+        .selection-toolbar {
+            display:none; position:sticky; top:8px; z-index:8; margin-bottom:12px;
+            padding:10px; border:1px solid var(--folder-border); border-radius:12px;
+            background:rgba(11,19,43,.96); backdrop-filter:blur(10px);
+            gap:7px; align-items:center; flex-wrap:wrap;
+        }
+        .selection-toolbar.active { display:flex; }
+        .selection-count { margin-right:auto; color:var(--accent-glow); font-size:12px; font-weight:700; }
+        .select-checkbox { width:18px; height:18px; accent-color:var(--primary-blue); cursor:pointer; }
+        .select-cell { text-align:center !important; width:45px; }
+        .select-card-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+        .whatsapp-mini {
+            background:var(--whatsapp-green); color:white; text-decoration:none;
+            width:32px; height:32px; padding:0; border-radius:8px; display:inline-flex; align-items:center;
+            justify-content:center; font-size:16px; font-weight:700; vertical-align:middle;
+        }
+        .whatsapp-mini:hover { filter:brightness(1.08); }
+        .registered-phone { color:var(--text-sub); font-size:12px; margin-top:4px; }
+        .empty-state { text-align:center; padding:30px 15px; color:var(--text-sub); }
+        @media (max-width:600px) {
+            .phone-row { grid-template-columns: 95px 1fr; }
+            .excel-table th, .excel-table td { padding:10px 8px; }
+            .item-actions { gap:7px; }
+            .btn-action { padding:9px 10px; font-size:12px; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <svg style="display: none;">
+        <symbol id="icon-folder" viewBox="0 0 24 24">
+            <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+        </symbol>
+        <symbol id="icon-admin" viewBox="0 0 24 24">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+        </symbol>
+        <symbol id="icon-phone" viewBox="0 0 24 24">
+            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+        </symbol>
+        <symbol id="icon-eye" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+        </symbol>
+    </svg>
+
+    <div class="app-container">
+
+        <!-- ЖОГОРКУ БАШКЫ ТИЛ ТАНДОО БӨЛҮМҮ -->
+        <div class="header-top-bar">
+            <h1 class="header-title" id="txtMainAppTitle">Байту закат</h1>
+            <div class="language-menu" id="languageMenu">
+                <button class="language-toggle" onclick="toggleLanguageMenu()" id="languageToggle">KG ▾</button>
+                <div class="language-options">
+                    <button onclick="selectLanguage('ky')">🇰🇬 Кыргызча</button>
+                    <button onclick="selectLanguage('ru')">🇷🇺 Русский</button>
+                    <button onclick="selectLanguage('ar')">🇰🇼 العربية</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 0-ЭКРАН: БАШКЫ ЭКРАН -->
+        <div id="screenMainMenu" class="screen">
+            <div class="main-menu-layout">
+                <div>
+                    <div class="hero-folder-title-outer" id="txtHeroSub">Байту закатка съемка</div>
+                    <div class="hero-folder-card" onclick="navigateTo('screenRegName')">
+                        <svg class="hero-folder-icon" style="fill: #3a86ff;"><use href="#icon-folder"/></svg>
+                        <div class="hero-folder-name" id="txtRegisterBtn">Каттоо</div>
+                    </div>
+                </div>
+
+                <div class="bottom-nav-bar">
+                    <button class="nav-btn-item" onclick="accessAdminPanel()">
+                        <svg class="nav-btn-icon"><use href="#icon-admin"/></svg>
+                        <span id="txtAdminBtn">Админ</span>
+                    </button>
+                    <a href="https://wa.me/996999114003" target="_blank" class="nav-btn-item whatsapp">
+                        <svg class="nav-btn-icon"><use href="#icon-phone"/></svg>
+                        <span id="txtCuratorBtn">Куратор менен байланышуу</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1-ЭКРАН: Ф.И.О. КИРГИЗҮҮ -->
+        <div id="screenRegName" class="screen">
+            <div class="glass-box">
+                <h3 style="margin-bottom: 20px; font-weight: 500;" id="txtInputTitle">Маалымат киргизүү</h3>
+                <div class="input-group">
+                    <label id="lblChildName">Баланын Ф.И.О.:</label>
+                    <input type="text" id="childNameInput" placeholder="Ф.И.О. жазыңыз..." autocomplete="off">
+                </div>
+                <button id="nameNextBtn" class="btn btn-blue" onclick="proceedToInstructionStep()">Улантуу →</button>
+                <div id="errorTextContainer" style="display: none; margin-top: 15px; text-align: center;">
+                    <p id="errorMessageText" style="font-size: 13px; color: var(--danger-red); margin-bottom: 5px;"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1.5-ЭКРАН: ТЕЛЕФОН НОМЕРИ -->
+        <div id="screenRegPhone" class="screen">
+            <div class="glass-box">
+                <h3 style="margin-bottom:20px;font-weight:500;" id="txtPhoneTitle">Телефон номери</h3>
+                <div class="input-group">
+                    <label id="lblPhone">Телефон номери:</label>
+                    <div class="phone-row">
+                        <select id="phoneCountry" class="phone-prefix" onchange="normalizePhoneInput()">
+                            <option value="+996">+996</option>
+                            <option value="+7">+7</option>
+                        </select>
+                        <input type="tel" id="childPhoneInput" inputmode="numeric" autocomplete="tel"
+                               placeholder="700 123 456" maxlength="10" oninput="normalizePhoneInput()">
+                    </div>
+                    <div class="phone-help" id="phoneHelp">Эгер номер 0 менен башталса, 0 автоматтык түрдө алынат.</div>
+                </div>
+                <button id="phoneNextBtn" class="btn btn-blue" disabled onclick="validatePhoneAndContinue()">Улантуу →</button>
+                <div id="phoneErrorContainer" style="display:none;margin-top:15px;text-align:center;">
+                    <p id="phoneErrorText" style="font-size:13px;color:var(--danger-red);"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1.5-ЭКРАН: СҮРӨТ ТАРТУУ НУСКАМАСЫ -->
+        <div id="screenRegInstruction" class="screen">
+            <div class="glass-box" style="text-align: center;">
+                <p style="font-size: 14px; margin-bottom: 15px; color: var(--text-main);" id="txtInstructionHeader">
+                    Сүрөттөрдү туура тартуу үчүн төмөндөгү эрежени сактаңыз:
+                </p>
+                <div class="instruction-grid">
+                    <div class="instruction-card bad">
+                        <div class="phone-mockup-frame vertical"><div class="phone-screen-fill"></div></div>
+                        <div class="instruction-badge bad-badge" id="badgeBad">❌ Мынтип тартпаңыз</div>
+                        <div class="instruction-desc" id="descBad">Тигинен (вертикалдуу) тартууга болбойт</div>
+                    </div>
+                    <div class="instruction-card good">
+                        <div class="phone-mockup-frame horizontal"><div class="phone-screen-fill"></div></div>
+                        <div class="instruction-badge good-badge" id="badgeGood">✅ Ушунтип тартыңыз</div>
+                        <div class="instruction-desc" id="descGood">Туурасынан (горизонталдуу) тартыңыз</div>
+                    </div>
+                </div>
+                <label class="checkbox-container" for="understandCheckbox">
+                    <input type="checkbox" id="understandCheckbox" onchange="toggleInstructionBtn()">
+                    <span class="checkbox-label" id="lblUnderstand">Тартуу эрежесин түшүндүм</span>
+                </label>
+                <button id="instructionNextBtn" class="btn btn-blue" disabled onclick="proceedToPhotoStepFinal()">Улантуу →</button>
+            </div>
+        </div>
+
+        <!-- 2-ЭКРАН: СҮРӨТКӨ ТАРТУУ -->
+        <div id="screenRegPhoto" class="screen">
+            <div class="glass-box">
+                <h3 id="displayName" style="color: var(--accent-glow); margin-bottom: 8px; font-weight: 600;"></h3>
+                <p style="font-size: 13px; color: var(--text-sub);" id="txtPhotoRule">
+                    Сүрөттөрдү <b>горизонталдуу (туурасынан)</b> тартыңыз: белинен өйдө жана толук бою түшкөн болушу керек.
+                </p>
+
+                <div class="photo-slot-grid">
+                    <div id="photoCard1" class="photo-slot-card" onclick="triggerCamera(1)">
+                        <div class="photo-slot-box" id="box1"><div class="photo-slot-plus" id="icon1">+</div></div>
+                        <div class="photo-slot-info">
+                            <div class="photo-slot-title" id="lblPhoto1Title">Белинен өйдө түшкөн</div>
+                            <div class="photo-slot-status" id="status1" style="margin-top:4px;">ⓘ Сүрөт кошуу &gt;</div>
+                        </div>
+                    </div>
+
+                    <div id="photoCard2" class="photo-slot-card" onclick="triggerCamera(2)">
+                        <div class="photo-slot-box" id="box2"><div class="photo-slot-plus" id="icon2">+</div></div>
+                        <div class="photo-slot-info">
+                            <div class="photo-slot-title" id="lblPhoto2Title">Толук бою түшкөн</div>
+                            <div class="photo-slot-status" id="status2" style="margin-top:4px;">ⓘ Сүрөт кошуу &gt;</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="photoErrorWhatsAppContainer" style="display: none; margin-bottom: 15px; text-align: center;">
+                    <p id="photoErrorMessageText" style="font-size: 13px; color: var(--danger-red); margin-bottom: 10px;"></p>
+                    <a href="https://wa.me/996999114003" target="_blank" class="btn btn-whatsapp" id="btnAskCurator">💬 Кантип туура тартса болорун билүү үчүн куратордон сураңыз</a>
+                </div>
+
+                <button id="saveRegBtn" class="btn-yellow-main" style="opacity: 0.4; cursor: not-allowed;" disabled onclick="saveRegistration()">Каттоо</button>
+            </div>
+        </div>
+
+        <!-- 3-ЭКРАН: АДМИН МЕНЮСУ -->
+        <div id="screenAdminMenu" class="screen">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 style="margin: 0; text-align: left;" id="txtAdminPanelTitle">Администратор Панели</h2>
+                <button class="btn-action btn-action-delete" onclick="adminLogout()" style="padding: 10px 16px; font-size: 13px;" id="btnLogout">🚪 Чыгуу</button>
+            </div>
+            
+            <div class="folder-grid">
+                <div class="folder-card" style="flex-direction: column; align-items: flex-start;" onclick="navigateTo('screenAdminRegistered')">
+                    <svg class="folder-svg-icon" style="fill: #00f5d4;"><use href="#icon-folder"/></svg>
+                    <div>
+                        <div class="folder-name" id="folderRegTitle">Катталгандар</div>
+                        <div class="folder-desc" id="folderRegDesc">Катталган колдонуучулар</div>
+                    </div>
+                </div>
+
+                <div class="folder-card" style="flex-direction: column; align-items: flex-start;" onclick="navigateTo('screenAdminSettings')">
+                    <svg class="folder-svg-icon" style="fill: #ffb703;"><use href="#icon-folder"/></svg>
+                    <div>
+                        <div class="folder-name" id="folderSetTitle">Жөндөөлөр</div>
+                        <div class="folder-desc" id="folderSetDesc">Системалык жөндөөлөр</div>
+                    </div>
+                </div>
+
+                <div class="folder-card" style="flex-direction: column; align-items: flex-start;" onclick="navigateTo('screenAdminCurators')">
+                    <svg class="folder-svg-icon" style="fill: #4cc9f0;"><use href="#icon-folder"/></svg>
+                    <div>
+                        <div class="folder-name" id="folderCurTitle">Кураторлор</div>
+                        <div class="folder-desc" id="folderCurDesc">Кураторлордун тизмеси</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4-ЭКРАН: КАТТАЛГАНДАР (ТОЛУК EXCEL СИСТЕМАСЫ ЖАНА КӨЧҮРҮҮ ЖӨНДӨӨСҮ МЕНЕН) -->
+        <div id="screenAdminRegistered" class="screen">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 id="totalRegisteredHeader" style="margin: 0; font-size: 22px;">Катталгандар тизмеси</h3>
+            </div>
+
+            <!-- ИЗДӨӨ ТИЛКЕСИ -->
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Аты-жөнү боюнча издөө..." oninput="applyFilters()">
+            </div>
+            <div id="selectionToolbar" class="selection-toolbar">
+                <span id="selectionCount" class="selection-count">0 тандалды</span>
+                <button class="btn-action btn-action-copy btn-icon-only" title="Көчүрүү" aria-label="Көчүрүү" onclick="bulkCopySelected()">📋</button>
+                <button class="btn-action btn-action-download btn-icon-only" title="Скачать" aria-label="Скачать" onclick="bulkDownloadSelected()">📥</button>
+                <button class="btn-action btn-action-delete btn-icon-only" title="Удалить" aria-label="Удалить" onclick="bulkDeleteSelected()">🗑</button>
+            </div>
+
+            <!-- ЭКИ ПАПКА (ӨТМӨКТӨР) -->
+            <div class="folder-tabs">
+                <button id="tabExcel" class="tab-btn active" onclick="switchFolder('excel')">📁 1. Тизме (Excel системасы)</button>
+                <button id="tabCards" class="tab-btn" onclick="switchFolder('cards')">📁 2. Сүрөттөр менен</button>
+            </div>
+
+            <!-- ПАПКА 1: ТОЛУК СИСТЕМАЛЫК EXCEL ТАБЛИЦА (СҮРӨТСҮЗ, ЫҢГАЙЛУУ) -->
+            <div id="folderViewExcel">
+                <div class="excel-toolbar">
+                    <span style="font-size: 13px; color: var(--text-sub);" id="txtExcelBarInfo">📊 Иреттөө үчүн тилкелерди басыңыз</span>
+                    <button class="btn-action btn-action-copy" onclick="sortDataByName()" style="font-size:12px; padding:6px 12px;">🔤 Алфавит боюнча</button>
+                </div>
+                <div class="excel-table-container">
+                    <table class="excel-table">
+                        <thead>
+                            <tr>
+                                <th class="select-cell"><input type="checkbox" class="select-checkbox" id="selectAllExcel" onchange="toggleSelectAll(this.checked)"></th>
+                                <th style="width: 50px;">№</th>
+                                <th onclick="sortDataByName()" id="thName">Ф.И.О. ⇳</th>
+                                <th id="thPhone">Телефон</th>
+                                <th onclick="sortDataByDate()" id="thDate">Катталган күнү/убактысы ⇳</th>
+                                <th style="text-align: right;" id="thActions">Аракеттер</th>
+                            </tr>
+                        </thead>
+                        <tbody id="excelTableBody">
+                            <!-- Маалыматтар динамикалуу жүктөлөт -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ПАПКА 2: КАРТОЧКАЛАР (СҮРӨТТӨР МЕНЕН) -->
+            <div id="folderViewCards" style="display: none;">
+                <div id="siteRegisteredList"></div>
+            </div>
+        </div>
+
+        <!-- 5-ЭКРАН: ЖӨНДӨӨЛӨР (КӨЧҮРҮҮ ФУНКЦИЯСЫ МЕНЕН) -->
+        <div id="screenAdminSettings" class="screen">
+            <h3 style="margin-bottom: 20px;" id="txtSettingsTitle">Жөндөөлөр</h3>
+            <div class="glass-box">
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-info" id="txtSetCopyTitle">Көчүрүп алуу (Копировать) функциясы</div>
+                        <div class="setting-desc" id="txtSetCopyDesc">Тизмедеги «Көчүрүү» баскычын күйгүзүү же өчүрүү</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="settingCopyToggle" onchange="saveSettings()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-info" id="txtSetDownloadTitle">Сүрөттөрдү жүктөө функциясы</div>
+                        <div class="setting-desc" id="txtSetDownloadDesc">Тизмеден сүрөттөрдү жүктөө баскычы</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="settingDownloadToggle" onchange="saveSettings()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-info" id="txtSetDeleteTitle">Өчүрүү функциясы</div>
+                        <div class="setting-desc" id="txtSetDeleteDesc">Тизмеден маалыматты өчүрүү баскычы</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="settingDeleteToggle" onchange="saveSettings()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <div class="setting-info" style="margin-bottom: 8px;" id="txtSetPassTitle">Админ паролун өзгөртүү</div>
+                    <div class="input-group">
+                        <div class="password-wrapper">
+                            <input type="password" id="newAdminPasswordInput" placeholder="Пароль жазыңыз..." autocomplete="off">
+                            <button type="button" class="eye-btn" onclick="togglePasswordVisibility()">
+                                <svg style="width: 22px; height: 22px;"><use href="#icon-eye"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="btn btn-blue" onclick="changeAdminPassword()" id="btnSavePass">Паролду сактоо</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6-ЭКРАН: КУРАТОРЛОР -->
+        <div id="screenAdminCurators" class="screen">
+            <h3 style="margin-bottom: 20px;" id="txtCuratorsTitle">Кураторлор тизмеси</h3>
+            <div class="glass-box">
+                <div class="list-item">
+                    <div class="list-title" id="txtMainCurator">Башкы Куратор</div>
+                    <div class="list-date" style="margin-top: 5px; font-size: 14px;">Тел: +996 999 114 003</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <input type="file" id="nativeCam1" accept="image/*" capture="environment" onchange="handlePhotoUpload(1, event)" style="display:none;">
+    <input type="file" id="nativeCam2" accept="image/*" capture="environment" onchange="handlePhotoUpload(2, event)" style="display:none;">
+
+    <div id="imageViewerModal" class="image-viewer-modal">
+        <button class="image-viewer-close" onclick="closeImageViewer()">✕</button>
+        <img id="enlargedImg" src="" alt="Сүрөт">
+    </div>
+
+    <div id="successModal" class="success-modal" onclick="if(event.target===this) closeSuccessModal()">
+        <div class="success-box">
+            <div class="success-icon">✓</div>
+            <h3 id="successModalTitle">Ийгиликтүү катталдыңыз!</h3>
+            <p id="successModalText">Маалыматыңыз сакталды жана катталгандардын тизмесине кошулду.</p>
+            <button class="success-ok" id="successModalOk" onclick="closeSuccessModal()">Жакшы</button>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDqFqR92LsaIROHMYRVY4jmEGWwP56OLRU",
+            authDomain: "bait-zakat-804f5.firebaseapp.com",
+            projectId: "bait-zakat-804f5",
+            storageBucket: "bait-zakat-804f5.firebasestorage.app",
+            messagingSenderId: "746636836589",
+            appId: "1:746636836589:web:de9ddc03633f5acebdd6e4",
+            measurementId: "G-L5LTBBRB41"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        let currentChildName = "";
+        let currentChildPhone = "";
+        let selectedIds = new Set();
+        let capturedPhotos = { 1: null, 2: null };
+        let allRegistrations = []; 
+        let currentFilteredRegistrations = [];
+        let sortAscending = true;
+        let currentLang = 'ky';
+
+        const translations = {
+            ky: {
+                code:"KG", mainTitle:"Байту закат", heroSub:"Байту закатка съемка", regBtn:"Каттоо",
+                adminBtn:"Админ", curatorBtn:"Куратор менен байланышуу", inputTitle:"Маалымат киргизүү",
+                lblChild:"Баланын Ф.И.О.:", phName:"Ф.И.О. жазыңыз...", next:"Улантуу →",
+                phoneTitle:"Телефон номери", phoneLabel:"Телефон номери:", phoneHelp:"Эгер номер 0 менен башталса, 0 автоматтык түрдө алынат.",
+                phonePh:"700 123 456", phoneError:"Телефон номерин туура киргизиңиз.",
+                duplicate:"Бул Ф.И.О. мурда катталган. Башка Ф.И.О. жазыңыз.",
+                instructionHeader:"Сүрөттөрдү туура тартуу үчүн төмөндөгү эрежени сактаңыз:",
+                badgeBad:"❌ Мынтип тартпаңыз", descBad:"Тигинен (вертикалдуу) тартууга болбойт",
+                badgeGood:"✅ Ушунтип тартыңыз", descGood:"Туурасынан (горизонталдуу) тартыңыз",
+                understand:"Тартуу эрежесин түшүндүм",
+                photoRule:"Сүрөттөрдү <b>горизонталдуу (туурасынан)</b> тартыңыз: белинен өйдө жана толук бою түшкөн болушу керек.",
+                photo1:"Белинен өйдө түшкөн", photo2:"Толук бою түшкөн",
+                askCurator:"💬 Кантип туура тартса болорун билүү үчүн куратордон сураңыз", saveReg:"Каттоо",
+                adminPanel:"Администратор Панели", logout:"🚪 Чыгуу", folderReg:"Катталгандар",
+                folderRegDesc:"Катталган колдонуучулар", folderSet:"Жөндөөлөр", folderSetDesc:"Системалык жөндөөлөр",
+                folderCur:"Кураторлор", folderCurDesc:"Кураторлордун тизмеси",
+                copyAll:"📋 Бардык ысымдарды көчүрүү (тизме катары)", searchPh:"🔍 Аты-жөнү боюнча издөө...",
+                tabExcel:"📁 1. Тизме (Excel системасы)", tabCards:"📁 2. Сүрөттөр менен",
+                setCopy:"Көчүрүп алуу (Копировать) функциясы", setCopyDesc:"Тизмедеги «Көчүрүү» баскычын күйгүзүү же өчүрүү",
+                setDown:"Сүрөттөрдү жүктөө функциясы", setDownDesc:"Тизмеден сүрөттөрдү жүктөө баскычы",
+                setDel:"Өчүрүү функциясы", setDelDesc:"Тизмеден маалыматты өчүрүү баскычы",
+                setPass:"Админ паролун өзгөртүү", savePass:"Паролду сактоо",
+                actions:"Аракеттер", date:"Катталган күнү/убактысы", name:"Ф.И.О.", number:"№",
+                selected:"тандалды", bulkCopy:"Көчүрүү", bulkDownload:"Скачать", bulkDelete:"Удалить",
+                whatsapp:"WhatsApp", noData:"Маалымат жок.", loading:"Жүктөлүүдө...", newItem:"Жаңы",
+                deleteConfirm:"Тандалган маалыматтарды өчүрүүнү каалайсызбы?", successTitle:"Ийгиликтүү катталдыңыз!", successText:"Маалыматыңыз сакталды жана катталгандардын тизмесине кошулду.", successOk:"Жакшы"
+            },
+            ru: {
+                code:"RU", mainTitle:"Байту закат", heroSub:"Съемка для Байту закат", regBtn:"Регистрация",
+                adminBtn:"Админ", curatorBtn:"Связаться с куратором", inputTitle:"Ввод данных",
+                lblChild:"Ф.И.О. ребенка:", phName:"Введите Ф.И.О...", next:"Продолжить →",
+                phoneTitle:"Номер телефона", phoneLabel:"Номер телефона:", phoneHelp:"Если номер начинается с 0, 0 будет удален автоматически.",
+                phonePh:"700 123 456", phoneError:"Введите корректный номер телефона.",
+                duplicate:"Это Ф.И.О. уже зарегистрировано. Введите другое Ф.И.О.",
+                instructionHeader:"Для правильной съемки соблюдайте следующие правила:",
+                badgeBad:"❌ Так не снимать", descBad:"Вертикальная съемка запрещена",
+                badgeGood:"✅ Снимайте так", descGood:"Снимайте горизонтально",
+                understand:"Я понял(а) правила съемки",
+                photoRule:"Снимайте фото <b>горизонтально</b>: по пояс и в полный рост.",
+                photo1:"Фото по пояс", photo2:"Фото в полный рост",
+                askCurator:"💬 Спросить у куратора, как снять правильно", saveReg:"Зарегистрировать",
+                adminPanel:"Панель администратора", logout:"🚪 Выйти", folderReg:"Зарегистрированные",
+                folderRegDesc:"Список зарегистрированных", folderSet:"Настройки", folderSetDesc:"Системные настройки",
+                folderCur:"Кураторы", folderCurDesc:"Список кураторов",
+                copyAll:"📋 Копировать все имена (списком)", searchPh:"🔍 Поиск по Ф.И.О...",
+                tabExcel:"📁 1. Список (Система Excel)", tabCards:"📁 2. С фото",
+                setCopy:"Функция копирования", setCopyDesc:"Включить или отключить кнопку «Копировать»",
+                setDown:"Функция скачивания фото", setDownDesc:"Кнопка скачивания фото из списка",
+                setDel:"Функция удаления", setDelDesc:"Кнопка удаления данных из списка",
+                setPass:"Изменить пароль админа", savePass:"Сохранить пароль",
+                actions:"Действия", date:"Дата/время регистрации", name:"Ф.И.О.", number:"№",
+                selected:"выбрано", bulkCopy:"Копировать", bulkDownload:"Скачать", bulkDelete:"Удалить",
+                whatsapp:"WhatsApp", noData:"Нет данных.", loading:"Загрузка...", newItem:"Новое",
+                deleteConfirm:"Удалить выбранные записи?", successTitle:"Вы успешно зарегистрированы!", successText:"Ваши данные сохранены и добавлены в список зарегистрированных.", successOk:"Хорошо"
+            },
+            ar: {
+                code:"AR", mainTitle:"بيت الزكاة", heroSub:"التصوير لبيت الزكاة", regBtn:"التسجيل",
+                adminBtn:"المشرف", curatorBtn:"التواصل مع المنسق", inputTitle:"إدخال البيانات",
+                lblChild:"اسم الطفل الكامل:", phName:"اكتب الاسم الكامل...", next:"متابعة →",
+                phoneTitle:"رقم الهاتف", phoneLabel:"رقم الهاتف:", phoneHelp:"إذا بدأ الرقم بـ 0 فسيتم حذف الصفر تلقائياً.",
+                phonePh:"700 123 456", phoneError:"يرجى إدخال رقم هاتف صحيح.",
+                duplicate:"هذا الاسم مسجل مسبقاً. اكتب اسماً آخر.",
+                instructionHeader:"يرجى اتباع التعليمات التالية للتصوير الصحيح:",
+                badgeBad:"❌ لا تصور هكذا", descBad:"التصوير العمودي غير مسموح",
+                badgeGood:"✅ صوّر هكذا", descGood:"صوّر بشكل أفقي",
+                understand:"فهمت قواعد التصوير", photoRule:"صوّر <b>بشكل أفقي</b>: صورة من الخصر إلى الأعلى وصورة كاملة.",
+                photo1:"صورة من الخصر إلى الأعلى", photo2:"صورة كاملة",
+                askCurator:"💬 اسأل المنسق عن طريقة التصوير الصحيحة", saveReg:"تسجيل",
+                adminPanel:"لوحة الإدارة", logout:"🚪 خروج", folderReg:"المسجلون",
+                folderRegDesc:"قائمة المسجلين", folderSet:"الإعدادات", folderSetDesc:"إعدادات النظام",
+                folderCur:"المنسقون", folderCurDesc:"قائمة المنسقين",
+                copyAll:"📋 نسخ جميع الأسماء", searchPh:"🔍 البحث بالاسم...",
+                tabExcel:"📁 1. القائمة (Excel)", tabCards:"📁 2. الصور",
+                setCopy:"وظيفة النسخ", setCopyDesc:"تشغيل أو إيقاف زر النسخ",
+                setDown:"وظيفة تنزيل الصور", setDownDesc:"زر تنزيل الصور من القائمة",
+                setDel:"وظيفة الحذف", setDelDesc:"زر حذف البيانات من القائمة",
+                setPass:"تغيير كلمة مرور المشرف", savePass:"حفظ كلمة المرور",
+                actions:"الإجراءات", date:"تاريخ/وقت التسجيل", name:"الاسم الكامل", number:"م",
+                selected:"محدد", bulkCopy:"نسخ", bulkDownload:"تنزيل", bulkDelete:"حذف",
+                whatsapp:"واتساب", noData:"لا توجد بيانات.", loading:"جارٍ التحميل...", newItem:"جديد",
+                deleteConfirm:"هل تريد حذف السجلات المحددة؟", successTitle:"تم التسجيل بنجاح!", successText:"تم حفظ البيانات وإضافتها إلى قائمة المسجلين.", successOk:"حسناً"
+            }
+        };
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            const t = translations[lang];
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            const ids = {
+                txtMainAppTitle:t.mainTitle, txtHeroSub:t.heroSub, txtRegisterBtn:t.regBtn, txtAdminBtn:t.adminBtn,
+                txtCuratorBtn:t.curatorBtn, txtInputTitle:t.inputTitle, lblChildName:t.lblChild,
+                nameNextBtn:t.next, txtPhoneTitle:t.phoneTitle, lblPhone:t.phoneLabel, phoneHelp:t.phoneHelp,
+                phoneNextBtn:t.next, txtInstructionHeader:t.instructionHeader, badgeBad:t.badgeBad,
+                descBad:t.descBad, badgeGood:t.badgeGood, descGood:t.descGood, lblUnderstand:t.understand,
+                lblPhoto1Title:t.photo1, lblPhoto2Title:t.photo2, btnAskCurator:t.askCurator,
+                saveRegBtn:t.saveReg, txtAdminPanelTitle:t.adminPanel, btnLogout:t.logout,
+                folderRegTitle:t.folderReg, folderRegDesc:t.folderRegDesc, folderSetTitle:t.folderSet,
+                folderSetDesc:t.folderSetDesc, folderCurTitle:t.folderCur, folderCurDesc:t.folderCurDesc,
+                tabExcel:t.tabExcel, tabCards:t.tabCards, successModalTitle:t.successTitle, successModalText:t.successText, successModalOk:t.successOk, txtSetCopyTitle:t.setCopy,
+                txtSetCopyDesc:t.setCopyDesc, txtSetDownloadTitle:t.setDown, txtSetDownloadDesc:t.setDownDesc,
+                txtSetDeleteTitle:t.setDel, txtSetDeleteDesc:t.setDelDesc, txtSetPassTitle:t.setPass,
+                btnSavePass:t.savePass, bulkCopyText:t.bulkCopy, bulkDownloadText:t.bulkDownload, bulkDeleteText:t.bulkDelete
+            };
+            Object.entries(ids).forEach(([id,value])=>{ const el=document.getElementById(id); if(el) el.innerText=value; });
+            const thName=document.getElementById('thName'), thPhone=document.getElementById('thPhone'), thDate=document.getElementById('thDate'), thActions=document.getElementById('thActions');
+            if(thName) thName.innerText=t.name+" ⇳";
+            if(thPhone) thPhone.innerText=currentLang==='ru'?'Телефон':currentLang==='ar'?'الهاتف':'Телефон';
+            if(thDate) thDate.innerText=t.date+" ⇳";
+            if(thActions) thActions.innerText=t.actions;
+            const name=document.getElementById('childNameInput'); if(name) name.placeholder=t.phName;
+            const phone=document.getElementById('childPhoneInput'); if(phone) phone.placeholder=t.phonePh;
+            const search=document.getElementById('searchInput'); if(search) search.placeholder=t.searchPh;
+            const toggle=document.getElementById('languageToggle'); if(toggle) toggle.innerText=t.code+" ▾";
+            if(document.getElementById('txtPhotoRule')) document.getElementById('txtPhotoRule').innerHTML=t.photoRule;
+            document.querySelectorAll('[data-i18n]').forEach(el=>{
+                const key=el.getAttribute('data-i18n'); if(t[key]) el.innerText=t[key];
+            });
+            try { localStorage.setItem('bait_language',lang); } catch(e){}
+            renderData(currentFilteredRegistrations);
+        }
+
+        function toggleLanguageMenu(){
+            document.getElementById('languageMenu').classList.toggle('open');
+        }
+        function selectLanguage(lang){
+            changeLanguage(lang);
+            document.getElementById('languageMenu').classList.remove('open');
+        }
+        document.addEventListener('click', function(e){
+            const menu=document.getElementById('languageMenu');
+            if(menu && !menu.contains(e.target)) menu.classList.remove('open');
+        });
+
+        function getAppSettings() {
+            return {
+                allowCopy: localStorage.getItem('setting_copy') !== 'false',
+                allowDownload: localStorage.getItem('setting_download') !== 'false',
+                allowDelete: localStorage.getItem('setting_delete') !== 'false',
+                adminPass: '1245'
+            };
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            navigateTo('screenMainMenu', false);
+            initSettingsUI();
+            const savedLang = localStorage.getItem('bait_language') || 'ky';
+            document.getElementById('langSelector')?.remove();
+            changeLanguage(savedLang);
+            updateLanguageVisibility('screenMainMenu');
+        });
+
+        function initSettingsUI() {
+            const settings = getAppSettings();
+            document.getElementById('settingCopyToggle').checked = settings.allowCopy;
+            document.getElementById('settingDownloadToggle').checked = settings.allowDownload;
+            document.getElementById('settingDeleteToggle').checked = settings.allowDelete;
+            
+            const passInput = document.getElementById('newAdminPasswordInput');
+            passInput.value = settings.adminPass;
+            passInput.type = 'password';
+        }
+
+        function saveSettings() {
+            const allowCopy = document.getElementById('settingCopyToggle').checked;
+            const allowDownload = document.getElementById('settingDownloadToggle').checked;
+            const allowDelete = document.getElementById('settingDeleteToggle').checked;
+            
+            localStorage.setItem('setting_copy', allowCopy);
+            localStorage.setItem('setting_download', allowDownload);
+            localStorage.setItem('setting_delete', allowDelete);
+
+            renderData(currentFilteredRegistrations);
+        }
+
+        function togglePasswordVisibility() {
+            const input = document.getElementById('newAdminPasswordInput');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        function changeAdminPassword() {
+            const inputField = document.getElementById('newAdminPasswordInput');
+            const newPass = inputField.value.trim();
+            if (!newPass) {
+                alert(currentLang === 'ky' ? "Пароль бош болбошу керек!" : "Пароль не должен быть пустым!");
+                return;
+            }
+            // Админ сыр сөзү бардык телефондо/компьютерде бирдей болушу үчүн
+            // бул версияда негизги сыр сөз 1245 болуп бекитилди.
+            if (newPass !== '1245') {
+                alert(currentLang === 'ky' ? "Бул версияда админ сыр сөзү 1245 болуп бекитилген." : "В этой версии пароль администратора закреплён как 1245.");
+                inputField.value = '1245';
+                return;
+            }
+            alert(currentLang === 'ky' ? "Админ паролу ийгиликтүү сакталды!" : "Пароль администратора сохранён!");
+        }
+
+        window.addEventListener('popstate', function(event) {
+            const screenId = event.state ? event.state.screen : 'screenMainMenu';
+            showScreenUI(screenId);
+        });
+
+        function navigateTo(screenId, pushHistory = true) {
+            if (pushHistory) {
+                history.pushState({ screen: screenId }, '', '#' + screenId);
+            }
+            showScreenUI(screenId);
+        }
+
+        function updateLanguageVisibility(screenId){
+            const menu=document.getElementById('languageMenu');
+            if(menu) menu.style.display = screenId === 'screenMainMenu' ? 'block' : 'none';
+        }
+
+        function showScreenUI(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(screenId) || document.getElementById('screenMainMenu');
+            target.classList.add('active');
+            updateLanguageVisibility(target.id);
+
+            if (screenId === 'screenRegName') {
+                document.getElementById('errorTextContainer').style.display = 'none';
+                document.getElementById('childNameInput').value = currentChildName;
+            } else if (screenId === 'screenRegPhone') {
+                document.getElementById('phoneErrorContainer').style.display = 'none';
+                document.getElementById('childPhoneInput').value = currentChildPhone;
+            } else if (screenId === 'screenAdminRegistered') {
+                loadRegisteredList();
+            }
+        }
+
+        async function proceedToInstructionStep() {
+            const input = document.getElementById('childNameInput').value.trim().replace(/\s+/g,' ');
+            const errContainer = document.getElementById('errorTextContainer');
+            const errText = document.getElementById('errorMessageText');
+            const btn = document.getElementById('nameNextBtn');
+            if (!input) {
+                errText.innerText = translations[currentLang].lblChild;
+                errContainer.style.display = 'block';
+                return;
+            }
+            errContainer.style.display = 'none';
+            btn.disabled = true;
+            try {
+                const normalized = normalizeName(input);
+                const existing = await db.collection("registrations").where("fullNameNormalized", "==", normalized).limit(1).get();
+                if(!existing.empty){
+                    errText.innerText = translations[currentLang].duplicate;
+                    errContainer.style.display='block';
+                    return;
+                }
+            } catch(e) {
+                console.error('Duplicate check failed:',e);
+                errText.innerText = currentLang === 'ru' ? 'Не удалось проверить регистрацию. Попробуйте ещё раз.' : currentLang === 'ar' ? 'تعذر التحقق من التسجيل. حاول مرة أخرى.' : 'Катталганын текшерүүдө ката кетти. Кайра аракет кылыңыз.';
+                errContainer.style.display='block';
+                return;
+            } finally {
+                btn.disabled = false;
+            }
+            currentChildName = input;
+            document.getElementById('phoneErrorContainer').style.display = 'none';
+            document.getElementById('childPhoneInput').value = currentChildPhone;
+            normalizePhoneInput();
+            navigateTo('screenRegPhone');
+        }
+
+        function normalizePhoneInput() {
+            const input=document.getElementById('childPhoneInput');
+            const btn=document.getElementById('phoneNextBtn');
+            if(!input) return;
+            let digits=input.value.replace(/\D/g,'');
+            if(digits.startsWith('0')) digits=digits.replace(/^0+/,'');
+            input.value=digits;
+            if(btn){
+                const prefix=document.getElementById('phoneCountry')?.value || '+996';
+                const valid = prefix === '+996' ? digits.length === 9 : digits.length === 10;
+                btn.disabled=!valid;
+                btn.style.opacity=valid?'1':'0.4';
+                btn.style.cursor=valid?'pointer':'not-allowed';
+            }
+        }
+
+        async function validatePhoneAndContinue() {
+            normalizePhoneInput();
+            const prefix=document.getElementById('phoneCountry').value;
+            const digits=document.getElementById('childPhoneInput').value;
+            const valid = prefix === '+996' ? digits.length === 9 : digits.length === 10;
+            const nextBtn=document.getElementById('phoneNextBtn');
+            if(nextBtn) nextBtn.disabled=!valid;
+            const err=document.getElementById('phoneErrorContainer');
+            const msg=document.getElementById('phoneErrorText');
+            if(!valid){
+                msg.innerText=translations[currentLang].phoneError;
+                err.style.display='block';
+                return;
+            }
+            currentChildPhone=prefix+digits;
+            err.style.display='none';
+            document.getElementById('understandCheckbox').checked=false;
+            document.getElementById('instructionNextBtn').disabled=true;
+            navigateTo('screenRegInstruction');
+        }
+
+        function toggleInstructionBtn() {
+            const checked = document.getElementById('understandCheckbox').checked;
+            document.getElementById('instructionNextBtn').disabled = !checked;
+        }
+
+        function proceedToPhotoStepFinal() {
+            document.getElementById('displayName').innerText = currentChildName;
+            document.getElementById('photoErrorWhatsAppContainer').style.display = 'none';
+            navigateTo('screenRegPhoto');
+        }
+
+        function triggerCamera(slotIndex) {
+            const input = document.getElementById('nativeCam' + slotIndex);
+            if (input) {
+                input.value = '';
+                input.click();
+            }
+        }
+
+        function handlePhotoUpload(slotIndex, event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onerror = function() {
+                showSaveError(currentLang === 'ky' ? 'Сүрөттү окуу мүмкүн болгон жок.' : 'Не удалось прочитать фото.');
+            };
+
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onerror = function() {
+                    showSaveError(currentLang === 'ky' ? 'Сүрөттүн форматы колдоого алынбайт. JPG/PNG сүрөт тандаңыз.' : 'Формат фото не поддерживается. Выберите JPG/PNG.');
+                };
+                img.onload = function() {
+                    if (img.width < img.height) {
+                        const errContainer = document.getElementById('photoErrorWhatsAppContainer');
+                        const errText = document.getElementById('photoErrorMessageText');
+                        errText.innerText = currentLang === 'ky' ? "❌ Сүрөт вертикалдуу (тигинен) тартылган! Телефонду туурасынан буруп кайра тартыңыз." : "❌ Фото сделано вертикально! Поверните телефон горизонтально.";
+                        errContainer.style.display = 'block';
+                        return;
+                    }
+
+                    document.getElementById('photoErrorWhatsAppContainer').style.display = 'none';
+
+                    // Firestore документине өтө чоң Base64 кирбеши үчүн сүрөттү кичирейтебиз.
+                    const canvas = document.createElement('canvas');
+                    const maxDim = 650;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxDim || height > maxDim) {
+                        if (width > height) {
+                            height = Math.round((height * maxDim) / width);
+                            width = maxDim;
+                        } else {
+                            width = Math.round((width * maxDim) / height);
+                            height = maxDim;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d', { alpha: false });
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const resizedBase64 = canvas.toDataURL('image/jpeg', 0.52);
+                    capturedPhotos[slotIndex] = resizedBase64;
+
+                    const card = document.getElementById('photoCard' + slotIndex);
+                    const box = document.getElementById('box' + slotIndex);
+                    const status = document.getElementById('status' + slotIndex);
+
+                    card.classList.add('done');
+                    box.innerHTML = `<img src="${resizedBase64}" class="photo-slot-img" alt="Сүрөт ${slotIndex}">`;
+                    status.classList.add('done');
+                    status.innerText = currentLang === 'ky' ? "✓ Сүрөт кошулду" : "✓ Фото добавлено";
+
+                    checkSaveButtonState();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function checkSaveButtonState() {
+            const btn = document.getElementById('saveRegBtn');
+            if (capturedPhotos[1] && capturedPhotos[2]) {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+            } else {
+                btn.disabled = true;
+                btn.style.opacity = '0.4';
+                btn.style.cursor = 'not-allowed';
+            }
+        }
+
+        function showSaveError(message) {
+            const text = String(message || 'Белгисиз ката');
+            console.error('SAVE ERROR:', text);
+            alert(text);
+        }
+
+        function getFriendlyFirebaseError(error) {
+            const code = error && error.code ? error.code : '';
+            const msg = error && error.message ? error.message : '';
+            if (code === 'storage/unauthorized' || code === 'storage/permission-denied') {
+                return 'Firebase Storage уруксат бербей жатат. Автоматтык түрдө сүрөттү кичирейтип Firestore аркылуу сактоого аракет кылабыз.';
+            }
+            if (code === 'storage/bucket-not-found') {
+                return 'Firebase Storage күйгүзүлгөн эмес же Storage bucket табылган жок. Автоматтык резервдик сактоо колдонулат.';
+            }
+            if (code === 'permission-denied') {
+                return 'Firestore уруксаты берилген жок (permission-denied). Firebase Rules текшерилиши керек.';
+            }
+            if (code === 'resource-exhausted') {
+                return 'Firestore документ көлөмү өтө чоң. Сүрөттөрдү дагы кичирейтүү керек.';
+            }
+            return `${code ? code + ': ' : ''}${msg || 'Маалыматты сактоодо белгисиз ката кетти.'}`;
+        }
+
+        // ЖАҢЫ: Promise'ди убакыт чеги (timeout) менен ороп алуу.
+        // Firebase Storage сурамы эч качан жооп бербей "асылып" калса
+        // (тармак, CORS же Storage конфигурация көйгөйлөрүнөн улам),
+        // бул функция белгилүү убакыттан кийин катаны "ыргытат" жана
+        // код автоматтык түрдө Firestore base64 резервдик режимине өтөт.
+        function withTimeout(promise, ms, timeoutMessage) {
+            return Promise.race([
+                promise,
+                new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error(timeoutMessage || 'timeout')), ms);
+                })
+            ]);
+        }
+
+        async function saveRegistration() {
+            if (!capturedPhotos[1] || !capturedPhotos[2] || !currentChildPhone || !currentChildName) {
+                showSaveError(currentLang === 'ky' ? 'Ф.И.О., телефон жана 2 сүрөт толук болушу керек.' : 'Заполните Ф.И.О., телефон и добавьте 2 фото.');
+                return;
+            }
+
+            const btn = document.getElementById('saveRegBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner spinner-dark"></span> ${translations[currentLang].saveReg}...`;
+
+            try {
+                const normalized = normalizeName(currentChildName);
+
+                // Эски жазууларда fullNameNormalized жок болушу мүмкүн. Ошондуктан локалдык
+                // тизмеден да текшеребиз, андан кийин Firestore query менен дагы текшеребиз.
+                const localDuplicate = allRegistrations.some(item => normalizeName(item.fullName || '') === normalized);
+                if (localDuplicate) {
+                    alert(translations[currentLang].duplicate);
+                    btn.disabled = false;
+                    btn.innerHTML = translations[currentLang].saveReg;
+                    return;
+                }
+
+                // Дубликат текшерүүсүнө да убакыт чеги коёбуз — интернет жай
+                // болсо да "Каттоо" баскычы түбөлүккө асылып калбашы үчүн.
+                let duplicateCheck;
+                try {
+                    duplicateCheck = await withTimeout(
+                        db.collection('registrations').where('fullNameNormalized', '==', normalized).limit(1).get(),
+                        10000,
+                        'duplicate-check-timeout'
+                    );
+                } catch (dupError) {
+                    console.warn('Дубликат текшерүүсү убакыт чегинен ашты же ката берди, улантабыз:', dupError);
+                    duplicateCheck = { empty: true };
+                }
+
+                if (!duplicateCheck.empty) {
+                    alert(translations[currentLang].duplicate);
+                    btn.disabled = false;
+                    btn.innerHTML = translations[currentLang].saveReg;
+                    return;
+                }
+
+                const safeFileName = normalized
+                    .replace(/[^a-z0-9а-яёңөүҗһқғі\s-]/gi, '')
+                    .replace(/\s+/g, '_')
+                    .slice(0, 80) || 'child';
+                const uniqueId = `${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+
+                async function uploadPhoto(slot) {
+                    const ref = storage.ref(`registrations/${uniqueId}/${safeFileName}_${slot}.jpg`);
+                    // Жүктөө өзүнө 8 секунд чейин убакыт беребиз.
+                    const snapshot = await withTimeout(
+                        ref.putString(capturedPhotos[slot], 'data_url', {
+                            contentType: 'image/jpeg',
+                            customMetadata: { fullName: currentChildName, phone: currentChildPhone }
+                        }),
+                        8000,
+                        'storage-upload-timeout'
+                    );
+                    // URL алууга дагы 8 секунд.
+                    return await withTimeout(snapshot.ref.getDownloadURL(), 8000, 'storage-url-timeout');
+                }
+
+                let photo1Url = null;
+                let photo2Url = null;
+                let usedStorage = false;
+
+                // Биринчи тандоо: Firebase Storage. Эгер 8 секунддан ашык убакыт
+                // алса же катага учураса, автоматтык түрдө Firestore base64
+                // резервдик режимине өтөбүз — спиннер эч качан асылып калбайт.
+                try {
+                    btn.innerHTML = `<span class="spinner spinner-dark"></span> Сүрөттөр жүктөлүүдө...`;
+                    [photo1Url, photo2Url] = await Promise.all([uploadPhoto(1), uploadPhoto(2)]);
+                    usedStorage = true;
+                } catch (storageError) {
+                    console.warn('Storage upload иштеген жок (же убакыт чегинен ашты), резервдик Firestore сактоо колдонулат:', storageError);
+                    // Сүрөттөр буга чейин 650px жана JPEG 0.52 болуп кысылган.
+                    photo1Url = capturedPhotos[1];
+                    photo2Url = capturedPhotos[2];
+                }
+
+                btn.innerHTML = `<span class="spinner spinner-dark"></span> Сакталууда...`;
+
+                const docData = {
+                    fullName: currentChildName,
+                    fullNameNormalized: normalized,
+                    phone: currentChildPhone,
+                    photo1: photo1Url,
+                    photo2: photo2Url,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    photoStorage: usedStorage ? 'storage' : 'firestore-base64'
+                };
+
+                // Firestore'го жазуу сурамына да убакыт чеги коёбуз.
+                const docRef = await withTimeout(
+                    db.collection('registrations').add(docData),
+                    12000,
+                    'firestore-write-timeout'
+                );
+
+                const localItem = {
+                    ...docData,
+                    id: docRef.id,
+                    createdAt: { toDate: () => new Date() }
+                };
+                if (!allRegistrations.some(x => x.id === docRef.id)) {
+                    allRegistrations.unshift(localItem);
+                }
+                currentFilteredRegistrations = allRegistrations.slice();
+                if (typeof applyFilters === 'function') applyFilters();
+
+                openSuccessModal();
+
+                currentChildName = '';
+                currentChildPhone = '';
+                capturedPhotos = {1:null, 2:null};
+                const nameInput = document.getElementById('childNameInput');
+                const phoneInput = document.getElementById('childPhoneInput');
+                if (nameInput) nameInput.value = '';
+                if (phoneInput) phoneInput.value = '';
+                const country = document.getElementById('phoneCountry');
+                if (country) country.value = '+996';
+                const understand = document.getElementById('understandCheckbox');
+                if (understand) understand.checked = false;
+                const instructionNext = document.getElementById('instructionNextBtn');
+                if (instructionNext) instructionNext.disabled = true;
+                resetPhotoCard(1, translations[currentLang].photo1);
+                resetPhotoCard(2, translations[currentLang].photo2);
+                btn.innerHTML = translations[currentLang].saveReg;
+                checkSaveButtonState();
+
+            } catch (error) {
+                console.error('Каттоону сактоодо ката:', error);
+                let message;
+                if (error && error.message === 'firestore-write-timeout') {
+                    message = currentLang === 'ru'
+                        ? 'Сервер долго не отвечает. Проверьте интернет и попробуйте ещё раз.'
+                        : currentLang === 'ar'
+                            ? 'الخادم لا يستجيب. تحقق من الإنترنت وحاول مرة أخرى.'
+                            : 'Сервер жооп бербей жатат. Интернетти текшерип, кайра аракет кылыңыз.';
+                } else {
+                    message = getFriendlyFirebaseError(error);
+                }
+                alert((currentLang === 'ky' ? 'Каттоону сактоого болбой жатат.\n\n' : 'Не удалось сохранить регистрацию.\n\n') + message);
+                btn.disabled = false;
+                btn.innerHTML = translations[currentLang].saveReg;
+                checkSaveButtonState();
+            }
+        }
+
+        function openSuccessModal(){
+            const modal=document.getElementById('successModal');
+            if(modal) modal.classList.add('open');
+        }
+        function closeSuccessModal(){
+            const modal=document.getElementById('successModal');
+            if(modal) modal.classList.remove('open');
+            navigateTo('screenMainMenu');
+        }
+
+        function normalizeName(name){
+            return (name||'').trim().replace(/\s+/g,' ').toLocaleLowerCase('ru-RU');
+        }
+
+        function resetPhotoCard(index, title) {
+            const card = document.getElementById('photoCard' + index);
+            const box = document.getElementById('box' + index);
+            const status = document.getElementById('status' + index);
+
+            card.classList.remove('done');
+            box.innerHTML = `<div class="photo-slot-plus" id="icon${index}">+</div>`;
+            status.classList.remove('done');
+            status.innerText = "ⓘ Сүрөт кошуу >";
+        }
+
+        function accessAdminPanel() {
+            const settings = getAppSettings();
+            const pass = prompt(currentLang === 'ky' ? "Администратор сыр сөзүн киргизиңиз:" : "Введите пароль администратора:");
+            if (pass === settings.adminPass) {
+                navigateTo('screenAdminMenu');
+            } else if (pass !== null) {
+                alert(currentLang === 'ky' ? "Сыр сөз туура эмес!" : "Неверный пароль!");
+            }
+        }
+
+        function adminLogout() {
+            navigateTo('screenMainMenu');
+        }
+
+        let registrationsUnsubscribe = null;
+        let registrationsLoading = false;
+        let registrationsServerReceived = false;
+
+        function loadRegisteredList() {
+            const listContainer = document.getElementById('siteRegisteredList');
+            const excelTableBody = document.getElementById('excelTableBody');
+            const header = document.getElementById('totalRegisteredHeader');
+            registrationsLoading = true;
+            registrationsServerReceived = false;
+
+            const loadingText = translations[currentLang].loading || 'Жүктөлүүдө...';
+            listContainer.innerHTML = `<div class="empty-state"><span class="spinner"></span> ${loadingText}</div>`;
+            excelTableBody.innerHTML = `<tr><td colspan="6" class="empty-state"><span class="spinner"></span> ${loadingText}</td></tr>`;
+            header.innerText = `${translations[currentLang].folderReg} (...)`;
+
+            if (registrationsUnsubscribe) {
+                registrationsUnsubscribe();
+                registrationsUnsubscribe = null;
+            }
+
+            // МААНИЛҮҮ:
+            // orderBy('createdAt') колдонбойбуз. Эски документтердин айрымдарында
+            // createdAt жок болушу мүмкүн. Ошондуктан бүт registrations коллекциясын
+            // алып, сорттоону браузердин ичинде жасайбыз.
+            registrationsUnsubscribe = db.collection('registrations').onSnapshot(
+                { includeMetadataChanges: true },
+                (snapshot) => {
+                    const isServerSnapshot = !snapshot.metadata || snapshot.metadata.fromCache === false;
+
+                    // Бош cache келгенде 0 көрсөтпөйбүз. Сервердик snapshot'ты күтөбүз.
+                    if (snapshot.metadata && snapshot.metadata.fromCache && snapshot.empty && !registrationsServerReceived) {
+                        console.log('Firestore: бош cache. Сервердик маалымат күтүлүүдө...');
+                        return;
+                    }
+
+                    // Эгер cache ичинде маалымат бар болсо, аны да дароо көрсөтөбүз.
+                    // Кийин сервер snapshot келгенде ошол эле тизмени автоматтык жаңыртабыз.
+                    allRegistrations = [];
+
+                    snapshot.forEach((doc) => {
+                        const data = doc.data() || {};
+                        allRegistrations.push({
+                            id: doc.id,
+                            fullName: data.fullName || data.name || '',
+                            fullNameNormalized: data.fullNameNormalized || normalizeName(data.fullName || data.name || ''),
+                            phone: data.phone || '',
+                            photo1: data.photo1 || null,
+                            photo2: data.photo2 || null,
+                            createdAt: data.createdAt || null
+                        });
+                    });
+
+                    // createdAt бар болсо дата боюнча жаңысы биринчи.
+                    // createdAt жок эски жазуулар да жоголбойт.
+                    allRegistrations.sort((a, b) => {
+                        const ta = a.createdAt && typeof a.createdAt.toMillis === 'function'
+                            ? a.createdAt.toMillis()
+                            : (a.createdAt && a.createdAt.seconds ? a.createdAt.seconds * 1000 : 0);
+                        const tb = b.createdAt && typeof b.createdAt.toMillis === 'function'
+                            ? b.createdAt.toMillis()
+                            : (b.createdAt && b.createdAt.seconds ? b.createdAt.seconds * 1000 : 0);
+                        return tb - ta;
+                    });
+
+                    if (isServerSnapshot) registrationsServerReceived = true;
+                    registrationsLoading = false;
+
+                    selectedIds = new Set(
+                        [...selectedIds].filter(id => allRegistrations.some(x => x.id === id))
+                    );
+
+                    header.innerText = `${translations[currentLang].folderReg} (${allRegistrations.length})`;
+                    applyFilters();
+                },
+                (error) => {
+                    console.error('FIREBASE REGISTRATIONS ERROR:', error);
+                    registrationsLoading = false;
+                    const code = error && error.code ? error.code : 'unknown';
+                    const message = currentLang === 'ru'
+                        ? `Ошибка Firebase: ${code}`
+                        : currentLang === 'ar'
+                            ? `خطأ Firebase: ${code}`
+                            : `Firebase катасы: ${code}`;
+
+                    listContainer.innerHTML = `<div class="glass-box" style="color:var(--danger-red);text-align:center;padding:25px;">❌ ${message}</div>`;
+                    excelTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--danger-red);padding:25px;">❌ ${message}</td></tr>`;
+                }
+            );
+
+            // 15 секунд ичинде серверден жооп келбесе гана диагностика чыгарабыз.
+            setTimeout(() => {
+                if (registrationsLoading && !registrationsServerReceived) {
+                    const msg = currentLang === 'ru'
+                        ? 'Firebase долго не отвечает. Проверьте интернет, Firestore и правила доступа.'
+                        : currentLang === 'ar'
+                            ? 'يستغرق Firebase وقتًا طويلاً. تحقق من الإنترنت وFirestore وقواعد الوصول.'
+                            : 'Firebase сервери жооп берүүгө көп убакыт кетти. Интернетти, Firestore жана уруксаттарды текшериңиз.';
+                    listContainer.innerHTML = `<div class="glass-box" style="color:var(--danger-red);text-align:center;padding:25px;">⚠️ ${msg}</div>`;
+                    excelTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--danger-red);padding:25px;">⚠️ ${msg}</td></tr>`;
+                }
+            }, 15000);
+        }
+
+        function switchFolder(folderType) {
+            const tabExcel = document.getElementById('tabExcel');
+            const tabCards = document.getElementById('tabCards');
+            const folderExcel = document.getElementById('folderViewExcel');
+            const folderCards = document.getElementById('folderViewCards');
+
+            if (folderType === 'excel') {
+                tabExcel.classList.add('active');
+                tabCards.classList.remove('active');
+                folderExcel.style.display = 'block';
+                folderCards.style.display = 'none';
+            } else {
+                tabCards.classList.add('active');
+                tabExcel.classList.remove('active');
+                folderCards.style.display = 'block';
+                folderExcel.style.display = 'none';
+            }
+        }
+
+        function applyFilters() {
+            const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
+
+            currentFilteredRegistrations = allRegistrations.filter(item => {
+                return item.fullName.toLowerCase().includes(searchText);
+            });
+
+            renderData(currentFilteredRegistrations);
+        }
+
+        // ТОЛУК EXCEL СОРТИРОВКА СИСТЕМАСЫ
+        function sortDataByName() {
+            sortAscending = !sortAscending;
+            currentFilteredRegistrations.sort((a, b) => {
+                return sortAscending 
+                    ? a.fullName.localeCompare(b.fullName)
+                    : b.fullName.localeCompare(a.fullName);
+            });
+            renderData(currentFilteredRegistrations);
+        }
+
+        function sortDataByDate() {
+            sortAscending = !sortAscending;
+            currentFilteredRegistrations.sort((a, b) => {
+                const t1 = a.createdAt ? a.createdAt.seconds : 0;
+                const t2 = b.createdAt ? b.createdAt.seconds : 0;
+                return sortAscending ? t1 - t2 : t2 - t1;
+            });
+            renderData(currentFilteredRegistrations);
+        }
+
+        function renderData(dataList) {
+            const settings=getAppSettings();
+            const listContainer=document.getElementById('siteRegisteredList');
+            const excelTableBody=document.getElementById('excelTableBody');
+            if(!dataList || dataList.length===0){
+                const empty=translations[currentLang].noData;
+                listContainer.innerHTML=`<div class="glass-box empty-state">${empty}</div>`;
+                excelTableBody.innerHTML=`<tr><td colspan="6" class="empty-state">${empty}</td></tr>`;
+                updateSelectionToolbar();
+                return;
+            }
+            let cardsHtml="", excelHtml="";
+            dataList.forEach((item,index)=>{
+                let dateStr=translations[currentLang].newItem;
+                if(item.createdAt && item.createdAt.toDate){
+                    const d=item.createdAt.toDate();
+                    dateStr=d.toLocaleDateString(currentLang==='ky'?'ky-KG':currentLang==='ar'?'ar-KW':'ru-RU')+" "+d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+                }
+                const checked=selectedIds.has(item.id)?'checked':'';
+                const safeName=escapeHtml(item.fullName);
+                const phoneValue=item.phone ? escapeHtml(item.phone) : (currentLang==='ru'?'Нет номера':currentLang==='ar'?'لا يوجد رقم':'Номер жок');
+                const phoneText=`<div class="registered-phone phone-value">📞 ${phoneValue} <button class="phone-edit-btn" title="${currentLang==='ru'?'Изменить номер':currentLang==='ar'?'تعديل الرقم':'Номерди өзгөртүү'}" aria-label="${currentLang==='ru'?'Изменить номер':currentLang==='ar'?'تعديل الرقم':'Номерди өзгөртүү'}" onclick="editPhoneById('${item.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button></div>`;
+                const copyNameBtn=settings.allowCopy?`<button class="btn-action btn-action-copy btn-icon-only" title="Көчүрүү" aria-label="Көчүрүү" onclick="copyNameById('${item.id}')">📋</button>`:'';
+                const downloadBtn=settings.allowDownload&&item.photo1&&item.photo2?`<button class="btn-action btn-action-download btn-icon-only" title="Скачать" aria-label="Скачать" onclick="downloadPhotosById('${item.id}')">📥</button>`:'';
+                const deleteBtn=settings.allowDelete?`<button class="btn-action btn-action-delete btn-icon-only" title="Удалить" aria-label="Удалить" onclick="deleteRegistration('${item.id}')">🗑</button>`:'';
+                const whatsappBtn=item.phone?`<a class="btn-whatsapp-icon" title="WhatsApp" aria-label="WhatsApp" target="_blank" rel="noopener" href="${whatsappUrl(item.phone,item.fullName)}"><svg viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M19.11 17.21c-.27-.14-1.59-.78-1.84-.87-.25-.09-.43-.14-.61.14-.18.27-.7.87-.86 1.05-.16.18-.32.2-.59.07-.27-.14-1.12-.41-2.13-1.31-.79-.7-1.32-1.56-1.48-1.83-.16-.27-.02-.42.12-.56.12-.12.27-.32.41-.48.14-.16.18-.27.27-.45.09-.18.05-.34-.02-.48-.07-.14-.61-1.47-.84-2.01-.22-.52-.45-.45-.61-.46h-.52c-.18 0-.48.07-.73.34-.25.27-.96.94-.96 2.29s.98 2.66 1.12 2.84c.14.18 1.93 2.95 4.68 4.14.65.28 1.16.45 1.56.58.66.21 1.26.18 1.74.11.53-.08 1.59-.65 1.82-1.28.23-.63.23-1.17.16-1.28-.07-.11-.25-.18-.52-.32Z"/><path fill="currentColor" d="M16.03 3.2c-7.08 0-12.83 5.75-12.83 12.83 0 2.26.59 4.46 1.72 6.39L3.1 28.8l6.55-1.72a12.8 12.8 0 0 0 6.38 1.7h.01c7.07 0 12.83-5.75 12.83-12.83S23.1 3.2 16.03 3.2Zm0 23.36h-.01a10.5 10.5 0 0 1-5.35-1.46l-.38-.23-3.89 1.02 1.04-3.79-.25-.39a10.53 10.53 0 1 1 8.84 4.85Z"/></svg></a>`:'';
+                const actionButtons=`${deleteBtn}${downloadBtn}${copyNameBtn}${whatsappBtn}`;
+                cardsHtml+=`
+                    <div class="list-item" id="doc-${item.id}">
+                        <div class="select-card-row">
+                            <input type="checkbox" class="select-checkbox" ${checked} onchange="toggleSelected('${item.id}',this.checked)">
+                            <div>
+                                <div class="list-title">${safeName}</div>${phoneText}
+                            </div>
+                        </div>
+                        <div class="list-header"><div></div><div class="list-date">${dateStr}</div></div>
+                        <div class="large-thumb-group">
+                            ${item.photo1?`<img src="${item.photo1}" alt="Фото 1" onclick="openImageViewer('${item.photo1}')">`:'<div class="empty-state">Сүрөт 1 жок</div>'}
+                            ${item.photo2?`<img src="${item.photo2}" alt="Фото 2" onclick="openImageViewer('${item.photo2}')">`:'<div class="empty-state">Сүрөт 2 жок</div>'}
+                        </div>
+                        <div class="item-actions">${actionButtons}</div>
+                    </div>`;
+                excelHtml+=`
+                    <tr id="row-${item.id}">
+                        <td class="select-cell"><input type="checkbox" class="select-checkbox" ${checked} onchange="toggleSelected('${item.id}',this.checked)"></td>
+                        <td style="font-weight:bold;color:var(--accent-glow);">${index+1}</td>
+                        <td style="font-weight:600;color:var(--text-main);">${safeName}</td>
+                        <td class="phone-cell">${phoneText}</td>
+                        <td style="font-size:13px;color:var(--text-sub);">${dateStr}</td>
+                        <td style="text-align:right;"><div style="display:inline-flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;">${actionButtons}</div></td>
+                    </tr>`;
+            });
+            listContainer.innerHTML=cardsHtml;
+            excelTableBody.innerHTML=excelHtml;
+            updateSelectionToolbar();
+        }
+
+        function escapeHtml(str){
+            return String(str||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+        }
+        function whatsappUrl(phone,name){
+            const clean=(phone||'').replace(/\D/g,'');
+            const message=currentLang==='ar'?`اسم الطفل: ${name}\\nرقم الهاتف: ${phone}`:`Баланын Ф.И.О.: ${name}\\nТелефон: ${phone}`;
+            return `https://wa.me/${clean}?text=${encodeURIComponent(message)}`;
+        }
+        function toggleSelected(id,checked){
+            if(checked) selectedIds.add(id); else selectedIds.delete(id);
+            updateSelectionToolbar();
+            const allBoxes=document.querySelectorAll('.select-checkbox');
+            const visibleBoxes=[...allBoxes].filter(x=>x.id!=='selectAllExcel');
+            const master=document.getElementById('selectAllExcel');
+            if(master) master.checked=visibleBoxes.length>0 && visibleBoxes.every(x=>x.checked);
+        }
+        function toggleSelectAll(checked){
+            currentFilteredRegistrations.forEach(item=>checked?selectedIds.add(item.id):selectedIds.delete(item.id));
+            renderData(currentFilteredRegistrations);
+        }
+        function updateSelectionToolbar(){
+            const bar=document.getElementById('selectionToolbar');
+            const count=document.getElementById('selectionCount');
+            if(!bar||!count)return;
+            const n=selectedIds.size;
+            bar.classList.toggle('active',n>0);
+            count.innerText=`${n} ${translations[currentLang].selected}`;
+        }
+        function getSelectedItems(){
+            return allRegistrations.filter(x=>selectedIds.has(x.id));
+        }
+        async function bulkCopySelected(){
+            const items=getSelectedItems();
+            if(!items.length)return;
+            await navigator.clipboard.writeText(items.map(x=>x.fullName).join('\\n'));
+        }
+        async function bulkDownloadSelected(){
+            const items=getSelectedItems().filter(x=>x.photo1&&x.photo2);
+            if(!items.length)return;
+            for(const item of items){ downloadPhotos(item.id,item.fullName,item.photo1,item.photo2); await new Promise(r=>setTimeout(r,500)); }
+        }
+        async function bulkDeleteSelected(){
+            const items=getSelectedItems();
+            if(!items.length || !confirm(translations[currentLang].deleteConfirm))return;
+            await Promise.all(items.map(item=>db.collection("registrations").doc(item.id).delete()));
+            selectedIds.clear();
+            applyFilters();
+        }
+
+
+        async function editPhoneById(id){
+            const item=allRegistrations.find(x=>x.id===id);
+            if(!item) return;
+            const label=currentLang==='ru'?'Введите номер телефона (+996... или +7...):':currentLang==='ar'?'أدخل رقم الهاتف (+996... أو +7...):':'Телефон номерин жазыңыз (+996... же +7...):';
+            const value=prompt(label, item.phone || '');
+            if(value===null) return;
+            let raw=value.trim().replace(/[^0-9+]/g,'');
+            if(raw.startsWith('00')) raw='+'+raw.slice(2);
+            if(!raw.startsWith('+')){
+                let d=raw.replace(/\D/g,'');
+                if(d.startsWith('0')) d=d.replace(/^0+/,'');
+                if(d.startsWith('996') && d.length===12) raw='+'+d;
+                else if(d.startsWith('7') && d.length===11) raw='+'+d;
+                else if(d.length===9) raw='+996'+d;
+                else if(d.length===10) raw='+7'+d;
+                else raw='+'+d;
+            }
+            const digits=raw.replace(/\D/g,'');
+            const valid=(raw.startsWith('+996') && digits.length===12) || (raw.startsWith('+7') && digits.length===11);
+            if(!valid){
+                alert(currentLang==='ru'?'Номер туура эмес. Формат: +996XXXXXXXXX же +7XXXXXXXXXX':currentLang==='ar'?'رقم الهاتف غير صحيح.':'Номер туура эмес. Формат: +996XXXXXXXXX же +7XXXXXXXXXX');
+                return;
+            }
+            try{
+                await db.collection('registrations').doc(id).update({phone:raw});
+                item.phone=raw;
+                applyFilters();
+            }catch(error){
+                console.error('Телефонду өзгөртүүдө ката:',error);
+                alert(currentLang==='ru'?'Не удалось изменить номер.':currentLang==='ar'?'تعذر تعديل الرقم.':'Номерди өзгөртүү мүмкүн болбоду.');
+            }
+        }
+
+        function copyNameById(id){
+            const item=allRegistrations.find(x=>x.id===id);
+            if(item) copyName(item.fullName);
+        }
+        function downloadPhotosById(id){
+            const item=allRegistrations.find(x=>x.id===id);
+            if(item) downloadPhotos(item.id,item.fullName,item.photo1,item.photo2);
+        }
+
+        function copyName(name) {
+            navigator.clipboard.writeText(name).then(() => {
+                alert(`"${name}" көчүрүлдү!`);
+            }).catch(err => {
+                console.error("Көчүрүүдө ката: ", err);
+            });
+        }
+
+        function copyAllNames() {
+            if (!currentFilteredRegistrations || currentFilteredRegistrations.length === 0) {
+                alert("Көчүрө турган эч кандай маалымат жок!");
+                return;
+            }
+
+            let textList = currentLang === 'ky' ? "Катталгандар тизмеси:\n" : "Список зарегистрированных:\n";
+            currentFilteredRegistrations.forEach((item, index) => {
+                textList += `${index + 1}. ${item.fullName}\n`;
+            });
+
+            navigator.clipboard.writeText(textList).then(() => {
+                alert(currentLang === 'ky' ? `Бардыгы болуп ${currentFilteredRegistrations.length} адамдын аты-жөнү көчүрүлдү!` : `Успешно скопировано ${currentFilteredRegistrations.length} имен!`);
+            }).catch(err => {
+                console.error("Көчүрүүдө ката: ", err);
+            });
+        }
+
+        function escapeQuotes(str) {
+            return (str || '').replace(/'/g, "\\'").replace(/"/g, "&quot;");
+        }
+
+        function openImageViewer(src) {
+            const modal = document.getElementById('imageViewerModal');
+            const img = document.getElementById('enlargedImg');
+            img.src = src;
+            modal.style.display = 'flex';
+        }
+
+        function closeImageViewer() {
+            document.getElementById('imageViewerModal').style.display = 'none';
+        }
+
+        function downloadPhotos(id, name, p1, p2) {
+            const cleanName = name.replace(/[^a-zA-Zа-яА-Я0-9]/g, "_");
+            
+            const a1 = document.createElement('a');
+            a1.href = p1;
+            a1.download = `${cleanName}_белинен.jpg`;
+            document.body.appendChild(a1);
+            a1.click();
+            document.body.removeChild(a1);
+
+            setTimeout(() => {
+                const a2 = document.createElement('a');
+                a2.href = p2;
+                a2.download = `${cleanName}_толук_бою.jpg`;
+                document.body.appendChild(a2);
+                a2.click();
+                document.body.removeChild(a2);
+            }, 400);
+        }
+
+        // БАРАКЧА ЖАҢЫЛАНГАНДА (F5 / Ctrl+R) УШУЛ ЭЛЕ БЕТТЕ КАЛУУ.
+        // navigateTo() history/hash колдонот, бул код ошол hash'ты кайра ачат.
+        function restoreScreenAfterRefresh() {
+            const hash = (window.location.hash || '').replace(/^#/, '');
+            const allowed = [
+                'screenMainMenu',
+                'screenRegName',
+                'screenRegPhone',
+                'screenRegInstruction',
+                'screenRegPhoto',
+                'screenAdminMenu',
+                'screenAdminRegistered',
+                'screenAdminSettings',
+                'screenAdminCurators'
+            ];
+            const screenId = allowed.includes(hash) ? hash : 'screenMainMenu';
+            showScreenUI(screenId);
+            history.replaceState({ screen: screenId }, '', '#' + screenId);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            restoreScreenAfterRefresh();
+        });
+
+        function deleteRegistration(id) {
+            if (!confirm(currentLang === 'ky' ? "Бул колдонуучуну өчүрүүнү каалайсызбы?" : "Вы действительно хотите удалить запись?")) return;
+
+            db.collection("registrations").doc(id).delete()
+                .then(() => {
+                    allRegistrations = allRegistrations.filter(item => item.id !== id);
+                    applyFilters();
+                    alert(currentLang === 'ky' ? "Маалымат өчүрүлдү." : "Данные удалены.");
+                })
+                .catch((error) => {
+                    console.error("Өчүрүүдө ката: ", error);
+                    alert("Өчүрүүдө ката чыкты.");
+                });
+        }
+    </script>
+</body>
+</html>
