@@ -1191,6 +1191,20 @@
             return `${code ? code + ': ' : ''}${msg || 'Маалыматты сактоодо белгисиз ката кетти.'}`;
         }
 
+        // ЖАҢЫ: Promise'ди убакыт чеги (timeout) менен ороп алуу.
+        // Firebase Storage сурамы эч качан жооп бербей "асылып" калса
+        // (тармак, CORS же Storage конфигурация көйгөйлөрүнөн улам),
+        // бул функция белгилүү убакыттан кийин катаны "ыргытат" жана
+        // код автоматтык түрдө Firestore base64 резервдик режимине өтөт.
+        function withTimeout(promise, ms, timeoutMessage) {
+            return Promise.race([
+                promise,
+                new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error(timeoutMessage || 'timeout')), ms);
+                })
+            ]);
+        }
+
         async function saveRegistration() {
             if (!capturedPhotos[1] || !capturedPhotos[2] || !currentChildPhone || !currentChildName) {
                 showSaveError(currentLang === 'ky' ? 'Ф.И.О., телефон жана 2 сүрөт толук болушу керек.' : 'Заполните Ф.И.О., телефон и добавьте 2 фото.');
@@ -1214,10 +1228,19 @@
                     return;
                 }
 
-                const duplicateCheck = await db.collection('registrations')
-                    .where('fullNameNormalized', '==', normalized)
-                    .limit(1)
-                    .get();
+                // Дубликат текшерүүсүнө да убакыт чеги коёбуз — интернет жай
+                // болсо да "Каттоо" баскычы түбөлүккө асылып калбашы үчүн.
+                let duplicateCheck;
+                try {
+                    duplicateCheck = await withTimeout(
+                        db.collection('registrations').where('fullNameNormalized', '==', normalized).limit(1).get(),
+                        10000,
+                        'duplicate-check-timeout'
+                    );
+                } catch (dupError) {
+                    console.warn('Дубликат текшерүүсү убакыт чегинен ашты же ката берди, улантабыз:', dupError);
+                    duplicateCheck = { empty: true };
+                }
 
                 if (!duplicateCheck.empty) {
                     alert(translations[currentLang].duplicate);
@@ -1234,25 +1257,32 @@
 
                 async function uploadPhoto(slot) {
                     const ref = storage.ref(`registrations/${uniqueId}/${safeFileName}_${slot}.jpg`);
-                    const snapshot = await ref.putString(capturedPhotos[slot], 'data_url', {
-                        contentType: 'image/jpeg',
-                        customMetadata: { fullName: currentChildName, phone: currentChildPhone }
-                    });
-                    return await snapshot.ref.getDownloadURL();
+                    // Жүктөө өзүнө 8 секунд чейин убакыт беребиз.
+                    const snapshot = await withTimeout(
+                        ref.putString(capturedPhotos[slot], 'data_url', {
+                            contentType: 'image/jpeg',
+                            customMetadata: { fullName: currentChildName, phone: currentChildPhone }
+                        }),
+                        8000,
+                        'storage-upload-timeout'
+                    );
+                    // URL алууга дагы 8 секунд.
+                    return await withTimeout(snapshot.ref.getDownloadURL(), 8000, 'storage-url-timeout');
                 }
 
                 let photo1Url = null;
                 let photo2Url = null;
                 let usedStorage = false;
 
-                // Биринчи тандоо: Firebase Storage.
+                // Биринчи тандоо: Firebase Storage. Эгер 8 секунддан ашык убакыт
+                // алса же катага учураса, автоматтык түрдө Firestore base64
+                // резервдик режимине өтөбүз — спиннер эч качан асылып калбайт.
                 try {
                     btn.innerHTML = `<span class="spinner spinner-dark"></span> Сүрөттөр жүктөлүүдө...`;
                     [photo1Url, photo2Url] = await Promise.all([uploadPhoto(1), uploadPhoto(2)]);
                     usedStorage = true;
                 } catch (storageError) {
-                    console.warn('Storage upload иштеген жок, резервдик Firestore сактоо колдонулат:', storageError);
-                    // Storage Rules/Storage өчүк болсо да каттоо токтоп калбасын.
+                    console.warn('Storage upload иштеген жок (же убакыт чегинен ашты), резервдик Firestore сактоо колдонулат:', storageError);
                     // Сүрөттөр буга чейин 650px жана JPEG 0.52 болуп кысылган.
                     photo1Url = capturedPhotos[1];
                     photo2Url = capturedPhotos[2];
@@ -1270,7 +1300,12 @@
                     photoStorage: usedStorage ? 'storage' : 'firestore-base64'
                 };
 
-                const docRef = await db.collection('registrations').add(docData);
+                // Firestore'го жазуу сурамына да убакыт чеги коёбуз.
+                const docRef = await withTimeout(
+                    db.collection('registrations').add(docData),
+                    12000,
+                    'firestore-write-timeout'
+                );
 
                 const localItem = {
                     ...docData,
@@ -1305,7 +1340,16 @@
 
             } catch (error) {
                 console.error('Каттоону сактоодо ката:', error);
-                const message = getFriendlyFirebaseError(error);
+                let message;
+                if (error && error.message === 'firestore-write-timeout') {
+                    message = currentLang === 'ru'
+                        ? 'Сервер долго не отвечает. Проверьте интернет и попробуйте ещё раз.'
+                        : currentLang === 'ar'
+                            ? 'الخادم لا يستجيب. تحقق من الإنترنت وحاول مرة أخرى.'
+                            : 'Сервер жооп бербей жатат. Интернетти текшерип, кайра аракет кылыңыз.';
+                } else {
+                    message = getFriendlyFirebaseError(error);
+                }
                 alert((currentLang === 'ky' ? 'Каттоону сактоого болбой жатат.\n\n' : 'Не удалось сохранить регистрацию.\n\n') + message);
                 btn.disabled = false;
                 btn.innerHTML = translations[currentLang].saveReg;
@@ -1374,7 +1418,7 @@
             }
 
             // МААНИЛҮҮ:
-            // orderBy('createdAt') колдонбойбуз. Эски 136 документтин айрымдарында
+            // orderBy('createdAt') колдонбойбуз. Эски документтердин айрымдарында
             // createdAt жок болушу мүмкүн. Ошондуктан бүт registrations коллекциясын
             // алып, сорттоону браузердин ичинде жасайбыз.
             registrationsUnsubscribe = db.collection('registrations').onSnapshot(
