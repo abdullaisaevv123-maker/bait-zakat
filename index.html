@@ -296,14 +296,59 @@
             border-color: var(--accent-glow);
         }
 
-        .item-actions { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        .item-actions { display: flex; gap: 7px; margin-top: 15px; flex-wrap: wrap; align-items:center; }
         .btn-action { padding: 10px 16px; border-radius: 10px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content:center; gap: 6px; }
-        .btn-icon-only { width: 42px; height: 42px; padding: 0 !important; border-radius: 10px; font-size: 18px !important; line-height: 1; }
+        .btn-icon-only { width: 34px; height: 34px; padding: 0 !important; border-radius: 8px; font-size: 16px !important; line-height: 1; }
+        .btn-whatsapp-icon { width:34px; height:34px; padding:0; border:0; border-radius:8px; background:#25D366; color:#fff; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; text-decoration:none; }
+        .btn-whatsapp-icon svg { width:20px; height:20px; display:block; }
+        .btn-whatsapp-icon:hover { filter:brightness(1.08); transform:translateY(-1px); }
+        .phone-edit-btn { width:28px; height:28px; padding:0; border:0; border-radius:7px; background:rgba(255,183,3,.16); color:#ffb703; cursor:pointer; font-size:14px; display:inline-flex; align-items:center; justify-content:center; }
+        .phone-edit-btn svg { width:15px; height:15px; }
         .phone-cell { white-space: nowrap; }
         .phone-value { display:inline-flex; align-items:center; gap:7px; }
-        .phone-edit-btn { width:32px; height:32px; padding:0; border:0; border-radius:8px; background:rgba(255,183,3,.16); color:#ffb703; cursor:pointer; font-size:15px; }
         .phone-edit-btn:hover { filter:brightness(1.15); }
 
+        .custom-action-icon {
+            width: 30px;
+            height: 30px;
+            object-fit: contain;
+            display: block;
+            transition: transform .15s ease, filter .15s ease;
+        }
+        .custom-action-btn {
+            width: 36px;
+            height: 36px;
+            padding: 3px !important;
+            border: 0;
+            background: transparent !important;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .custom-action-btn:hover {
+            transform: translateY(-1px) scale(1.06);
+            filter: brightness(1.08);
+        }
+        .custom-action-btn:active { transform: scale(.96); }
+        .custom-action-btn .custom-action-icon { width: 30px; height: 30px; }
+        .custom-whatsapp-btn {
+            width: 36px;
+            height: 36px;
+            padding: 3px;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .custom-whatsapp-btn .custom-action-icon { width: 30px; height: 30px; }
+        .custom-whatsapp-btn:hover { transform: translateY(-1px) scale(1.06); filter: brightness(1.08); }
+        .action-icons-wrap { display:inline-flex; align-items:center; justify-content:flex-end; gap:8px; flex-wrap:wrap; }
         .btn-action-copy { background: #2a9d8f; color: #fff; }
         .btn-action-download { background: var(--primary-blue); color: #fff; }
         .btn-action-delete { background: var(--danger-red); color: #fff; }
@@ -495,11 +540,11 @@
                             <option value="+7">+7</option>
                         </select>
                         <input type="tel" id="childPhoneInput" inputmode="numeric" autocomplete="tel"
-                               placeholder="700 123 456" oninput="normalizePhoneInput()">
+                               placeholder="700 123 456" maxlength="10" oninput="normalizePhoneInput()">
                     </div>
                     <div class="phone-help" id="phoneHelp">Эгер номер 0 менен башталса, 0 автоматтык түрдө алынат.</div>
                 </div>
-                <button id="phoneNextBtn" class="btn btn-blue" onclick="validatePhoneAndContinue()">Улантуу →</button>
+                <button id="phoneNextBtn" class="btn btn-blue" disabled onclick="validatePhoneAndContinue()">Улантуу →</button>
                 <div id="phoneErrorContainer" style="display:none;margin-top:15px;text-align:center;">
                     <p id="phoneErrorText" style="font-size:13px;color:var(--danger-red);"></p>
                 </div>
@@ -907,20 +952,13 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            let savedScreen = null;
-            try { savedScreen = sessionStorage.getItem('bait_current_screen'); } catch(e) {}
-            const validScreens = [
-                'screenMainMenu','screenRegName','screenRegPhone','screenRegInstruction','screenRegPhoto',
-                'screenAdminLogin','screenAdminMenu','screenAdminRegistered','screenAdminPhotos',
-                'screenAdminSettings','screenAdminCurators'
-            ];
-            if (!validScreens.includes(savedScreen)) savedScreen = 'screenMainMenu';
-            navigateTo(savedScreen, false);
+            // Баштапкы экранды дароо башкы бетке мажбурлап койбойбуз.
+            // Refresh болгондо hash/sessionStorage аркылуу мурунку экран калыбына келет.
             initSettingsUI();
             const savedLang = localStorage.getItem('bait_language') || 'ky';
             document.getElementById('langSelector')?.remove();
             changeLanguage(savedLang);
-            updateLanguageVisibility(savedScreen);
+            updateLanguageVisibility('screenMainMenu');
         });
 
         function initSettingsUI() {
@@ -963,18 +1001,16 @@
         }
 
         window.addEventListener('popstate', function(event) {
-            const screenId = event.state ? event.state.screen : (location.hash ? location.hash.substring(1) : 'screenMainMenu');
-            try { sessionStorage.setItem('bait_current_screen', screenId); } catch(e) {}
+            const screenId = event.state ? event.state.screen : 'screenMainMenu';
             showScreenUI(screenId);
         });
 
         function navigateTo(screenId, pushHistory = true) {
-            const safeScreenId = document.getElementById(screenId) ? screenId : 'screenMainMenu';
-            try { sessionStorage.setItem('bait_current_screen', safeScreenId); } catch(e) {}
+            try { sessionStorage.setItem('bait_current_screen', screenId); } catch(e) {}
             if (pushHistory) {
-                history.pushState({ screen: safeScreenId }, '', '#' + safeScreenId);
+                history.pushState({ screen: screenId }, '', '#' + screenId);
             }
-            showScreenUI(safeScreenId);
+            showScreenUI(screenId);
         }
 
         function updateLanguageVisibility(screenId){
@@ -1030,15 +1066,24 @@
             currentChildName = input;
             document.getElementById('phoneErrorContainer').style.display = 'none';
             document.getElementById('childPhoneInput').value = currentChildPhone;
+            normalizePhoneInput();
             navigateTo('screenRegPhone');
         }
 
         function normalizePhoneInput() {
             const input=document.getElementById('childPhoneInput');
+            const btn=document.getElementById('phoneNextBtn');
             if(!input) return;
             let digits=input.value.replace(/\D/g,'');
             if(digits.startsWith('0')) digits=digits.replace(/^0+/,'');
             input.value=digits;
+            if(btn){
+                const prefix=document.getElementById('phoneCountry')?.value || '+996';
+                const valid = prefix === '+996' ? digits.length === 9 : digits.length === 10;
+                btn.disabled=!valid;
+                btn.style.opacity=valid?'1':'0.4';
+                btn.style.cursor=valid?'pointer':'not-allowed';
+            }
         }
 
         async function validatePhoneAndContinue() {
@@ -1046,6 +1091,8 @@
             const prefix=document.getElementById('phoneCountry').value;
             const digits=document.getElementById('childPhoneInput').value;
             const valid = prefix === '+996' ? digits.length === 9 : digits.length === 10;
+            const nextBtn=document.getElementById('phoneNextBtn');
+            if(nextBtn) nextBtn.disabled=!valid;
             const err=document.getElementById('phoneErrorContainer');
             const msg=document.getElementById('phoneErrorText');
             if(!valid){
@@ -1299,85 +1346,106 @@
 
         let registrationsUnsubscribe = null;
         let registrationsLoading = false;
+        let registrationsServerReceived = false;
+
         function loadRegisteredList() {
             const listContainer = document.getElementById('siteRegisteredList');
             const excelTableBody = document.getElementById('excelTableBody');
             const header = document.getElementById('totalRegisteredHeader');
             registrationsLoading = true;
+            registrationsServerReceived = false;
 
-            // Маалымат серверден так келгенге чейин "Нет данных" көрсөтпөйбүз.
-            // Firestore кээде биринчи бош cache snapshot берет, андан кийин сервердеги
-            // чыныгы 136 жазууну берет. Ошол биринчи бош snapshot мурун 0 деп чыгып жаткан.
-            const loadingText = currentLang==='ru' ? 'Загрузка данных...' : currentLang==='ar' ? 'جارٍ تحميل البيانات...' : 'Маалыматтар жүктөлүүдө...';
+            const loadingText = translations[currentLang].loading || 'Жүктөлүүдө...';
             listContainer.innerHTML = `<div class="empty-state"><span class="spinner"></span> ${loadingText}</div>`;
             excelTableBody.innerHTML = `<tr><td colspan="6" class="empty-state"><span class="spinner"></span> ${loadingText}</td></tr>`;
-            header.innerText = currentLang==='ru' ? 'Зарегистрированные (...)' : currentLang==='ar' ? 'المسجلون (...)' : 'Катталгандар (...)';
+            header.innerText = `${translations[currentLang].folderReg} (...)`;
 
-            if(registrationsUnsubscribe) registrationsUnsubscribe();
+            if (registrationsUnsubscribe) {
+                registrationsUnsubscribe();
+                registrationsUnsubscribe = null;
+            }
 
-            const processSnapshot = (querySnapshot) => {
-                // Эң маанилүү бөлүк: cache бош болсо, сервер келгенге чейин renderData() кылбайбыз.
-                if (querySnapshot.metadata && querySnapshot.metadata.fromCache && querySnapshot.empty) {
-                    console.log('Firestore: бош cache snapshot, сервердин жообун күтүп жатабыз...');
-                    return;
-                }
-
-                allRegistrations=[];
-                querySnapshot.forEach(doc=>{
-                    const data=doc.data() || {};
-                    allRegistrations.push({
-                        id:doc.id,
-                        fullName:data.fullName||'',
-                        fullNameNormalized:data.fullNameNormalized||normalizeName(data.fullName||''),
-                        phone:data.phone||'',
-                        photo1:data.photo1||null,
-                        photo2:data.photo2||null,
-                        createdAt:data.createdAt||null
-                    });
-                });
-
-                // createdAt жок эски жазуулар да сакталат жана көрсөтүлөт.
-                allRegistrations.sort((a,b)=>{
-                    const ta = a.createdAt && a.createdAt.seconds ? a.createdAt.seconds : 0;
-                    const tb = b.createdAt && b.createdAt.seconds ? b.createdAt.seconds : 0;
-                    return tb - ta;
-                });
-
-                registrationsLoading = false;
-                selectedIds = new Set([...selectedIds].filter(id=>allRegistrations.some(x=>x.id===id)));
-                header.innerText=`${translations[currentLang].folderReg} (${allRegistrations.length})`;
-                applyFilters();
-            };
-
-            registrationsUnsubscribe = db.collection("registrations").onSnapshot(
+            // МААНИЛҮҮ:
+            // orderBy('createdAt') колдонбойбуз. Эски 136 документтин айрымдарында
+            // createdAt жок болушу мүмкүн. Ошондуктан бүт registrations коллекциясын
+            // алып, сорттоону браузердин ичинде жасайбыз.
+            registrationsUnsubscribe = db.collection('registrations').onSnapshot(
                 { includeMetadataChanges: true },
-                processSnapshot,
-                (error)=>{
+                (snapshot) => {
+                    const isServerSnapshot = !snapshot.metadata || snapshot.metadata.fromCache === false;
+
+                    // Бош cache келгенде 0 көрсөтпөйбүз. Сервердик snapshot'ты күтөбүз.
+                    if (snapshot.metadata && snapshot.metadata.fromCache && snapshot.empty && !registrationsServerReceived) {
+                        console.log('Firestore: бош cache. Сервердик маалымат күтүлүүдө...');
+                        return;
+                    }
+
+                    // Эгер cache ичинде маалымат бар болсо, аны да дароо көрсөтөбүз.
+                    // Кийин сервер snapshot келгенде ошол эле тизмени автоматтык жаңыртабыз.
+                    allRegistrations = [];
+
+                    snapshot.forEach((doc) => {
+                        const data = doc.data() || {};
+                        allRegistrations.push({
+                            id: doc.id,
+                            fullName: data.fullName || data.name || '',
+                            fullNameNormalized: data.fullNameNormalized || normalizeName(data.fullName || data.name || ''),
+                            phone: data.phone || '',
+                            photo1: data.photo1 || null,
+                            photo2: data.photo2 || null,
+                            createdAt: data.createdAt || null
+                        });
+                    });
+
+                    // createdAt бар болсо дата боюнча жаңысы биринчи.
+                    // createdAt жок эски жазуулар да жоголбойт.
+                    allRegistrations.sort((a, b) => {
+                        const ta = a.createdAt && typeof a.createdAt.toMillis === 'function'
+                            ? a.createdAt.toMillis()
+                            : (a.createdAt && a.createdAt.seconds ? a.createdAt.seconds * 1000 : 0);
+                        const tb = b.createdAt && typeof b.createdAt.toMillis === 'function'
+                            ? b.createdAt.toMillis()
+                            : (b.createdAt && b.createdAt.seconds ? b.createdAt.seconds * 1000 : 0);
+                        return tb - ta;
+                    });
+
+                    if (isServerSnapshot) registrationsServerReceived = true;
+                    registrationsLoading = false;
+
+                    selectedIds = new Set(
+                        [...selectedIds].filter(id => allRegistrations.some(x => x.id === id))
+                    );
+
+                    header.innerText = `${translations[currentLang].folderReg} (${allRegistrations.length})`;
+                    applyFilters();
+                },
+                (error) => {
                     console.error('FIREBASE REGISTRATIONS ERROR:', error);
                     registrationsLoading = false;
                     const code = error && error.code ? error.code : 'unknown';
-                    const message = currentLang==='ru'
-                        ? `Ошибка Firebase: ${code}. Проверьте Firestore и интернет.`
-                        : currentLang==='ar'
-                        ? `خطأ Firebase: ${code}. تحقق من Firestore والاتصال بالإنترنت.`
-                        : `Firebase катасы: ${code}. Firestore жана интернет байланышын текшериңиз.`;
-                    listContainer.innerHTML=`<div class="glass-box" style="color:var(--danger-red);text-align:center;padding:25px;">${message}</div>`;
-                    excelTableBody.innerHTML=`<tr><td colspan="6" style="text-align:center;color:var(--danger-red);padding:25px;">${message}</td></tr>`;
+                    const message = currentLang === 'ru'
+                        ? `Ошибка Firebase: ${code}`
+                        : currentLang === 'ar'
+                            ? `خطأ Firebase: ${code}`
+                            : `Firebase катасы: ${code}`;
+
+                    listContainer.innerHTML = `<div class="glass-box" style="color:var(--danger-red);text-align:center;padding:25px;">❌ ${message}</div>`;
+                    excelTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--danger-red);padding:25px;">❌ ${message}</td></tr>`;
                 }
             );
 
-            // 15 секундда сервердик snapshot келбесе, так диагностика көрсөтөбүз.
-            setTimeout(()=>{
-                if(registrationsLoading){
-                    const msg = currentLang==='ru'
-                        ? 'Firebase отвечает слишком долго. Проверьте интернет и Firestore.'
-                        : currentLang==='ar'
-                        ? 'يستغرق Firebase وقتًا طويلاً. تحقق من الإنترنت وFirestore.'
-                        : 'Firebase жооп берүүгө көп убакыт кетти. Интернетти жана Firestore жөндөөлөрүн текшериңиз.';
-                    listContainer.innerHTML=`<div class="glass-box" style="color:var(--danger-red);text-align:center;padding:25px;">${msg}</div>`;
-                    excelTableBody.innerHTML=`<tr><td colspan="6" style="text-align:center;color:var(--danger-red);padding:25px;">${msg}</td></tr>`;
+            // 15 секунд ичинде серверден жооп келбесе гана диагностика чыгарабыз.
+            setTimeout(() => {
+                if (registrationsLoading && !registrationsServerReceived) {
+                    const msg = currentLang === 'ru'
+                        ? 'Firebase долго не отвечает. Проверьте интернет, Firestore и правила доступа.'
+                        : currentLang === 'ar'
+                            ? 'يستغرق Firebase وقتًا طويلاً. تحقق من الإنترنت وFirestore وقواعد الوصول.'
+                            : 'Firebase сервери жооп берүүгө көп убакыт кетти. Интернетти, Firestore жана уруксаттарды текшериңиз.';
+                    listContainer.innerHTML = `<div class="glass-box" style="color:var(--danger-red);text-align:center;padding:25px;">⚠️ ${msg}</div>`;
+                    excelTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--danger-red);padding:25px;">⚠️ ${msg}</td></tr>`;
                 }
-            },15000);
+            }, 15000);
         }
 
         function switchFolder(folderType) {
@@ -1451,11 +1519,16 @@
                 const checked=selectedIds.has(item.id)?'checked':'';
                 const safeName=escapeHtml(item.fullName);
                 const phoneValue=item.phone ? escapeHtml(item.phone) : (currentLang==='ru'?'Нет номера':currentLang==='ar'?'لا يوجد رقم':'Номер жок');
-                const phoneText=`<div class="registered-phone phone-value">📞 ${phoneValue} <button class="phone-edit-btn" title="${currentLang==='ru'?'Изменить номер':currentLang==='ar'?'تعديل الرقم':'Номерди өзгөртүү'}" aria-label="${currentLang==='ru'?'Изменить номер':currentLang==='ar'?'تعديل الرقم':'Номерди өзгөртүү'}" onclick="editPhoneById('${item.id}')">✏️</button>${item.phone?`<a class="whatsapp-mini" title="WhatsApp" aria-label="WhatsApp" target="_blank" href="${whatsappUrl(item.phone,item.fullName)}">🟢</a>`:''}</div>`;
-                const copyNameBtn=settings.allowCopy?`<button class="btn-action btn-action-copy btn-icon-only" title="Көчүрүү" aria-label="Көчүрүү" onclick="copyNameById('${item.id}')">📋</button>`:'';
-                const downloadBtn=settings.allowDownload&&item.photo1&&item.photo2?`<button class="btn-action btn-action-download btn-icon-only" title="Скачать" aria-label="Скачать" onclick="downloadPhotosById('${item.id}')">📥</button>`:'';
-                const deleteBtn=settings.allowDelete?`<button class="btn-action btn-action-delete btn-icon-only" title="Удалить" aria-label="Удалить" onclick="deleteRegistration('${item.id}')">🗑</button>`:'';
-                const actionButtons=`${deleteBtn}${downloadBtn}${copyNameBtn}`;
+                const phoneText=`<div class="registered-phone phone-value">📞 ${phoneValue} <button class="phone-edit-btn" title="${currentLang==='ru'?'Изменить номер':currentLang==='ar'?'تعديل الرقم':'Номерди өзгөртүү'}" aria-label="${currentLang==='ru'?'Изменить номер':currentLang==='ar'?'تعديل الرقم':'Номерди өзгөртүү'}" onclick="editPhoneById('${item.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button></div>`;
+                const iconDelete = 'data:image/png;base64,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';
+                const iconWhatsApp = 'data:image/png;base64,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';
+                const iconDownload = 'data:image/png;base64,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';
+                const iconCopy = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEUAAABPCAYAAAC9FghPAAAPIUlEQVR4nN2ca4xd1XXHf2ufcx++4xlsYxu/ARMJG7CTxiKFVg390oQkKoUIVYqKGqWK2kCbiBSoWsBQWlDUipDQKo9WVdp+SFUJpVGkNoU8aFqRtE14NAG/sGPw2wbHHtszc+fec85e/XDej/sau/ZMl3TnzDl7n332+u+11v6vfR6iqpyPeDte0O4P/hnvtf/CnjoOng8IWFAFSj/J7WuxzEYN2x7l2f2orlpBAFWhvuXnWHz/w7jXbpa56iRzBcWeOq7tZ/6c4MXncL0uXqAEtlpBzR0vK9hT8ez5RPtFYHJtCA2EYPV6xh9/ktp1W+YEzJxAsaeP68yXPkX9jVdoe0UweiieVSyrYPL/AKuIyy3EltgfmHVMfObzuNdeNzIwcwJl+ku/p+blZ5n1NVFAFISyoiiICmrD3RQUjRSXqE6oVKhYVGbTtoQQWK0AzVpNjmt0Tg3Brl7HZY8/hXvdDSMBMzIo3Zef1dkv/y7WpqPvADgNgsY4Ik5vi6HoCpqCWLSoftaSLbOKnTyN+EEKTMGVJp54Cnfz9UMDMzIo01/8bTWvPs+sF1qJK6DL1tO88w+ob70FmmNzDnBzkeCtY3r2/o8jB/bjWc0FXxQaItg1G1j8xFPUNg3nSmaUDtjJ42qP/5QABQNiwDcOi+56lPp7PigXGxAAcWuoEcQQ+li0FRP2sYPC0YOcffBevJ2vDmUBI4GiU6ex7Uk0CgI1R3A2bMbZ+K7RtbmgYkMvjH4i4BhBJOynh+IeO8y57Q/g7d4xEJjRQLEB2CjqEV5cGi3M4qUX3UJKEkV6I8DEBGbNOmpGkKhnHRRz9CDnHvw0/q7X+gIzEijJGUJkruFIaGfm/Bjg+UpiJYoxglmylNYDj8EN76JuJHQlUboo5thhzj50X19XGg0UiYYiY6ZyqW0k248IGPU93A1XM/HY59HNW1jkmKhc6ariHDvE1PYH8PfsrASmEhTtTKs9ukv917+v/s7vqr/zefV2/4cG+38EQTfnv1xqUCABJmsxGgSYlVfI+KNP4m26noYjSZ04+J75o+rg6xYPdP/7H9R78WsEx16n4U2HqEWkyVrAT0ll7EqXXExIW8Sk+7E4azfIxCOf1XOP3Udjz2t0CImep9A4dphz2+9n/ImntLYp5THJ6XbyiM783cfU/8ZDuEdexnhTzAbKjK/MBEo7UDpW0Zi6zgcwspIJ/qnphOKs2yDjj/8Fdsu2fPBVxTl6iKmH78Pblc5KBkCnTmr7mXup7f8eniqzgYZcJGsNBb+dP5aSGSQTklwJugQH9uK/sUf9vTvV37tLmZ1h0Z13YS9fgZPwGA1d6chBzj30+3g7QldyAbr//jTNYy8yHSgioCak7nWXQo4BXU8j0qhRhLskSORFQgVRCFDk9Nu0t38iyafitCCwUfIaWxWgaORKh5h69AHG/+wv1bVHf6L+q9/ADzSpXDOCrY/jrd+GWbSEMBVw0OlT6J7vYwIvjC+ilx4U1dRTQi1RIaT8OVA0rFDor0RFHZTW0YO0v/oVXG/v96j7Z2lrOPKuATuxhuaHn8TdeHOuieDIDp0+8D+Y9mRyDSS+6iWSWh1Tq4WurBpSBiXaj7Lv2Dps3Om8iImCLwKHD+Lat3ZGJSCiWBUa772nBAhAslqUjTGXWMz4EnG23Kjm0Oshm61ab4kAUkNuOUIVuoGSg8oIrs6cStoxAkFtMbLm+j69IMdR5gMwrbs+TXt8CcFPfhjxhnSdBkgz5+wyBILOTKN7d4fLDuERFMXFBnkljUGcWvXVizPPvJh9QFqLpfWRT8JHRjvP/+kenbz3NzFnzxLYEEERMJiU6Q3fi2gI5gEg5yU2DgeaMww3TuoSYAZlQ8m6hcaw9r/u5AnVqZ+hyXpkJFqBaK94HR03YxOYlesv4FDEYEhuoN3cwswQ+YzE9ZWBU7L36re1/cwf4545XlrRj5cMS0uXhZWz+GcUvPoYjdvv1kW3/c6FASYJB5oOroBJlIoUHBg446l+AHg6fVq9556mMXWcrlU8q3ha2Bb/z+z7Gv0f/TpWMZ1pul//Av6b1dntnKSCVpjkbzaIDmrEFLPScjVtn8WeO4mnNp8SVKzHJEE7V0fz1zARWw26cPrE3ACoUicbNqIlTDe1lFi5PoOQBWCAq5nlV4rZeKPWd3wTX7TaVTS+rVHtRhKVxVOpi9BdeRVm49a5o1Chk0RMOBTNx5Th1kg0ZYtx3R44Nu94hO7S1XgHfly61VEZXwrHc3UDiy5fR+tDH8dcdvmFC7YJFUn33ax5AkPOPunM0286NxMrpHnbgzTPv+v/N5LVPb7hFgZaDVe940rDNiR93GwhSSEcSGgpkjeffpZSdLFoQXhBS8ZS4n03O/Iy7PpIKf4sYGqbnXUjPmLyyulAyj8MwVtQUtRH4oXr3Mgr0m9azgbXeZIQzlmKLD6+oTb8VByLlhtbyJLVBUh5SoE59msgRXT47FrPva2KDl6gi1d7hqk3hIhxkIkBnCYz6yRZssTZ1rAjn8uS+9cPTuzWzrc/S/D2/go2myFy2SeZqGa++XLNk7voqaiQGWuS/CIOta2/pM0PfxLTGq/uaWZ9SAhX58o0fxhgpLCtEO3OaOdfH6d16Ae0u5pf9UqovJRByYJWeCQsybSRyse7KKQMouAc38fs4mW0bv9Ef30ya5JuPjkbwhcKiV2vhWudegt9ew/TviUoUfrMj6JSFWWZbWgtkQZVdQptCILufak3GInuEHO2JKaEN6l1NPLWx6pkbAWy/Cpa3ZO0PaqflIzXZUw6umSfjatKFE1G6fi8rOVmLEY0vF0TbNwypE5aJG/E9wt7N5BNAgeB0hiT5vsf0ennnkBPH8pnwpB50pHQjSqsJhd7Chakxacrq87F4G26idb7PzokKOGhfEKYuFKvBkJHlWSE+9QFzJotMvaxf8ROHlHJzj4Su0GF9JtZRpmVVMGtYZau6hsTSsuwJkvestu+rYRXlzj+DBOGlqwt1ZoX9CZrIflAq5lAw3CP8UR342SYuvNd4nhaWqONA+woPCUJ0EMyqfkqGd3j0GEknooSxtOvgcx2WE4z36UQOkJniSluPF8PSvKqli4XMjAJO091NzmloiA6VEP/XwAp6i5xWI38aXCCJ/mgvJABiSXLziNvKa3m951REvA0fXS0T32dndTui3+LPbErTSHifKdI54vHYlqTo/ySJ2q58jzJU1VUDPV3/gr1n7+9cvgk/lP4Vdz3GUISU+t/Quf5P6H++tfCV1KKL0hV5UFFBlt6u6zAbqtedckkkQLMvvIcqGr9pjuqgakGRfPLAMMEWhN6UXJehdjJg8rhF+gGihdQyHg1ofZlYLSkfO4RrUJmnZaXz8NC0wH/x9+iftMd1R0t3omksHAdPgo0QHIcpbexSL2FWbQEZ/YEvtVM8hdvQyWkHzDR8zdiozTHpucl7UQTR+wy2MitbejqriP4l63or4vRCI+wXZMrhOEY7RCzj7SWi7nxHmYbK8I4VbpXTBK0S0ubRUJpiv6v5T4UywyoEWbXbaX+y0MkhKQD7OaeazfFyFdsQMs8pY+4m24XZ9U71Z49QhIIYylept++ZjZV3atsV0AczKprMOPLe/c0GzYIbwy6JQUHelCmB0MAI0uuFmfJ1YMavbRSmGzyi0zD5D+xRaksfK5S5CjRsXT2ySZFfdqo9OsFK4UVgkiXNNBmt30k/25N1PAClWz4iXVXNJP7GM2bUZWIAWNyM4bik5KQBSaBj0j0dFA0iYjrFu8QDnCJ2mKotTCRqwWq6Jl92HNHL5YaF1TswdeQzrlw0U3AGMVMLK24bdpn0chMXCUyvhbHlQgUqAdn8F/6DHbqyILyI3/vf2rnO18O31qBkLcJOOs2F3hK/Oujnrv+VvTUjxJr6lqldvQ7dL65G1m2VcVpFpI4eiR3Vf9LnzqSLnb3aSdXJ3mFLVNPBJ2aJNj/EmZ2Ch8gepXHa07QuuGWiqcOMu1UiXPNr+O/+QyNM7vpdMMeeFZx24dxjx0uvzAAhTwlo7gtlqcP/ZXvAMrgJLLy8yRSqq8WAl/x45RAoekKwXt+FefKLeLGLjPsE9fSWCpm259q8MLdNDiZAONbxQ8KyVk2zU9uhmketIqcJwdMDNqFTiIhzHlUaNaFzoZtjH3gU0B24TpL3gaIc8XN4vzC03Sb61nUEOo1SYJv7pW6LBnM8CAp5DXFmCbF1/EKN/WldE5aliWj+bL8NV0DzZrguuBfewutj34OmQjTgXyWjAxNxpzVt0jz1q+rv+tvCA5/F86+Qavmp3lKxiVKrpSUl007dS3p4Sppm8VyVeh40XsIRMcFmo5E7wKFytkAOs4YwaprcbfdQeMXfyOntVscpVFYqixaJbV3P0zturvVTh0k6EyGV4ylGLAL+7nnZ4t1BpxbSgLFIN02/NvnqJ3ch+crjgPWHUPedz9m+TVo4IGC4zZZPL4MWbYBaZQ/WlEdaEeV5uVimpfP8eQLK+aHf6/mlKb5XK2Gc9WNOGuG/7BMD56yoChHItqdCUNo1upz8/RwYioD2nx4B24OIvWWaFU4GFGMOLXC87M+eFMXrKMXU7R9WvFnEh4YDrQBp/T1gr5iTGstxgkRDYCaTBOcePbC9/giSHDkFeyJXXga6mOMYMaWYMaWjdSOkYl3o6oYJyRwgYIe+gr+3ieV7lsLI7h0p9Xb9S/a/dZ2XOMnVuIYcFa+Axm/YiQnkqB9WP2Xfo1a9xBdD9SGc7oRg8cExjSq6Tb0/mYblL/CFbPSLOOMU4IiD4naKb0HlLumJMc0CDDdKfA6BEF4vdh7Gnf+Fe6mW0cCxTXNteJceY/afQ+GH0VAsVawanFlEvHJU+5sDtLnS305YmXLig/60F2Yo+SBLqYGmumLBpn8T5SGY/Cv+cDIgEDEU5x1vyX+zJtaP/bXBIHie4qq9PjSX5pn5BWPhq3whniv3CROzMK6hfIEAE0JXiXrDSlr8tq+gnFgkWPorNxG432PjIoHQP47b8GBL6g9+EVq+jMCT/F9SS2iimqXRjxfVv3tyH5W0yuJhN5JZHieAWqOEFCHd3yQ+i1/iJlYPSduUfr4nZ3ao/bEP6Enn8dO7QOvXRE/MkqUlK5WPv/tyLKCVZ8/LIMnlf0QU4Ox1TjrbsbddBvu1e89L6L1v9IkcsQIuRHTAAAAAElFTkSuQmCC';
+                const copyNameBtn=settings.allowCopy?`<button class="custom-action-btn" title="Көчүрүү" aria-label="Көчүрүү" onclick="copyNameById('${item.id}')"><img class="custom-action-icon" src="${iconCopy}" alt=""></button>`:'';
+                const downloadBtn=settings.allowDownload&&item.photo1&&item.photo2?`<button class="custom-action-btn" title="Скачать" aria-label="Скачать" onclick="downloadPhotosById('${item.id}')"><img class="custom-action-icon" src="${iconDownload}" alt=""></button>`:'';
+                const deleteBtn=settings.allowDelete?`<button class="custom-action-btn" title="Удалить" aria-label="Удалить" onclick="deleteRegistration('${item.id}')"><img class="custom-action-icon" src="${iconDelete}" alt=""></button>`:'';
+                const whatsappBtn=item.phone?`<a class="custom-whatsapp-btn" title="WhatsApp" aria-label="WhatsApp" target="_blank" rel="noopener" href="${whatsappUrl(item.phone,item.fullName)}"><img class="custom-action-icon" src="${iconWhatsApp}" alt=""></a>`:'';
+                const actionButtons=`<div class="action-icons-wrap">${deleteBtn}${whatsappBtn}${downloadBtn}${copyNameBtn}</div>`;
                 cardsHtml+=`
                     <div class="list-item" id="doc-${item.id}">
                         <div class="select-card-row">
@@ -1638,6 +1711,37 @@
                 document.body.removeChild(a2);
             }, 400);
         }
+
+        // БАРАКЧА ЖАҢЫЛАНГАНДА (F5 / Ctrl+R) УШУЛ ЭЛЕ БЕТТЕ КАЛУУ.
+        // navigateTo() history/hash колдонот, бул код ошол hash'ты кайра ачат.
+        function restoreScreenAfterRefresh() {
+            const allowed = [
+                'screenMainMenu',
+                'screenRegName',
+                'screenRegPhone',
+                'screenRegInstruction',
+                'screenRegPhoto',
+                'screenAdminMenu',
+                'screenAdminRegistered',
+                'screenAdminSettings',
+                'screenAdminCurators'
+            ];
+
+            const hash = (window.location.hash || '').replace(/^#/, '');
+            let saved = hash;
+            if (!allowed.includes(saved)) {
+                try { saved = sessionStorage.getItem('bait_current_screen') || ''; } catch(e) { saved = ''; }
+            }
+
+            const screenId = allowed.includes(saved) ? saved : 'screenMainMenu';
+            showScreenUI(screenId);
+            try { sessionStorage.setItem('bait_current_screen', screenId); } catch(e) {}
+            history.replaceState({ screen: screenId }, '', '#' + screenId);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            restoreScreenAfterRefresh();
+        });
 
         function deleteRegistration(id) {
             if (!confirm(currentLang === 'ky' ? "Бул колдонуучуну өчүрүүнү каалайсызбы?" : "Вы действительно хотите удалить запись?")) return;
