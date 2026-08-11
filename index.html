@@ -8,6 +8,7 @@
     <!-- FIREBASE КИТЕПКАНАЛАРЫ -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 
     <style>
         :root {
@@ -296,7 +297,13 @@
         }
 
         .item-actions { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
-        .btn-action { padding: 10px 16px; border-radius: 10px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-action { padding: 10px 16px; border-radius: 10px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content:center; gap: 6px; }
+        .btn-icon-only { width: 42px; height: 42px; padding: 0 !important; border-radius: 10px; font-size: 18px !important; line-height: 1; }
+        .phone-cell { white-space: nowrap; }
+        .phone-value { display:inline-flex; align-items:center; gap:7px; }
+        .phone-edit-btn { width:32px; height:32px; padding:0; border:0; border-radius:8px; background:rgba(255,183,3,.16); color:#ffb703; cursor:pointer; font-size:15px; }
+        .phone-edit-btn:hover { filter:brightness(1.15); }
+
         .btn-action-copy { background: #2a9d8f; color: #fff; }
         .btn-action-download { background: var(--primary-blue); color: #fff; }
         .btn-action-delete { background: var(--danger-red); color: #fff; }
@@ -390,8 +397,8 @@
         .select-card-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
         .whatsapp-mini {
             background:var(--whatsapp-green); color:white; text-decoration:none;
-            padding:10px 12px; border-radius:10px; display:inline-flex; align-items:center;
-            justify-content:center; gap:6px; font-size:13px; font-weight:700;
+            width:32px; height:32px; padding:0; border-radius:8px; display:inline-flex; align-items:center;
+            justify-content:center; font-size:16px; font-weight:700; vertical-align:middle;
         }
         .whatsapp-mini:hover { filter:brightness(1.08); }
         .registered-phone { color:var(--text-sub); font-size:12px; margin-top:4px; }
@@ -606,9 +613,9 @@
             </div>
             <div id="selectionToolbar" class="selection-toolbar">
                 <span id="selectionCount" class="selection-count">0 тандалды</span>
-                <button class="btn-action btn-action-copy" onclick="bulkCopySelected()">📋 <span id="bulkCopyText">Көчүрүү</span></button>
-                <button class="btn-action btn-action-download" onclick="bulkDownloadSelected()">📥 <span id="bulkDownloadText">Скачать</span></button>
-                <button class="btn-action btn-action-delete" onclick="bulkDeleteSelected()">🗑 <span id="bulkDeleteText">Удалить</span></button>
+                <button class="btn-action btn-action-copy btn-icon-only" title="Көчүрүү" aria-label="Көчүрүү" onclick="bulkCopySelected()">📋</button>
+                <button class="btn-action btn-action-download btn-icon-only" title="Скачать" aria-label="Скачать" onclick="bulkDownloadSelected()">📥</button>
+                <button class="btn-action btn-action-delete btn-icon-only" title="Удалить" aria-label="Удалить" onclick="bulkDeleteSelected()">🗑</button>
             </div>
 
             <!-- ЭКИ ПАПКА (ӨТМӨКТӨР) -->
@@ -630,6 +637,7 @@
                                 <th class="select-cell"><input type="checkbox" class="select-checkbox" id="selectAllExcel" onchange="toggleSelectAll(this.checked)"></th>
                                 <th style="width: 50px;">№</th>
                                 <th onclick="sortDataByName()" id="thName">Ф.И.О. ⇳</th>
+                                <th id="thPhone">Телефон</th>
                                 <th onclick="sortDataByDate()" id="thDate">Катталган күнү/убактысы ⇳</th>
                                 <th style="text-align: right;" id="thActions">Аракеттер</th>
                             </tr>
@@ -742,6 +750,7 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        const storage = firebase.storage();
 
         let currentChildName = "";
         let currentChildPhone = "";
@@ -859,8 +868,9 @@
                 btnSavePass:t.savePass, bulkCopyText:t.bulkCopy, bulkDownloadText:t.bulkDownload, bulkDeleteText:t.bulkDelete
             };
             Object.entries(ids).forEach(([id,value])=>{ const el=document.getElementById(id); if(el) el.innerText=value; });
-            const thName=document.getElementById('thName'), thDate=document.getElementById('thDate'), thActions=document.getElementById('thActions');
+            const thName=document.getElementById('thName'), thPhone=document.getElementById('thPhone'), thDate=document.getElementById('thDate'), thActions=document.getElementById('thActions');
             if(thName) thName.innerText=t.name+" ⇳";
+            if(thPhone) thPhone.innerText=currentLang==='ru'?'Телефон':currentLang==='ar'?'الهاتف':'Телефон';
             if(thDate) thDate.innerText=t.date+" ⇳";
             if(thActions) thActions.innerText=t.actions;
             const name=document.getElementById('childNameInput'); if(name) name.placeholder=t.phName;
@@ -897,12 +907,20 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            navigateTo('screenMainMenu', false);
+            let savedScreen = null;
+            try { savedScreen = sessionStorage.getItem('bait_current_screen'); } catch(e) {}
+            const validScreens = [
+                'screenMainMenu','screenRegName','screenRegPhone','screenRegInstruction','screenRegPhoto',
+                'screenAdminLogin','screenAdminMenu','screenAdminRegistered','screenAdminPhotos',
+                'screenAdminSettings','screenAdminCurators'
+            ];
+            if (!validScreens.includes(savedScreen)) savedScreen = 'screenMainMenu';
+            navigateTo(savedScreen, false);
             initSettingsUI();
             const savedLang = localStorage.getItem('bait_language') || 'ky';
             document.getElementById('langSelector')?.remove();
             changeLanguage(savedLang);
-            updateLanguageVisibility('screenMainMenu');
+            updateLanguageVisibility(savedScreen);
         });
 
         function initSettingsUI() {
@@ -945,15 +963,18 @@
         }
 
         window.addEventListener('popstate', function(event) {
-            const screenId = event.state ? event.state.screen : 'screenMainMenu';
+            const screenId = event.state ? event.state.screen : (location.hash ? location.hash.substring(1) : 'screenMainMenu');
+            try { sessionStorage.setItem('bait_current_screen', screenId); } catch(e) {}
             showScreenUI(screenId);
         });
 
         function navigateTo(screenId, pushHistory = true) {
+            const safeScreenId = document.getElementById(screenId) ? screenId : 'screenMainMenu';
+            try { sessionStorage.setItem('bait_current_screen', safeScreenId); } catch(e) {}
             if (pushHistory) {
-                history.pushState({ screen: screenId }, '', '#' + screenId);
+                history.pushState({ screen: safeScreenId }, '', '#' + safeScreenId);
             }
-            showScreenUI(screenId);
+            showScreenUI(safeScreenId);
         }
 
         function updateLanguageVisibility(screenId){
@@ -1129,56 +1150,111 @@
         }
 
         async function saveRegistration() {
-            if (!capturedPhotos[1] || !capturedPhotos[2] || !currentChildPhone) return;
+            if (!capturedPhotos[1] || !capturedPhotos[2] || !currentChildPhone || !currentChildName) return;
+
             const btn = document.getElementById('saveRegBtn');
             btn.disabled = true;
             btn.innerHTML = `<span class="spinner spinner-dark"></span> ${translations[currentLang].saveReg}...`;
+
             try {
                 const normalized = normalizeName(currentChildName);
-                // Каттоо учурунда дагы бир жолу текшеребиз — эки терезе бир убакта катталса да кайталоого жол берилбейт.
-                const duplicateCheck = await db.collection("registrations").where("fullNameNormalized", "==", normalized).limit(1).get();
-                if(!duplicateCheck.empty){
+
+                // Каттоо учурунда дагы бир жолу текшеребиз — бир эле Ф.И.О. экинчи жолу катталбайт.
+                const duplicateCheck = await db.collection("registrations")
+                    .where("fullNameNormalized", "==", normalized)
+                    .limit(1)
+                    .get();
+
+                if (!duplicateCheck.empty) {
                     alert(translations[currentLang].duplicate);
                     navigateTo('screenRegName');
-                    btn.disabled=false;
-                    btn.innerHTML=translations[currentLang].saveReg;
+                    btn.disabled = false;
+                    btn.innerHTML = translations[currentLang].saveReg;
                     return;
                 }
+
+                // СҮРӨТТӨРДҮ FIRESTORE'ГО BASE64 КАТАРЫ САКТАБАЙБЫЗ.
+                // Firestore'дун 1 MB документ чегинен улам каттоо сакталбай калышы мүмкүн.
+                // Сүрөттөр Firebase Storage'ге жүктөлүп, Firestore'го алардын URL'дери гана сакталат.
+                const safeFileName = normalized
+                    .replace(/[^a-z0-9а-яёңөүҗһқғі\s-]/gi, '')
+                    .replace(/\s+/g, '_')
+                    .slice(0, 80) || 'child';
+                const uniqueId = `${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+
+                async function uploadPhoto(slot) {
+                    const ref = storage.ref(`registrations/${uniqueId}/${safeFileName}_${slot}.jpg`);
+                    const snapshot = await ref.putString(capturedPhotos[slot], 'data_url', {
+                        contentType: 'image/jpeg',
+                        customMetadata: {
+                            fullName: currentChildName,
+                            phone: currentChildPhone
+                        }
+                    });
+                    return await snapshot.ref.getDownloadURL();
+                }
+
+                btn.innerHTML = `<span class="spinner spinner-dark"></span> Сүрөттөр жүктөлүүдө...`;
+                const [photo1Url, photo2Url] = await Promise.all([
+                    uploadPhoto(1),
+                    uploadPhoto(2)
+                ]);
+
+                btn.innerHTML = `<span class="spinner spinner-dark"></span> ${translations[currentLang].saveReg}...`;
+
                 const docData = {
                     fullName: currentChildName,
                     fullNameNormalized: normalized,
                     phone: currentChildPhone,
-                    photo1: capturedPhotos[1],
-                    photo2: capturedPhotos[2],
+                    photo1: photo1Url,
+                    photo2: photo2Url,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
+
                 const docRef = await db.collection("registrations").add(docData);
 
-                // Админ баракчасы ачык турган болсо, жаңы каттоо дароо тизмеде көрүнүшү үчүн локалдуу тизмеге да кошобуз.
-                const localItem = { ...docData, id: docRef.id, createdAt: { toDate: () => new Date() } };
+                // Экранда катталгандар ачык болсо, жаңы бала дароо көрүнөт.
+                const localItem = {
+                    ...docData,
+                    id: docRef.id,
+                    createdAt: { toDate: () => new Date() }
+                };
                 const existingIndex = allRegistrations.findIndex(x => x.id === docRef.id);
-                if(existingIndex === -1) allRegistrations.unshift(localItem);
+                if (existingIndex === -1) allRegistrations.unshift(localItem);
                 currentFilteredRegistrations = allRegistrations.slice();
 
                 openSuccessModal();
 
                 currentChildName = "";
                 currentChildPhone = "";
-                capturedPhotos = {1:null,2:null};
-                document.getElementById('childNameInput').value="";
-                document.getElementById('childPhoneInput').value="";
-                document.getElementById('phoneCountry').value='+996';
-                document.getElementById('understandCheckbox').checked=false;
-                document.getElementById('instructionNextBtn').disabled=true;
+                capturedPhotos = {1:null, 2:null};
+                document.getElementById('childNameInput').value = "";
+                document.getElementById('childPhoneInput').value = "";
+                document.getElementById('phoneCountry').value = '+996';
+                document.getElementById('understandCheckbox').checked = false;
+                document.getElementById('instructionNextBtn').disabled = true;
                 resetPhotoCard(1, translations[currentLang].photo1);
                 resetPhotoCard(2, translations[currentLang].photo2);
-                btn.innerHTML=translations[currentLang].saveReg;
+                btn.innerHTML = translations[currentLang].saveReg;
                 checkSaveButtonState();
-            } catch(error) {
-                console.error("Ката чыкты: ", error);
-                alert(currentLang === 'ru' ? "Ошибка сохранения данных." : currentLang === 'ar' ? "حدث خطأ أثناء حفظ البيانات." : "Маалыматты сактоодо ката чыкты.");
-                btn.disabled=false;
-                btn.innerHTML=translations[currentLang].saveReg;
+
+            } catch (error) {
+                console.error("Каттоону сактоодо ката:", error);
+                let message = currentLang === 'ru'
+                    ? "Не удалось сохранить регистрацию. Проверьте интернет и настройки Firebase Storage/Firestore."
+                    : currentLang === 'ar'
+                        ? "تعذر حفظ التسجيل. تحقق من الإنترنت وإعدادات Firebase Storage وFirestore."
+                        : "Каттоону сактоого болбой жатат. Интернетти жана Firebase Storage/Firestore жөндөөлөрүн текшериңиз.";
+
+                // Колдонуучуга чыныгы Firebase катасын да көрсөтөбүз — себебин дароо табууга жардам берет.
+                if (error && error.code) {
+                    console.error("Firebase error code:", error.code, error.message || '');
+                    message += `\n\nКата: ${error.code}`;
+                }
+                alert(message);
+                btn.disabled = false;
+                btn.innerHTML = translations[currentLang].saveReg;
+                checkSaveButtonState();
             }
         }
 
@@ -1222,30 +1298,86 @@
         }
 
         let registrationsUnsubscribe = null;
+        let registrationsLoading = false;
         function loadRegisteredList() {
             const listContainer = document.getElementById('siteRegisteredList');
             const excelTableBody = document.getElementById('excelTableBody');
             const header = document.getElementById('totalRegisteredHeader');
-            listContainer.innerHTML = `<div class="empty-state"><span class="spinner"></span> ${translations[currentLang].loading}</div>`;
-            excelTableBody.innerHTML = `<tr><td colspan="5" class="empty-state"><span class="spinner"></span> ${translations[currentLang].loading}</td></tr>`;
+            registrationsLoading = true;
+
+            // Маалымат серверден так келгенге чейин "Нет данных" көрсөтпөйбүз.
+            // Firestore кээде биринчи бош cache snapshot берет, андан кийин сервердеги
+            // чыныгы 136 жазууну берет. Ошол биринчи бош snapshot мурун 0 деп чыгып жаткан.
+            const loadingText = currentLang==='ru' ? 'Загрузка данных...' : currentLang==='ar' ? 'جارٍ تحميل البيانات...' : 'Маалыматтар жүктөлүүдө...';
+            listContainer.innerHTML = `<div class="empty-state"><span class="spinner"></span> ${loadingText}</div>`;
+            excelTableBody.innerHTML = `<tr><td colspan="6" class="empty-state"><span class="spinner"></span> ${loadingText}</td></tr>`;
+            header.innerText = currentLang==='ru' ? 'Зарегистрированные (...)' : currentLang==='ar' ? 'المسجلون (...)' : 'Катталгандар (...)';
+
             if(registrationsUnsubscribe) registrationsUnsubscribe();
-            registrationsUnsubscribe = db.collection("registrations").orderBy("createdAt","desc").onSnapshot((querySnapshot)=>{
+
+            const processSnapshot = (querySnapshot) => {
+                // Эң маанилүү бөлүк: cache бош болсо, сервер келгенге чейин renderData() кылбайбыз.
+                if (querySnapshot.metadata && querySnapshot.metadata.fromCache && querySnapshot.empty) {
+                    console.log('Firestore: бош cache snapshot, сервердин жообун күтүп жатабыз...');
+                    return;
+                }
+
                 allRegistrations=[];
                 querySnapshot.forEach(doc=>{
-                    const data=doc.data();
+                    const data=doc.data() || {};
                     allRegistrations.push({
-                        id:doc.id, fullName:data.fullName||'', fullNameNormalized:data.fullNameNormalized||normalizeName(data.fullName||''),
-                        phone:data.phone||'', photo1:data.photo1||null, photo2:data.photo2||null, createdAt:data.createdAt
+                        id:doc.id,
+                        fullName:data.fullName||'',
+                        fullNameNormalized:data.fullNameNormalized||normalizeName(data.fullName||''),
+                        phone:data.phone||'',
+                        photo1:data.photo1||null,
+                        photo2:data.photo2||null,
+                        createdAt:data.createdAt||null
                     });
                 });
+
+                // createdAt жок эски жазуулар да сакталат жана көрсөтүлөт.
+                allRegistrations.sort((a,b)=>{
+                    const ta = a.createdAt && a.createdAt.seconds ? a.createdAt.seconds : 0;
+                    const tb = b.createdAt && b.createdAt.seconds ? b.createdAt.seconds : 0;
+                    return tb - ta;
+                });
+
+                registrationsLoading = false;
                 selectedIds = new Set([...selectedIds].filter(id=>allRegistrations.some(x=>x.id===id)));
                 header.innerText=`${translations[currentLang].folderReg} (${allRegistrations.length})`;
                 applyFilters();
-            },(error)=>{
-                console.error("Тизмени алууда ката: ",error);
-                listContainer.innerHTML=`<div class="glass-box" style="color:var(--danger-red);text-align:center;">${currentLang==='ru'?'Ошибка загрузки данных.':currentLang==='ar'?'حدث خطأ في تحميل البيانات.':'Маалыматты жүктөөдө ката чыкты.'}</div>`;
-                excelTableBody.innerHTML=`<tr><td colspan="5" style="text-align:center;color:var(--danger-red);">${currentLang==='ru'?'Ошибка.':currentLang==='ar'?'Ошибка.':'Ката чыкты.'}</td></tr>`;
-            });
+            };
+
+            registrationsUnsubscribe = db.collection("registrations").onSnapshot(
+                { includeMetadataChanges: true },
+                processSnapshot,
+                (error)=>{
+                    console.error('FIREBASE REGISTRATIONS ERROR:', error);
+                    registrationsLoading = false;
+                    const code = error && error.code ? error.code : 'unknown';
+                    const message = currentLang==='ru'
+                        ? `Ошибка Firebase: ${code}. Проверьте Firestore и интернет.`
+                        : currentLang==='ar'
+                        ? `خطأ Firebase: ${code}. تحقق من Firestore والاتصال بالإنترنت.`
+                        : `Firebase катасы: ${code}. Firestore жана интернет байланышын текшериңиз.`;
+                    listContainer.innerHTML=`<div class="glass-box" style="color:var(--danger-red);text-align:center;padding:25px;">${message}</div>`;
+                    excelTableBody.innerHTML=`<tr><td colspan="6" style="text-align:center;color:var(--danger-red);padding:25px;">${message}</td></tr>`;
+                }
+            );
+
+            // 15 секундда сервердик snapshot келбесе, так диагностика көрсөтөбүз.
+            setTimeout(()=>{
+                if(registrationsLoading){
+                    const msg = currentLang==='ru'
+                        ? 'Firebase отвечает слишком долго. Проверьте интернет и Firestore.'
+                        : currentLang==='ar'
+                        ? 'يستغرق Firebase وقتًا طويلاً. تحقق من الإنترنت وFirestore.'
+                        : 'Firebase жооп берүүгө көп убакыт кетти. Интернетти жана Firestore жөндөөлөрүн текшериңиз.';
+                    listContainer.innerHTML=`<div class="glass-box" style="color:var(--danger-red);text-align:center;padding:25px;">${msg}</div>`;
+                    excelTableBody.innerHTML=`<tr><td colspan="6" style="text-align:center;color:var(--danger-red);padding:25px;">${msg}</td></tr>`;
+                }
+            },15000);
         }
 
         function switchFolder(folderType) {
@@ -1305,7 +1437,7 @@
             if(!dataList || dataList.length===0){
                 const empty=translations[currentLang].noData;
                 listContainer.innerHTML=`<div class="glass-box empty-state">${empty}</div>`;
-                excelTableBody.innerHTML=`<tr><td colspan="5" class="empty-state">${empty}</td></tr>`;
+                excelTableBody.innerHTML=`<tr><td colspan="6" class="empty-state">${empty}</td></tr>`;
                 updateSelectionToolbar();
                 return;
             }
@@ -1318,12 +1450,12 @@
                 }
                 const checked=selectedIds.has(item.id)?'checked':'';
                 const safeName=escapeHtml(item.fullName);
-                const phoneText=item.phone ? `<div class="registered-phone">📞 ${escapeHtml(item.phone)}</div>` : '';
-                const wa=item.phone ? `<a class="whatsapp-mini" target="_blank" href="${whatsappUrl(item.phone,item.fullName)}">🟢 WhatsApp</a>` : '';
-                const copyNameBtn=settings.allowCopy?`<button class="btn-action btn-action-copy" onclick="copyNameById('${item.id}')">📋 ${translations[currentLang].bulkCopy}</button>`:'';
-                const downloadBtn=settings.allowDownload&&item.photo1&&item.photo2?`<button class="btn-action btn-action-download" onclick="downloadPhotosById('${item.id}')">📥 ${translations[currentLang].bulkDownload}</button>`:'';
-                const deleteBtn=settings.allowDelete?`<button class="btn-action btn-action-delete" onclick="deleteRegistration('${item.id}')">🗑 ${translations[currentLang].bulkDelete}</button>`:'';
-                const actionButtons=`${deleteBtn}${downloadBtn}${copyNameBtn}${wa}`;
+                const phoneValue=item.phone ? escapeHtml(item.phone) : (currentLang==='ru'?'Нет номера':currentLang==='ar'?'لا يوجد رقم':'Номер жок');
+                const phoneText=`<div class="registered-phone phone-value">📞 ${phoneValue} <button class="phone-edit-btn" title="${currentLang==='ru'?'Изменить номер':currentLang==='ar'?'تعديل الرقم':'Номерди өзгөртүү'}" aria-label="${currentLang==='ru'?'Изменить номер':currentLang==='ar'?'تعديل الرقم':'Номерди өзгөртүү'}" onclick="editPhoneById('${item.id}')">✏️</button>${item.phone?`<a class="whatsapp-mini" title="WhatsApp" aria-label="WhatsApp" target="_blank" href="${whatsappUrl(item.phone,item.fullName)}">🟢</a>`:''}</div>`;
+                const copyNameBtn=settings.allowCopy?`<button class="btn-action btn-action-copy btn-icon-only" title="Көчүрүү" aria-label="Көчүрүү" onclick="copyNameById('${item.id}')">📋</button>`:'';
+                const downloadBtn=settings.allowDownload&&item.photo1&&item.photo2?`<button class="btn-action btn-action-download btn-icon-only" title="Скачать" aria-label="Скачать" onclick="downloadPhotosById('${item.id}')">📥</button>`:'';
+                const deleteBtn=settings.allowDelete?`<button class="btn-action btn-action-delete btn-icon-only" title="Удалить" aria-label="Удалить" onclick="deleteRegistration('${item.id}')">🗑</button>`:'';
+                const actionButtons=`${deleteBtn}${downloadBtn}${copyNameBtn}`;
                 cardsHtml+=`
                     <div class="list-item" id="doc-${item.id}">
                         <div class="select-card-row">
@@ -1343,7 +1475,8 @@
                     <tr id="row-${item.id}">
                         <td class="select-cell"><input type="checkbox" class="select-checkbox" ${checked} onchange="toggleSelected('${item.id}',this.checked)"></td>
                         <td style="font-weight:bold;color:var(--accent-glow);">${index+1}</td>
-                        <td style="font-weight:600;color:var(--text-main);">${safeName}<div class="registered-phone">📞 ${escapeHtml(item.phone)}</div></td>
+                        <td style="font-weight:600;color:var(--text-main);">${safeName}</td>
+                        <td class="phone-cell">${phoneText}</td>
                         <td style="font-size:13px;color:var(--text-sub);">${dateStr}</td>
                         <td style="text-align:right;"><div style="display:inline-flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;">${actionButtons}</div></td>
                     </tr>`;
@@ -1402,6 +1535,39 @@
             applyFilters();
         }
 
+
+        async function editPhoneById(id){
+            const item=allRegistrations.find(x=>x.id===id);
+            if(!item) return;
+            const label=currentLang==='ru'?'Введите номер телефона (+996... или +7...):':currentLang==='ar'?'أدخل رقم الهاتف (+996... أو +7...):':'Телефон номерин жазыңыз (+996... же +7...):';
+            const value=prompt(label, item.phone || '');
+            if(value===null) return;
+            let raw=value.trim().replace(/[^0-9+]/g,'');
+            if(raw.startsWith('00')) raw='+'+raw.slice(2);
+            if(!raw.startsWith('+')){
+                let d=raw.replace(/\D/g,'');
+                if(d.startsWith('0')) d=d.replace(/^0+/,'');
+                if(d.startsWith('996') && d.length===12) raw='+'+d;
+                else if(d.startsWith('7') && d.length===11) raw='+'+d;
+                else if(d.length===9) raw='+996'+d;
+                else if(d.length===10) raw='+7'+d;
+                else raw='+'+d;
+            }
+            const digits=raw.replace(/\D/g,'');
+            const valid=(raw.startsWith('+996') && digits.length===12) || (raw.startsWith('+7') && digits.length===11);
+            if(!valid){
+                alert(currentLang==='ru'?'Номер туура эмес. Формат: +996XXXXXXXXX же +7XXXXXXXXXX':currentLang==='ar'?'رقم الهاتف غير صحيح.':'Номер туура эмес. Формат: +996XXXXXXXXX же +7XXXXXXXXXX');
+                return;
+            }
+            try{
+                await db.collection('registrations').doc(id).update({phone:raw});
+                item.phone=raw;
+                applyFilters();
+            }catch(error){
+                console.error('Телефонду өзгөртүүдө ката:',error);
+                alert(currentLang==='ru'?'Не удалось изменить номер.':currentLang==='ar'?'تعذر تعديل الرقم.':'Номерди өзгөртүү мүмкүн болбоду.');
+            }
+        }
 
         function copyNameById(id){
             const item=allRegistrations.find(x=>x.id===id);
