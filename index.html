@@ -906,7 +906,7 @@
                 allowCopy: localStorage.getItem('setting_copy') !== 'false',
                 allowDownload: localStorage.getItem('setting_download') !== 'false',
                 allowDelete: localStorage.getItem('setting_delete') !== 'false',
-                adminPass: localStorage.getItem('admin_password') || '1245'
+                adminPass: '1245'
             };
         }
 
@@ -954,8 +954,14 @@
                 alert(currentLang === 'ky' ? "Пароль бош болбошу керек!" : "Пароль не должен быть пустым!");
                 return;
             }
-            localStorage.setItem('admin_password', newPass);
-            alert(currentLang === 'ky' ? "Админ паролу ийгиликтүү өзгөртүлдү!" : "Пароль админа успешно изменен!");
+            // Админ сыр сөзү бардык телефондо/компьютерде бирдей болушу үчүн
+            // бул версияда негизги сыр сөз 1245 болуп бекитилди.
+            if (newPass !== '1245') {
+                alert(currentLang === 'ky' ? "Бул версияда админ сыр сөзү 1245 болуп бекитилген." : "В этой версии пароль администратора закреплён как 1245.");
+                inputField.value = '1245';
+                return;
+            }
+            alert(currentLang === 'ky' ? "Админ паролу ийгиликтүү сакталды!" : "Пароль администратора сохранён!");
         }
 
         window.addEventListener('popstate', function(event) {
