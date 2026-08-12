@@ -9,6 +9,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
     <style>
         :root {
@@ -296,17 +298,25 @@
             border-color: var(--accent-glow);
         }
 
-        .item-actions { display: flex; gap: 7px; margin-top: 15px; flex-wrap: wrap; align-items:center; }
-        .btn-action { padding: 10px 16px; border-radius: 10px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content:center; gap: 6px; }
-        .btn-icon-only { width: 34px; height: 34px; padding: 0 !important; border-radius: 8px; font-size: 16px !important; line-height: 1; }
-        .btn-whatsapp-icon { width:34px; height:34px; padding:0; border:0; border-radius:8px; background:#25D366; color:#fff; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; text-decoration:none; }
-        .btn-whatsapp-icon svg { width:20px; height:20px; display:block; }
-        .btn-whatsapp-icon:hover { filter:brightness(1.08); transform:translateY(-1px); }
-        .phone-edit-btn { width:28px; height:28px; padding:0; border:0; border-radius:7px; background:rgba(255,183,3,.16); color:#ffb703; cursor:pointer; font-size:14px; display:inline-flex; align-items:center; justify-content:center; }
-        .phone-edit-btn svg { width:15px; height:15px; }
-        .phone-cell { white-space: nowrap; }
+        .item-actions { display:flex; gap:12px; margin-top:15px; flex-wrap:wrap; align-items:center; }
+        .btn-action { padding:0; border:0; background:transparent !important; font-size:13px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; }
+        .btn-icon-only { width:28px; height:28px; padding:0 !important; border-radius:0; line-height:1; }
+        .btn-icon-only svg { width:25px; height:25px; display:block; }
+        .btn-icon-only:hover { transform:scale(1.08); filter:brightness(1.05); }
+        .icon-trash { color:#ff1515; }
+        .icon-whatsapp { color:#25D366; }
+        .icon-download { color:#2f6ff3; }
+        .icon-copy { color:#f26b2b; }
+        .btn-whatsapp-icon { width:28px; height:28px; padding:0; border:0; border-radius:0; background:transparent !important; color:#25D366; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; text-decoration:none; }
+        .btn-whatsapp-icon svg { width:25px; height:25px; display:block; }
+        .btn-whatsapp-icon:hover { transform:scale(1.08); filter:brightness(1.05); }
+                .phone-cell { white-space: nowrap; }
+        .inline-edit-cell { cursor: text; }
+        .inline-edit-input { width: 100%; min-width: 145px; box-sizing: border-box; border: 1px solid transparent; background: transparent; color: var(--text-main); font: inherit; padding: 7px 8px; border-radius: 7px; outline: none; }
+        .inline-edit-input:hover, .inline-edit-input:focus { border-color: rgba(0,245,212,.35); background: rgba(255,255,255,.035); }
+        .file-number-input { width: 100%; min-width: 90px; box-sizing: border-box; border: 1px solid transparent; background: transparent; color: var(--text-main); font: inherit; padding: 7px 8px; border-radius: 7px; outline: none; }
+        .file-number-input:hover, .file-number-input:focus { border-color: rgba(0,245,212,.35); background: rgba(255,255,255,.035); }
         .phone-value { display:inline-flex; align-items:center; gap:7px; }
-        .phone-edit-btn:hover { filter:brightness(1.15); }
 
         .btn-action-copy { background: #2a9d8f; color: #fff; }
         .btn-action-download { background: var(--primary-blue); color: #fff; }
@@ -412,6 +422,104 @@
             .excel-table th, .excel-table td { padding:10px 8px; }
             .item-actions { gap:7px; }
             .btn-action { padding:9px 10px; font-size:12px; }
+        }
+
+
+        /* === ЖАҢЫ: ФАЙЛ НОМЕРИ + ЫҢГАЙЛУУ ТАНДОО/БИЛДИРҮҮЛӨР === */
+        .file-number-cell { min-width: 120px; }
+        .file-number-input {
+            width:100%; min-width:95px; padding:6px 8px;
+            background:transparent; color:var(--text-main);
+            border:0; border-bottom:1px solid rgba(91,192,190,.28); border-radius:0;
+            outline:none; font-size:13px;
+        }
+        .file-number-input:focus { border-bottom-color:var(--accent-glow); box-shadow:none; }
+        .excel-table tbody tr.row-selected { background:rgba(58,134,255,.20) !important; outline:1px solid rgba(58,134,255,.42); }
+        .excel-table tbody tr { cursor:pointer; transition:background .12s ease; }
+        .excel-table tbody tr input, .excel-table tbody tr button, .excel-table tbody tr a { cursor:pointer; }
+        .all-btn {
+            border:0; background:transparent; color:var(--accent-glow);
+            padding:4px 2px; font-size:13px; font-weight:800; cursor:pointer;
+        }
+        .all-btn:hover { text-decoration:underline; }
+        .card-selected { outline:1px solid rgba(58,134,255,.55) !important; background:rgba(58,134,255,.12) !important; }
+        .card-meta { display:flex; flex-direction:column; align-items:flex-end; gap:3px; }
+        .card-file-number { color:var(--accent-glow); font-size:12px; font-weight:700; }
+        .center-notice {
+            position: fixed; inset: 0; z-index: 25000; display: none;
+            align-items: center; justify-content: center; padding: 20px;
+            background: rgba(0,0,0,.38);
+        }
+        .center-notice.open { display: flex; }
+        .center-notice-box {
+            width: min(380px, 94vw); background: linear-gradient(180deg,#182442,#0f1830);
+            border: 1px solid rgba(0,245,212,.35); border-radius: 20px;
+            padding: 25px 22px; text-align:center; box-shadow: 0 20px 60px rgba(0,0,0,.55);
+        }
+        .center-notice-icon {
+            width: 56px; height: 56px; margin: 0 auto 12px; border-radius: 50%;
+            display:flex; align-items:center; justify-content:center;
+            background: rgba(0,245,212,.12); color:var(--accent-glow); font-size:30px; font-weight:800;
+        }
+        .center-notice-box h3 { color:var(--accent-glow); margin-bottom:8px; font-size:20px; }
+        .center-notice-box p { color:var(--text-main); font-size:14px; line-height:1.45; margin-bottom:16px; }
+        .center-notice-ok {
+            width:100%; border:0; border-radius:10px; padding:11px 16px;
+            background:var(--primary-blue); color:#fff; font-weight:700; cursor:pointer;
+        }
+
+        /* === КАМЕРА OVERLAY (СИЛУЭТ МЕНЕН ТАРТУУ) === */
+        .camera-modal {
+            position: fixed; inset: 0; background: #000; z-index: 20000;
+            display: none; flex-direction: column;
+        }
+        .camera-modal.open { display: flex; }
+        .camera-topbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 16px; background: rgba(0,0,0,.55); position: relative; z-index: 3;
+        }
+        .camera-close-btn {
+            width: 40px; height: 40px; border-radius: 50%; border: none;
+            background: rgba(255,255,255,.15); color: #fff; font-size: 20px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .camera-title-text { color: #fff; font-size: 15px; font-weight: 600; text-align: center; flex: 1; }
+        .camera-flip-btn {
+            width: 40px; height: 40px; border-radius: 50%; border: none;
+            background: rgba(255,255,255,.15); color: #fff; font-size: 18px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .camera-viewport { position: relative; flex: 1; overflow: hidden; background: #000; }
+        .camera-video { width: 100%; height: 100%; object-fit: cover; display: block; background: #000; }
+        .camera-guide-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+        .camera-guide-shape {
+            fill: rgba(0,245,212,0.08); stroke: var(--accent-glow); stroke-width: 3;
+            stroke-dasharray: 10 8; vector-effect: non-scaling-stroke;
+        }
+        .camera-orientation-warning {
+            position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+            flex-direction: column; gap: 14px; background: rgba(11,19,43,.92); z-index: 4; padding: 30px; text-align: center;
+        }
+        .camera-orientation-warning.show { display: flex; }
+        .camera-rotate-icon { font-size: 46px; }
+        .camera-orientation-warning p { color: #fff; font-size: 15px; max-width: 280px; }
+        .camera-bottombar {
+            padding: 18px 16px 26px; background: rgba(0,0,0,.55);
+            display: flex; align-items: center; justify-content: center; gap: 26px; position: relative; z-index: 3;
+        }
+        .camera-capture-btn {
+            width: 70px; height: 70px; border-radius: 50%; background: #fff; border: 5px solid rgba(255,255,255,.35);
+            cursor: pointer; padding: 0;
+        }
+        .camera-capture-btn:active { background: #ddd; }
+        .camera-fallback-link {
+            background: none; border: none; color: var(--text-sub); font-size: 12px; text-decoration: underline;
+            cursor: pointer; position: absolute; right: 16px;
+        }
+        .camera-hint-text {
+            position: absolute; bottom: 100px; left: 0; right: 0; text-align: center;
+            color: #fff; font-size: 12px; background: rgba(0,0,0,.4); padding: 8px 12px; margin: 0 auto; width: fit-content;
+            border-radius: 20px; z-index: 3;
         }
 
     </style>
@@ -607,8 +715,9 @@
 
         <!-- 4-ЭКРАН: КАТТАЛГАНДАР (ТОЛУК EXCEL СИСТЕМАСЫ ЖАНА КӨЧҮРҮҮ ЖӨНДӨӨСҮ МЕНЕН) -->
         <div id="screenAdminRegistered" class="screen">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 id="totalRegisteredHeader" style="margin: 0; font-size: 22px;">Катталгандар тизмеси</h3>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+                <h3 id="totalRegisteredHeader" style="margin:0;font-size:22px;">Катталгандар тизмеси</h3>
+                <button class="all-btn" id="selectAllHeaderBtn" onclick="toggleAllVisible()">Все</button>
             </div>
 
             <!-- ИЗДӨӨ ТИЛКЕСИ -->
@@ -617,9 +726,9 @@
             </div>
             <div id="selectionToolbar" class="selection-toolbar">
                 <span id="selectionCount" class="selection-count">0 тандалды</span>
-                <button class="btn-action btn-action-copy btn-icon-only" title="Көчүрүү" aria-label="Көчүрүү" onclick="bulkCopySelected()">📋</button>
-                <button class="btn-action btn-action-download btn-icon-only" title="Скачать" aria-label="Скачать" onclick="bulkDownloadSelected()">📥</button>
-                <button class="btn-action btn-action-delete btn-icon-only" title="Удалить" aria-label="Удалить" onclick="bulkDeleteSelected()">🗑</button>
+                <button class="btn-action btn-icon-only icon-copy" title="Көчүрүү" aria-label="Көчүрүү" onclick="bulkCopySelected()"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 3h10a2 2 0 0 1 2 2v11h-2V5H8V3Zm-2 4h10a2 2 0 0 1 2 2v12H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Zm0 2v10h10V9H6Z"/></svg></button>
+                <button class="btn-action btn-icon-only icon-download" title="Скачать" aria-label="Скачать" onclick="bulkDownloadSelected()"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M11 3h2v10.17l3.59-3.58L18 11l-6 6-6-6 1.41-1.41L11 13.17V3ZM5 19h14v2H5v-2Z"/></svg></button>
+                <button class="btn-action btn-icon-only icon-trash" title="Удалить" aria-label="Удалить" onclick="bulkDeleteSelected()"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5h8l-1-2H9L8 5Zm-4 2h16v2H4V7Zm2 3h12v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V10Zm3 2v7h2v-7H9Zm4 0v7h2v-7h-2Z"/></svg></button>
             </div>
 
             <!-- ЭКИ ПАПКА (ӨТМӨКТӨР) -->
@@ -632,18 +741,21 @@
             <div id="folderViewExcel">
                 <div class="excel-toolbar">
                     <span style="font-size: 13px; color: var(--text-sub);" id="txtExcelBarInfo">📊 Иреттөө үчүн тилкелерди басыңыз</span>
-                    <button class="btn-action btn-action-copy" onclick="sortDataByName()" style="font-size:12px; padding:6px 12px;">🔤 Алфавит боюнча</button>
+                    <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;">
+                        <button class="btn-action btn-action-copy" onclick="sortDataByName()" style="font-size:12px; padding:6px 12px;">🔤 Алфавит боюнча</button>
+                        <button class="btn-action btn-action-download" onclick="downloadExcelFile()" style="font-size:12px; padding:6px 12px;">📊 Excel скачать</button>
+                    </div>
                 </div>
                 <div class="excel-table-container">
                     <table class="excel-table">
                         <thead>
                             <tr>
-                                <th class="select-cell"><input type="checkbox" class="select-checkbox" id="selectAllExcel" onchange="toggleSelectAll(this.checked)"></th>
-                                <th style="width: 50px;">№</th>
+                                <th style="width:50px;">№</th>
                                 <th onclick="sortDataByName()" id="thName">Ф.И.О. ⇳</th>
+                                <th id="thFileNumber">Файл №</th>
                                 <th id="thPhone">Телефон</th>
-                                <th onclick="sortDataByDate()" id="thDate">Катталган күнү/убактысы ⇳</th>
-                                <th style="text-align: right;" id="thActions">Аракеттер</th>
+                                <th onclick="sortDataByDate()" id="thDate">Дата/убакыт ⇳</th>
+                                <th style="text-align:right;" id="thActions">Аракеттер</th>
                             </tr>
                         </thead>
                         <tbody id="excelTableBody">
@@ -727,6 +839,68 @@
     <input type="file" id="nativeCam1" accept="image/*" capture="environment" onchange="handlePhotoUpload(1, event)" style="display:none;">
     <input type="file" id="nativeCam2" accept="image/*" capture="environment" onchange="handlePhotoUpload(2, event)" style="display:none;">
 
+    <!-- КАМЕРА OVERLAY: СИЛУЭТ МЕНЕН ТАРТУУ ЭКРАНЫ -->
+    <div id="cameraModal" class="camera-modal">
+        <div class="camera-topbar">
+            <button type="button" class="camera-close-btn" onclick="closeCameraModal()">✕</button>
+            <div class="camera-title-text" id="cameraModalTitle">Сүрөт тартуу</div>
+            <button type="button" class="camera-flip-btn" onclick="flipCameraFacing()" title="Камераны которуу">🔄</button>
+        </div>
+        <div class="camera-viewport">
+            <video id="cameraVideo" class="camera-video" autoplay playsinline muted></video>
+
+            <!-- 1-СҮРӨТ ҮЧҮН СИЛУЭТ: БЕЛИНЕН ӨЙДӨ (жарым бой) -->
+            <svg id="cameraGuideBust" class="camera-guide-svg" viewBox="0 0 400 225" preserveAspectRatio="xMidYMid meet" style="display:none;">
+                <path class="camera-guide-shape"
+                    d="M 200 30
+                       c -18 0 -32 15 -32 34 c 0 13 6 24 15 30
+                       c -34 8 -58 30 -66 62 c -6 24 -8 45 -8 55
+                       l 182 0
+                       c 0 -10 -2 -31 -8 -55
+                       c -8 -32 -32 -54 -66 -62
+                       c 9 -6 15 -17 15 -30
+                       c 0 -19 -14 -34 -32 -34 Z"/>
+            </svg>
+
+            <!-- 2-СҮРӨТ ҮЧҮН СИЛУЭТ: ТОЛУК БОЮ -->
+            <svg id="cameraGuideFull" class="camera-guide-svg" viewBox="0 0 400 225" preserveAspectRatio="xMidYMid meet" style="display:none;">
+                <path class="camera-guide-shape"
+                    d="M 200 8
+                       c -9 0 -16 7 -16 16 c 0 7 4 13 10 15
+                       c -14 4 -24 15 -26 29
+                       c -1 8 6 14 6 14 l 4 34
+                       c -10 3 -18 10 -22 20 l -14 36
+                       c -2 6 3 12 9 10 c 5 -2 8 -6 9 -11 l 11 -28 l 3 46 l -6 62
+                       c -1 6 4 11 10 11 c 5 0 9 -4 10 -9 l 7 -55 l 4 0 l 7 55
+                       c 1 5 5 9 10 9 c 6 0 11 -5 10 -11 l -6 -62 l 3 -46 l 11 28
+                       c 1 5 4 9 9 11 c 6 2 11 -4 9 -10 l -14 -36
+                       c -4 -10 -12 -17 -22 -20 l 4 -34
+                       c 0 0 7 -6 6 -14 c -2 -14 -12 -25 -26 -29
+                       c 6 -2 10 -8 10 -15 c 0 -9 -7 -16 -16 -16 Z"/>
+            </svg>
+
+            <div class="camera-hint-text" id="cameraHintText">Телефонду туурасынан кармаңыз</div>
+
+            <div id="cameraOrientationWarning" class="camera-orientation-warning">
+                <div class="camera-rotate-icon">📱↻</div>
+                <p id="cameraOrientationWarningText">Сүрөт тартуу үчүн телефонду туурасынан (горизонталдуу) буруңуз</p>
+            </div>
+        </div>
+        <div class="camera-bottombar">
+            <button type="button" class="camera-capture-btn" onclick="captureFromCamera()" aria-label="Тартуу"></button>
+            <button type="button" class="camera-fallback-link" onclick="useNativeCameraFallback()">Башка ыкма</button>
+        </div>
+    </div>
+
+    <div id="centerNotice" class="center-notice" onclick="if(event.target===this)closeCenterNotice()">
+        <div class="center-notice-box">
+            <div class="center-notice-icon" id="centerNoticeIcon">✓</div>
+            <h3 id="centerNoticeTitle">Даяр</h3>
+            <p id="centerNoticeText"></p>
+            <button class="center-notice-ok" onclick="closeCenterNotice()">OK</button>
+        </div>
+    </div>
+
     <div id="imageViewerModal" class="image-viewer-modal">
         <button class="image-viewer-close" onclick="closeImageViewer()">✕</button>
         <img id="enlargedImg" src="" alt="Сүрөт">
@@ -789,7 +963,7 @@
                 setDown:"Сүрөттөрдү жүктөө функциясы", setDownDesc:"Тизмеден сүрөттөрдү жүктөө баскычы",
                 setDel:"Өчүрүү функциясы", setDelDesc:"Тизмеден маалыматты өчүрүү баскычы",
                 setPass:"Админ паролун өзгөртүү", savePass:"Паролду сактоо",
-                actions:"Аракеттер", date:"Катталган күнү/убактысы", name:"Ф.И.О.", number:"№",
+                actions:"Аракеттер", date:"Катталган күнү/убактысы", name:"Ф.И.О.", number:"№", fileNumber:"Файл №",
                 selected:"тандалды", bulkCopy:"Көчүрүү", bulkDownload:"Скачать", bulkDelete:"Удалить",
                 whatsapp:"WhatsApp", noData:"Маалымат жок.", loading:"Жүктөлүүдө...", newItem:"Жаңы",
                 deleteConfirm:"Тандалган маалыматтарды өчүрүүнү каалайсызбы?", successTitle:"Ийгиликтүү катталдыңыз!", successText:"Маалыматыңыз сакталды жана катталгандардын тизмесине кошулду.", successOk:"Жакшы"
@@ -817,7 +991,7 @@
                 setDown:"Функция скачивания фото", setDownDesc:"Кнопка скачивания фото из списка",
                 setDel:"Функция удаления", setDelDesc:"Кнопка удаления данных из списка",
                 setPass:"Изменить пароль админа", savePass:"Сохранить пароль",
-                actions:"Действия", date:"Дата/время регистрации", name:"Ф.И.О.", number:"№",
+                actions:"Действия", date:"Дата/время регистрации", name:"Ф.И.О.", number:"№", fileNumber:"Файл №",
                 selected:"выбрано", bulkCopy:"Копировать", bulkDownload:"Скачать", bulkDelete:"Удалить",
                 whatsapp:"WhatsApp", noData:"Нет данных.", loading:"Загрузка...", newItem:"Новое",
                 deleteConfirm:"Удалить выбранные записи?", successTitle:"Вы успешно зарегистрированы!", successText:"Ваши данные сохранены и добавлены в список зарегистрированных.", successOk:"Хорошо"
@@ -844,7 +1018,7 @@
                 setDown:"وظيفة تنزيل الصور", setDownDesc:"زر تنزيل الصور من القائمة",
                 setDel:"وظيفة الحذف", setDelDesc:"زر حذف البيانات من القائمة",
                 setPass:"تغيير كلمة مرور المشرف", savePass:"حفظ كلمة المرور",
-                actions:"الإجراءات", date:"تاريخ/وقت التسجيل", name:"الاسم الكامل", number:"م",
+                actions:"الإجراءات", date:"تاريخ/وقت التسجيل", name:"الاسم الكامل", number:"م", fileNumber:"رقم الملف",
                 selected:"محدد", bulkCopy:"نسخ", bulkDownload:"تنزيل", bulkDelete:"حذف",
                 whatsapp:"واتساب", noData:"لا توجد بيانات.", loading:"جارٍ التحميل...", newItem:"جديد",
                 deleteConfirm:"هل تريد حذف السجلات المحددة؟", successTitle:"تم التسجيل بنجاح!", successText:"تم حفظ البيانات وإضافتها إلى قائمة المسجلين.", successOk:"حسناً"
@@ -872,9 +1046,10 @@
                 btnSavePass:t.savePass, bulkCopyText:t.bulkCopy, bulkDownloadText:t.bulkDownload, bulkDeleteText:t.bulkDelete
             };
             Object.entries(ids).forEach(([id,value])=>{ const el=document.getElementById(id); if(el) el.innerText=value; });
-            const thName=document.getElementById('thName'), thPhone=document.getElementById('thPhone'), thDate=document.getElementById('thDate'), thActions=document.getElementById('thActions');
+            const thName=document.getElementById('thName'), thPhone=document.getElementById('thPhone'), thFile=document.getElementById('thFileNumber'), thDate=document.getElementById('thDate'), thActions=document.getElementById('thActions');
             if(thName) thName.innerText=t.name+" ⇳";
             if(thPhone) thPhone.innerText=currentLang==='ru'?'Телефон':currentLang==='ar'?'الهاتف':'Телефон';
+            if(thFile) thFile.innerText=t.fileNumber;
             if(thDate) thDate.innerText=t.date+" ⇳";
             if(thActions) thActions.innerText=t.actions;
             const name=document.getElementById('childNameInput'); if(name) name.placeholder=t.phName;
@@ -1081,7 +1256,145 @@
             navigateTo('screenRegPhoto');
         }
 
-        function triggerCamera(slotIndex) {
+        // === КАМЕРА OVERLAY (СИЛУЭТ МЕНЕН ТАРТУУ) ЛОГИКАСЫ ===
+        let cameraStream = null;
+        let cameraActiveSlot = null;
+        let cameraFacingMode = 'environment';
+        let cameraOrientationHandler = null;
+
+        async function triggerCamera(slotIndex) {
+            cameraActiveSlot = slotIndex;
+
+            // Браузер getUserMedia'ды колдобосо (эски телефон/десктоп), түз эле
+            // телефондун өздүк камерасын ачабыз (силуэтсиз, бирок иштейт).
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                useNativeCameraFallback();
+                return;
+            }
+
+            const titleEl = document.getElementById('cameraModalTitle');
+            titleEl.innerText = slotIndex === 1
+                ? (currentLang === 'ru' ? 'Фото по пояс' : currentLang === 'ar' ? 'صورة من الخصر' : 'Белинен өйдө сүрөт')
+                : (currentLang === 'ru' ? 'Фото в полный рост' : currentLang === 'ar' ? 'صورة كاملة' : 'Толук бою сүрөт');
+
+            setCameraGuide(slotIndex);
+
+            const modal = document.getElementById('cameraModal');
+            modal.classList.add('open');
+
+            try {
+                await startCameraStream(cameraFacingMode);
+                attachOrientationWatcher();
+            } catch (err) {
+                console.error('Камера ачылган жок:', err);
+                closeCameraModal();
+                alert(currentLang === 'ru'
+                    ? 'Не удалось получить доступ к камере. Разрешите доступ к камере в браузере или используйте другой способ.'
+                    : currentLang === 'ar'
+                        ? 'تعذر الوصول إلى الكاميرا.'
+                        : 'Камерага уруксат берилген жок. Браузердин жөндөөлөрүнөн камерага уруксат бериңиз же башка ыкманы колдонуңуз.');
+                useNativeCameraFallback();
+            }
+        }
+
+        async function startCameraStream(facingMode) {
+            stopCameraStream();
+            const constraints = {
+                audio: false,
+                video: {
+                    facingMode: { ideal: facingMode },
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                }
+            };
+            cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+            const video = document.getElementById('cameraVideo');
+            video.srcObject = cameraStream;
+            await video.play().catch(() => {});
+        }
+
+        function stopCameraStream() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+        }
+
+        async function flipCameraFacing() {
+            cameraFacingMode = cameraFacingMode === 'environment' ? 'user' : 'environment';
+            try {
+                await startCameraStream(cameraFacingMode);
+            } catch (err) {
+                console.error('Камераны которуу мүмкүн болгон жок:', err);
+            }
+        }
+
+        function setCameraGuide(slotIndex) {
+            const bust = document.getElementById('cameraGuideBust');
+            const full = document.getElementById('cameraGuideFull');
+            bust.style.display = slotIndex === 1 ? 'block' : 'none';
+            full.style.display = slotIndex === 2 ? 'block' : 'none';
+        }
+
+        function attachOrientationWatcher() {
+            const check = () => {
+                const video = document.getElementById('cameraVideo');
+                const warning = document.getElementById('cameraOrientationWarning');
+                if (!video.videoWidth || !video.videoHeight) return;
+                const isLandscape = video.videoWidth >= video.videoHeight;
+                warning.classList.toggle('show', !isLandscape);
+            };
+            cameraOrientationHandler = check;
+            window.addEventListener('resize', check);
+            window.addEventListener('orientationchange', check);
+            const video = document.getElementById('cameraVideo');
+            video.addEventListener('loadedmetadata', check);
+            setTimeout(check, 300);
+        }
+
+        function detachOrientationWatcher() {
+            if (cameraOrientationHandler) {
+                window.removeEventListener('resize', cameraOrientationHandler);
+                window.removeEventListener('orientationchange', cameraOrientationHandler);
+                cameraOrientationHandler = null;
+            }
+            document.getElementById('cameraOrientationWarning').classList.remove('show');
+        }
+
+        function closeCameraModal() {
+            stopCameraStream();
+            detachOrientationWatcher();
+            document.getElementById('cameraModal').classList.remove('open');
+            cameraActiveSlot = null;
+        }
+
+        function captureFromCamera() {
+            const video = document.getElementById('cameraVideo');
+            if (!video.videoWidth || !video.videoHeight) return;
+
+            const slotIndex = cameraActiveSlot;
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            // Алдыңкы камера (селфи) болсо, күзгүдөй тескери чагылдырбашы үчүн
+            // толук бойдо/белинен өйдө сүрөт табигый көрүнүшү үчүн mirror кылбайбыз.
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+            const img = new Image();
+            img.onload = function () {
+                closeCameraModal();
+                processCapturedImage(img, slotIndex);
+            };
+            img.src = dataUrl;
+        }
+
+        // Камера API иштебей калса (уруксат берилбесе, колдоого алынбаса),
+        // телефондун өздүк камера колдонмосуна кайрылабыз (силуэтсиз, бирок иштейт).
+        function useNativeCameraFallback() {
+            const slotIndex = cameraActiveSlot || 1;
+            closeCameraModal();
             const input = document.getElementById('nativeCam' + slotIndex);
             if (input) {
                 input.value = '';
@@ -1104,54 +1417,61 @@
                     showSaveError(currentLang === 'ky' ? 'Сүрөттүн форматы колдоого алынбайт. JPG/PNG сүрөт тандаңыз.' : 'Формат фото не поддерживается. Выберите JPG/PNG.');
                 };
                 img.onload = function() {
-                    if (img.width < img.height) {
-                        const errContainer = document.getElementById('photoErrorWhatsAppContainer');
-                        const errText = document.getElementById('photoErrorMessageText');
-                        errText.innerText = currentLang === 'ky' ? "❌ Сүрөт вертикалдуу (тигинен) тартылган! Телефонду туурасынан буруп кайра тартыңыз." : "❌ Фото сделано вертикально! Поверните телефон горизонтально.";
-                        errContainer.style.display = 'block';
-                        return;
-                    }
-
-                    document.getElementById('photoErrorWhatsAppContainer').style.display = 'none';
-
-                    // Firestore документине өтө чоң Base64 кирбеши үчүн сүрөттү кичирейтебиз.
-                    const canvas = document.createElement('canvas');
-                    const maxDim = 650;
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > maxDim || height > maxDim) {
-                        if (width > height) {
-                            height = Math.round((height * maxDim) / width);
-                            width = maxDim;
-                        } else {
-                            width = Math.round((width * maxDim) / height);
-                            height = maxDim;
-                        }
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d', { alpha: false });
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    const resizedBase64 = canvas.toDataURL('image/jpeg', 0.52);
-                    capturedPhotos[slotIndex] = resizedBase64;
-
-                    const card = document.getElementById('photoCard' + slotIndex);
-                    const box = document.getElementById('box' + slotIndex);
-                    const status = document.getElementById('status' + slotIndex);
-
-                    card.classList.add('done');
-                    box.innerHTML = `<img src="${resizedBase64}" class="photo-slot-img" alt="Сүрөт ${slotIndex}">`;
-                    status.classList.add('done');
-                    status.innerText = currentLang === 'ky' ? "✓ Сүрөт кошулду" : "✓ Фото добавлено";
-
-                    checkSaveButtonState();
+                    processCapturedImage(img, slotIndex);
                 };
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
+        }
+
+        // ЖАҢЫ: файлдан тандоо жана камера-overlay экили тең ушул бирдей
+        // функцияны колдонот — вертикалдуулукту текшерет, кичирейтет,
+        // JPEG'ке кысат жана слотко коёт.
+        function processCapturedImage(img, slotIndex) {
+            if (img.width < img.height) {
+                const errContainer = document.getElementById('photoErrorWhatsAppContainer');
+                const errText = document.getElementById('photoErrorMessageText');
+                errText.innerText = currentLang === 'ky' ? "❌ Сүрөт вертикалдуу (тигинен) тартылган! Телефонду туурасынан буруп кайра тартыңыз." : "❌ Фото сделано вертикально! Поверните телефон горизонтально.";
+                errContainer.style.display = 'block';
+                return;
+            }
+
+            document.getElementById('photoErrorWhatsAppContainer').style.display = 'none';
+
+            // Firestore документине өтө чоң Base64 кирбеши үчүн сүрөттү кичирейтебиз.
+            const canvas = document.createElement('canvas');
+            const maxDim = 650;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxDim || height > maxDim) {
+                if (width > height) {
+                    height = Math.round((height * maxDim) / width);
+                    width = maxDim;
+                } else {
+                    width = Math.round((width * maxDim) / height);
+                    height = maxDim;
+                }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d', { alpha: false });
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const resizedBase64 = canvas.toDataURL('image/jpeg', 0.52);
+            capturedPhotos[slotIndex] = resizedBase64;
+
+            const card = document.getElementById('photoCard' + slotIndex);
+            const box = document.getElementById('box' + slotIndex);
+            const status = document.getElementById('status' + slotIndex);
+
+            card.classList.add('done');
+            box.innerHTML = `<img src="${resizedBase64}" class="photo-slot-img" alt="Сүрөт ${slotIndex}">`;
+            status.classList.add('done');
+            status.innerText = currentLang === 'ky' ? "✓ Сүрөт кошулду" : "✓ Фото добавлено";
+
+            checkSaveButtonState();
         }
 
         function checkSaveButtonState() {
@@ -1443,6 +1763,7 @@
                             fullName: data.fullName || data.name || '',
                             fullNameNormalized: data.fullNameNormalized || normalizeName(data.fullName || data.name || ''),
                             phone: data.phone || '',
+                            fileNumber: data.fileNumber || '',
                             photo1: data.photo1 || null,
                             photo2: data.photo2 || null,
                             createdAt: data.createdAt || null
@@ -1561,6 +1882,7 @@
                 updateSelectionToolbar();
                 return;
             }
+
             let cardsHtml="", excelHtml="";
             dataList.forEach((item,index)=>{
                 let dateStr=translations[currentLang].newItem;
@@ -1568,43 +1890,70 @@
                     const d=item.createdAt.toDate();
                     dateStr=d.toLocaleDateString(currentLang==='ky'?'ky-KG':currentLang==='ar'?'ar-KW':'ru-RU')+" "+d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
                 }
-                const checked=selectedIds.has(item.id)?'checked':'';
+
+                const selectedClass=selectedIds.has(item.id)?' row-selected':'';
+                const cardSelectedClass=selectedIds.has(item.id)?' card-selected':'';
                 const safeName=escapeHtml(item.fullName);
+                const safeFile=escapeHtml(item.fileNumber || '');
                 const phoneValue=item.phone ? escapeHtml(item.phone) : (currentLang==='ru'?'Нет номера':currentLang==='ar'?'لا يوجد رقم':'Номер жок');
-                const phoneText=`<div class="registered-phone phone-value">📞 ${phoneValue} <button class="phone-edit-btn" title="${currentLang==='ru'?'Изменить номер':currentLang==='ar'?'تعديل الرقم':'Номерди өзгөртүү'}" aria-label="${currentLang==='ru'?'Изменить номер':currentLang==='ar'?'تعديل الرقم':'Номерди өзгөртүү'}" onclick="editPhoneById('${item.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button></div>`;
-                const copyNameBtn=settings.allowCopy?`<button class="btn-action btn-action-copy btn-icon-only" title="Көчүрүү" aria-label="Көчүрүү" onclick="copyNameById('${item.id}')">📋</button>`:'';
-                const downloadBtn=settings.allowDownload&&item.photo1&&item.photo2?`<button class="btn-action btn-action-download btn-icon-only" title="Скачать" aria-label="Скачать" onclick="downloadPhotosById('${item.id}')">📥</button>`:'';
-                const deleteBtn=settings.allowDelete?`<button class="btn-action btn-action-delete btn-icon-only" title="Удалить" aria-label="Удалить" onclick="deleteRegistration('${item.id}')">🗑</button>`:'';
-                const whatsappBtn=item.phone?`<a class="btn-whatsapp-icon" title="WhatsApp" aria-label="WhatsApp" target="_blank" rel="noopener" href="${whatsappUrl(item.phone,item.fullName)}"><svg viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M19.11 17.21c-.27-.14-1.59-.78-1.84-.87-.25-.09-.43-.14-.61.14-.18.27-.7.87-.86 1.05-.16.18-.32.2-.59.07-.27-.14-1.12-.41-2.13-1.31-.79-.7-1.32-1.56-1.48-1.83-.16-.27-.02-.42.12-.56.12-.12.27-.32.41-.48.14-.16.18-.27.27-.45.09-.18.05-.34-.02-.48-.07-.14-.61-1.47-.84-2.01-.22-.52-.45-.45-.61-.46h-.52c-.18 0-.48.07-.73.34-.25.27-.96.94-.96 2.29s.98 2.66 1.12 2.84c.14.18 1.93 2.95 4.68 4.14.65.28 1.16.45 1.56.58.66.21 1.26.18 1.74.11.53-.08 1.59-.65 1.82-1.28.23-.63.23-1.17.16-1.28-.07-.11-.25-.18-.52-.32Z"/><path fill="currentColor" d="M16.03 3.2c-7.08 0-12.83 5.75-12.83 12.83 0 2.26.59 4.46 1.72 6.39L3.1 28.8l6.55-1.72a12.8 12.8 0 0 0 6.38 1.7h.01c7.07 0 12.83-5.75 12.83-12.83S23.1 3.2 16.03 3.2Zm0 23.36h-.01a10.5 10.5 0 0 1-5.35-1.46l-.38-.23-3.89 1.02 1.04-3.79-.25-.39a10.53 10.53 0 1 1 8.84 4.85Z"/></svg></a>`:'';
-                const actionButtons=`${deleteBtn}${downloadBtn}${copyNameBtn}${whatsappBtn}`;
+                const phoneText=`<div class="registered-phone phone-value">📞 ${phoneValue}</div>`;
+
+                const copyNameBtn=settings.allowCopy?`<button class="btn-action btn-icon-only icon-copy" title="Көчүрүү" aria-label="Көчүрүү" onclick="event.stopPropagation();copyNameById('${item.id}')"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 3h10a2 2 0 0 1 2 2v11h-2V5H8V3Zm-2 4h10a2 2 0 0 1 2 2v12H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Zm0 2v10h10V9H6Z"/></svg></button>`:'';
+                const downloadBtn=settings.allowDownload&&item.photo1&&item.photo2?`<button class="btn-action btn-icon-only icon-download" title="Сүрөттөрдү скачать" aria-label="Сүрөттөрдү скачать" onclick="event.stopPropagation();downloadPhotosById('${item.id}')"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M11 3h2v10.17l3.59-3.58L18 11l-6 6-6-6 1.41-1.41L11 13.17V3ZM5 19h14v2H5v-2Z"/></svg></button>`:'';
+                const deleteBtn=settings.allowDelete?`<button class="btn-action btn-icon-only icon-trash" title="Удалить" aria-label="Удалить" onclick="event.stopPropagation();deleteRegistration('${item.id}')"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5h8l-1-2H9L8 5Zm-4 2h16v2H4V7Zm2 3h12v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V10Zm3 2v7h2v-7H9Zm4 0v7h2v-7h-2Z"/></svg></button>`:'';
+                const whatsappBtn=item.phone?`<a class="btn-whatsapp-icon" title="WhatsApp" aria-label="WhatsApp" target="_blank" rel="noopener" href="${whatsappUrl(item.phone,item.fullName)}" onclick="event.stopPropagation()">${iconSvg('whatsapp')}</a>`:'';
+                const actionButtons=`${deleteBtn}${whatsappBtn}${downloadBtn}${copyNameBtn}`;
+
                 cardsHtml+=`
-                    <div class="list-item" id="doc-${item.id}">
-                        <div class="select-card-row">
-                            <input type="checkbox" class="select-checkbox" ${checked} onchange="toggleSelected('${item.id}',this.checked)">
-                            <div>
-                                <div class="list-title">${safeName}</div>${phoneText}
+                    <div class="list-item${cardSelectedClass}" id="doc-${item.id}" onclick="toggleCardSelection('${item.id}',event)">
+                        <div class="select-card-row" style="margin-bottom:8px;">
+                            <div style="width:100%;">
+                                <div class="list-title">${safeName}</div>
+                                ${phoneText}
                             </div>
                         </div>
-                        <div class="list-header"><div></div><div class="list-date">${dateStr}</div></div>
+                        <div class="list-header"><div></div><div class="card-meta">${safeFile?`<div class="card-file-number">Файл № ${safeFile}</div>`:''}<div class="list-date">${dateStr}</div></div></div>
                         <div class="large-thumb-group">
-                            ${item.photo1?`<img src="${item.photo1}" alt="Фото 1" onclick="openImageViewer('${item.photo1}')">`:'<div class="empty-state">Сүрөт 1 жок</div>'}
-                            ${item.photo2?`<img src="${item.photo2}" alt="Фото 2" onclick="openImageViewer('${item.photo2}')">`:'<div class="empty-state">Сүрөт 2 жок</div>'}
+                            ${item.photo1?`<img src="${item.photo1}" alt="Фото 1" onclick="event.stopPropagation();openImageViewer('${item.photo1}')">`:'<div class="empty-state">Сүрөт 1 жок</div>'}
+                            ${item.photo2?`<img src="${item.photo2}" alt="Фото 2" onclick="event.stopPropagation();openImageViewer('${item.photo2}')">`:'<div class="empty-state">Сүрөт 2 жок</div>'}
                         </div>
                         <div class="item-actions">${actionButtons}</div>
                     </div>`;
+
                 excelHtml+=`
-                    <tr id="row-${item.id}">
-                        <td class="select-cell"><input type="checkbox" class="select-checkbox" ${checked} onchange="toggleSelected('${item.id}',this.checked)"></td>
+                    <tr id="row-${item.id}" class="${selectedClass.trim()}" onclick="toggleRowSelection('${item.id}',event)">
                         <td style="font-weight:bold;color:var(--accent-glow);">${index+1}</td>
                         <td style="font-weight:600;color:var(--text-main);">${safeName}</td>
-                        <td class="phone-cell">${phoneText}</td>
+                        <td class="file-number-cell" onclick="event.stopPropagation()">
+                            <input class="file-number-input" value="${safeFile}" placeholder="Файл №" autocomplete="off" inputmode="numeric" maxlength="5"
+                                   oninput="this.value=this.value.replace(/\D/g,'').slice(0,5)"
+                                   onclick="event.stopPropagation()"
+                                   onkeydown="if(event.key==='Enter'){this.blur();}"
+                                   onblur="saveFileNumber('${item.id}',this.value)">
+                        </td>
+                        <td class="phone-cell inline-edit-cell" onclick="event.stopPropagation()">
+                            <input class="inline-edit-input" value="${escapeHtml(item.phone || '')}" placeholder="Телефон" autocomplete="off" inputmode="tel"
+                                   onclick="event.stopPropagation()"
+                                   onkeydown="if(event.key==='Enter'){this.blur();}"
+                                   onblur="savePhoneInline('${item.id}',this.value)">
+                        </td>
                         <td style="font-size:13px;color:var(--text-sub);">${dateStr}</td>
-                        <td style="text-align:right;"><div style="display:inline-flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;">${actionButtons}</div></td>
+                        <td style="text-align:right;"><div style="display:inline-flex;gap:10px;align-items:center;justify-content:flex-end;">${actionButtons}</div></td>
                     </tr>`;
             });
             listContainer.innerHTML=cardsHtml;
             excelTableBody.innerHTML=excelHtml;
             updateSelectionToolbar();
+        }
+
+        function iconSvg(type){
+            const icons={
+                trash:`<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5h8l-1-2H9L8 5Zm-4 2h16v2H4V7Zm2 3h12v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V10Zm3 2v7h2v-7H9Zm4 0v7h2v-7h-2Z"/></svg>`,
+                whatsapp:`<svg viewBox="0 0 32 32" aria-hidden="true" fill="currentColor"><path d="M16 3.2C8.92 3.2 3.2 8.92 3.2 16c0 2.27.59 4.48 1.72 6.42L3.1 28.9l6.62-1.74A12.73 12.73 0 0 0 16 28.8h.01C23.08 28.8 28.8 23.08 28.8 16S23.08 3.2 16 3.2Zm0 23.25h-.01a10.43 10.43 0 0 1-5.3-1.45l-.38-.23-3.93 1.03 1.05-3.82-.25-.4A10.5 10.5 0 1 1 16 26.45Zm5.76-7.88c-.31-.16-1.84-.91-2.12-1.01-.29-.1-.5-.16-.71.16-.21.31-.81 1.01-.99 1.22-.18.21-.36.23-.67.08-.31-.16-1.32-.49-2.51-1.56-.93-.83-1.56-1.85-1.74-2.16-.18-.31-.02-.48.14-.63.14-.14.31-.36.47-.54.16-.18.21-.31.31-.52.1-.21.05-.39-.03-.55-.08-.16-.71-1.7-.98-2.33-.26-.62-.53-.53-.72-.54h-.62c-.21 0-.55.08-.84.39-.29.31-1.1 1.08-1.1 2.63s1.13 3.05 1.29 3.26c.16.21 2.22 3.39 5.38 4.75.75.32 1.34.51 1.8.65.76.24 1.45.21 2 .13.61-.09 1.84-.75 2.1-1.47.26-.72.26-1.34.18-1.47-.08-.13-.29-.21-.6-.37Z"/></svg>`,
+                download:`<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M11 3h2v10.17l3.59-3.58L18 11l-6 6-6-6 1.41-1.41L11 13.17V3ZM5 19h14v2H5v-2Z"/></svg>`,
+                copy:`<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 3h10a2 2 0 0 1 2 2v11h-2V5H8V3Zm-2 4h10a2 2 0 0 1 2 2v12H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Zm0 2v10h10V9H6Z"/></svg>`
+            };
+            return icons[type]||'';
         }
 
         function escapeHtml(str){
@@ -1617,16 +1966,46 @@
         }
         function toggleSelected(id,checked){
             if(checked) selectedIds.add(id); else selectedIds.delete(id);
-            updateSelectionToolbar();
-            const allBoxes=document.querySelectorAll('.select-checkbox');
-            const visibleBoxes=[...allBoxes].filter(x=>x.id!=='selectAllExcel');
-            const master=document.getElementById('selectAllExcel');
-            if(master) master.checked=visibleBoxes.length>0 && visibleBoxes.every(x=>x.checked);
+            syncSelectionUI();
         }
+
+        function syncSelectionUI(){
+            document.querySelectorAll('#excelTableBody tr[id^="row-"]').forEach(row=>{
+                const id=row.id.replace('row-','');
+                row.classList.toggle('row-selected',selectedIds.has(id));
+            });
+            document.querySelectorAll('#siteRegisteredList .list-item[id^="doc-"]').forEach(card=>{
+                const id=card.id.replace('doc-','');
+                card.classList.toggle('card-selected',selectedIds.has(id));
+            });
+            updateSelectionToolbar();
+        }
+
+        function toggleRowSelection(id,event){
+            if(event && event.target.closest('input,button,a')) return;
+            if(selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
+            syncSelectionUI();
+        }
+
+        function toggleCardSelection(id,event){
+            if(event && event.target.closest('button,a,img,input')) return;
+            if(selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
+            syncSelectionUI();
+        }
+
         function toggleSelectAll(checked){
             currentFilteredRegistrations.forEach(item=>checked?selectedIds.add(item.id):selectedIds.delete(item.id));
-            renderData(currentFilteredRegistrations);
+            syncSelectionUI();
         }
+
+        function toggleAllVisible(){
+            const allSelected=currentFilteredRegistrations.length>0 &&
+                currentFilteredRegistrations.every(item=>selectedIds.has(item.id));
+            if(allSelected) currentFilteredRegistrations.forEach(item=>selectedIds.delete(item.id));
+            else currentFilteredRegistrations.forEach(item=>selectedIds.add(item.id));
+            syncSelectionUI();
+        }
+
         function updateSelectionToolbar(){
             const bar=document.getElementById('selectionToolbar');
             const count=document.getElementById('selectionCount');
@@ -1634,28 +2013,108 @@
             const n=selectedIds.size;
             bar.classList.toggle('active',n>0);
             count.innerText=`${n} ${translations[currentLang].selected}`;
+
         }
+
         function getSelectedItems(){
             return allRegistrations.filter(x=>selectedIds.has(x.id));
         }
+
         async function bulkCopySelected(){
             const items=getSelectedItems();
             if(!items.length)return;
-            await navigator.clipboard.writeText(items.map(x=>x.fullName).join('\\n'));
+            try{
+                await navigator.clipboard.writeText(items.map(x=>x.fullName).join('\n'));
+                showCenterNotice('📋', 'Көчүрүү болду', `${items.length} адамдын аты-жөнү көчүрүлдү.`);
+            }catch(e){ console.error(e); }
         }
+
         async function bulkDownloadSelected(){
             const items=getSelectedItems().filter(x=>x.photo1&&x.photo2);
-            if(!items.length)return;
-            for(const item of items){ downloadPhotos(item.id,item.fullName,item.photo1,item.photo2); await new Promise(r=>setTimeout(r,500)); }
+            if(!items.length){
+                showCenterNotice('ℹ️','Сүрөт жок','Тандалган балдарда жүктөй турган эки сүрөт тең жок.');
+                return;
+            }
+            await downloadPhotosAsZip(items);
         }
+
         async function bulkDeleteSelected(){
             const items=getSelectedItems();
             if(!items.length || !confirm(translations[currentLang].deleteConfirm))return;
-            await Promise.all(items.map(item=>db.collection("registrations").doc(item.id).delete()));
-            selectedIds.clear();
-            applyFilters();
+            try{
+                await Promise.all(items.map(item=>db.collection("registrations").doc(item.id).delete()));
+                selectedIds.clear();
+                applyFilters();
+                showCenterNotice('✓','Успешно удалено',`${items.length} маалымат өчүрүлдү.`);
+            }catch(e){
+                console.error(e);
+                showCenterNotice('❌','Ката','Маалыматты өчүрүүдө ката чыкты.');
+            }
         }
 
+        async function saveFileNumber(id,value){
+            const item=allRegistrations.find(x=>x.id===id);
+            if(!item)return;
+            const clean=String(value||'').replace(/\D/g,'').slice(0,5);
+            if(clean.length > 5){
+                showCenterNotice('⚠️','Файл №','Файл № эң көп 5 цифра болушу керек.');
+                renderData(currentFilteredRegistrations);
+                return;
+            }
+            if((item.fileNumber||'')===clean)return;
+            try{
+                await db.collection('registrations').doc(id).update({fileNumber:clean});
+                item.fileNumber=clean;
+                const filteredItem=currentFilteredRegistrations.find(x=>x.id===id);
+                if(filteredItem) filteredItem.fileNumber=clean;
+                showCenterNotice('✓','Сакталды',`Файл номери: ${clean || 'бош'}`);
+            }catch(e){
+                console.error('Файл номерин сактоодо ката:',e);
+                showCenterNotice('❌','Ката','Файл номерин сактоо мүмкүн болбоду.');
+            }
+        }
+
+        async function savePhoneInline(id,value){
+            const item=allRegistrations.find(x=>x.id===id);
+            if(!item) return;
+            let raw=String(value||'').trim().replace(/[^0-9+]/g,'');
+            if(raw.startsWith('00')) raw='+'+raw.slice(2);
+            if(!raw.startsWith('+')){
+                let d=raw.replace(/\D/g,'');
+                if(d.startsWith('0')) d=d.replace(/^0+/,'');
+                if(d.startsWith('996') && d.length===12) raw='+'+d;
+                else if(d.startsWith('7') && d.length===11) raw='+'+d;
+                else if(d.length===9) raw='+996'+d;
+                else if(d.length===10) raw='+7'+d;
+                else raw='+'+d;
+            }
+            if(!raw){
+                if(item.phone){
+                    try{ await db.collection('registrations').doc(id).update({phone:''}); item.phone=''; applyFilters(); }
+                    catch(e){ console.error(e); }
+                }
+                return;
+            }
+            const digits=raw.replace(/\D/g,'');
+            const valid=(raw.startsWith('+996') && digits.length===12) || (raw.startsWith('+7') && digits.length===11);
+            if(!valid){
+                showCenterNotice('⚠️','Телефон','Телефон туура эмес. +996XXXXXXXXX же +7XXXXXXXXXX');
+                renderData(currentFilteredRegistrations);
+                return;
+            }
+            if(item.phone===raw) return;
+            try{
+                await db.collection('registrations').doc(id).update({phone:raw});
+                item.phone=raw;
+                const filteredItem=currentFilteredRegistrations.find(x=>x.id===id);
+                if(filteredItem) filteredItem.phone=raw;
+                showCenterNotice('✓','Сакталды','Телефон номери өзгөртүлдү.');
+            }catch(e){
+                console.error('Телефонду сактоодо ката:',e);
+                showCenterNotice('❌','Ката','Телефон номерин сактоо мүмкүн болбоду.');
+                renderData(currentFilteredRegistrations);
+            }
+        }
 
         async function editPhoneById(id){
             const item=allRegistrations.find(x=>x.id===id);
@@ -1694,14 +2153,9 @@
             const item=allRegistrations.find(x=>x.id===id);
             if(item) copyName(item.fullName);
         }
-        function downloadPhotosById(id){
-            const item=allRegistrations.find(x=>x.id===id);
-            if(item) downloadPhotos(item.id,item.fullName,item.photo1,item.photo2);
-        }
-
         function copyName(name) {
             navigator.clipboard.writeText(name).then(() => {
-                alert(`"${name}" көчүрүлдү!`);
+                showCenterNotice('📋','Копировать болду',`"${name}" көчүрүлдү!`);
             }).catch(err => {
                 console.error("Көчүрүүдө ката: ", err);
             });
@@ -1719,7 +2173,7 @@
             });
 
             navigator.clipboard.writeText(textList).then(() => {
-                alert(currentLang === 'ky' ? `Бардыгы болуп ${currentFilteredRegistrations.length} адамдын аты-жөнү көчүрүлдү!` : `Успешно скопировано ${currentFilteredRegistrations.length} имен!`);
+                showCenterNotice('📋','Копировать болду',currentLang === 'ky' ? `Бардыгы болуп ${currentFilteredRegistrations.length} адамдын аты-жөнү көчүрүлдү!` : `Успешно скопировано ${currentFilteredRegistrations.length} имен!`);
             }).catch(err => {
                 console.error("Көчүрүүдө ката: ", err);
             });
@@ -1740,24 +2194,103 @@
             document.getElementById('imageViewerModal').style.display = 'none';
         }
 
-        function downloadPhotos(id, name, p1, p2) {
-            const cleanName = name.replace(/[^a-zA-Zа-яА-Я0-9]/g, "_");
-            
-            const a1 = document.createElement('a');
-            a1.href = p1;
-            a1.download = `${cleanName}_белинен.jpg`;
-            document.body.appendChild(a1);
-            a1.click();
-            document.body.removeChild(a1);
+        function showCenterNotice(icon,title,text){
+            const modal=document.getElementById('centerNotice');
+            if(!modal)return;
+            document.getElementById('centerNoticeIcon').textContent=icon||'✓';
+            document.getElementById('centerNoticeTitle').textContent=title||'Даяр';
+            document.getElementById('centerNoticeText').textContent=text||'';
+            modal.classList.add('open');
+        }
+        function closeCenterNotice(){
+            const modal=document.getElementById('centerNotice');
+            if(modal) modal.classList.remove('open');
+        }
 
-            setTimeout(() => {
-                const a2 = document.createElement('a');
-                a2.href = p2;
-                a2.download = `${cleanName}_толук_бою.jpg`;
-                document.body.appendChild(a2);
-                a2.click();
-                document.body.removeChild(a2);
-            }, 400);
+        async function saveBlobWithPicker(blob,suggestedName,mime){
+            try{
+                if(window.showSaveFilePicker){
+                    const handle=await window.showSaveFilePicker({
+                        suggestedName:suggestedName,
+                        types:[{description:mime||'Файл',accept:{[mime||'application/octet-stream']:[suggestedName.includes('.')?'.'+suggestedName.split('.').pop():'.bin']}}]
+                    });
+                    const writable=await handle.createWritable();
+                    await writable.write(blob);
+                    await writable.close();
+                    return true;
+                }
+            }catch(e){
+                if(e && e.name==='AbortError') return false;
+            }
+            const url=URL.createObjectURL(blob);
+            const a=document.createElement('a');
+            a.href=url; a.download=suggestedName; document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(()=>URL.revokeObjectURL(url),1500);
+            return true;
+        }
+
+        async function downloadExcelFile(){
+            if(!window.XLSX){
+                showCenterNotice('❌','Ката','Excel модулу жүктөлгөн жок. Интернет байланышын текшериңиз.');
+                return;
+            }
+            const rows=allRegistrations.map((item,index)=>({
+                "№":index+1,
+                "Ф.И.О.":item.fullName||'',
+                "Телефон":item.phone||'',
+                "Файл номери":item.fileNumber||'',
+                "Катталган күнү/убактысы":formatExportDate(item.createdAt)
+            }));
+            const ws=XLSX.utils.json_to_sheet(rows);
+            ws['!cols']=[{wch:7},{wch:32},{wch:18},{wch:18},{wch:24}];
+            const wb=XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb,ws,'Байту закат');
+            const out=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+            const blob=new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+            const ok=await saveBlobWithPicker(blob,'Байту_закат_тизме.xlsx','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            if(ok) showCenterNotice('✓','Excel даяр','Файл сакталды.');
+        }
+
+        function formatExportDate(createdAt){
+            if(!createdAt)return '';
+            try{
+                const d=createdAt.toDate?createdAt.toDate():(createdAt.seconds?new Date(createdAt.seconds*1000):new Date(createdAt));
+                return isNaN(d)?'':d.toLocaleString('ky-KG');
+            }catch(e){return '';}
+        }
+
+        async function downloadPhotosById(id){
+            const item=allRegistrations.find(x=>x.id===id);
+            if(item) await downloadPhotosAsZip([item]);
+        }
+
+        async function downloadPhotosAsZip(items){
+            if(!window.JSZip){
+                showCenterNotice('❌','Ката','Сүрөт жүктөө модулу жүктөлгөн жок.');
+                return;
+            }
+            const zip=new JSZip();
+            let count=0;
+            for(const item of items){
+                const folder=zip.folder((item.fileNumber||item.fullName||item.id).replace(/[\\/:*?"<>|]/g,'_'));
+                for(const [key,label] of [['photo1','белинен'],['photo2','толук_бою']]){
+                    const src=item[key];
+                    if(!src)continue;
+                    try{
+                        const resp=await fetch(src);
+                        const blob=await resp.blob();
+                        folder.file(`${label}.jpg`,blob);
+                        count++;
+                    }catch(e){ console.error('Сүрөт жүктөөдө ката:',e); }
+                }
+            }
+            if(!count){
+                showCenterNotice('ℹ️','Сүрөт жок','Жүктөй турган сүрөт табылган жок.');
+                return;
+            }
+            const blob=await zip.generateAsync({type:'blob'});
+            const ok=await saveBlobWithPicker(blob,'Байту_закат_сүрөттөр.zip','application/zip');
+            if(ok) showCenterNotice('✓','Сүрөттөр даяр',`${count} сүрөт ZIP файлга салынды.`);
         }
 
         // БАРАКЧА ЖАҢЫЛАНГАНДА (F5 / Ctrl+R) УШУЛ ЭЛЕ БЕТТЕ КАЛУУ.
@@ -1791,7 +2324,7 @@
                 .then(() => {
                     allRegistrations = allRegistrations.filter(item => item.id !== id);
                     applyFilters();
-                    alert(currentLang === 'ky' ? "Маалымат өчүрүлдү." : "Данные удалены.");
+                    showCenterNotice('✓','Успешно удалено',currentLang === 'ky' ? "Маалымат өчүрүлдү." : "Данные удалены.");
                 })
                 .catch((error) => {
                     console.error("Өчүрүүдө ката: ", error);
