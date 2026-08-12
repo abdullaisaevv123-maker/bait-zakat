@@ -333,6 +333,21 @@
         .success-box p { color:var(--text-main); line-height:1.55; margin-bottom:20px; }
         .success-ok { width:100%; border:0; border-radius:12px; padding:13px 18px; background:var(--primary-blue); color:#fff; font-size:15px; font-weight:700; cursor:pointer; }
 
+        .sticky-list-controls { position: sticky; top: 0; z-index: 900; padding: 6px 0 10px; background: rgba(10,18,39,.94); backdrop-filter: blur(14px); }
+        .sticky-list-controls .search-container { margin-bottom: 10px; }
+        .sticky-list-controls .folder-tabs { margin-bottom: 0; }
+        .card-date-large { font-size: 16px !important; font-weight: 700; color: var(--text-main) !important; }
+        .delete-confirm-modal { position:fixed; inset:0; z-index:13000; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(0,0,0,.72); }
+        .delete-confirm-modal.open { display:flex; }
+        .delete-confirm-box { width:min(430px,100%); background:linear-gradient(180deg,#182442,#0f1830); border:1px solid rgba(255,80,80,.35); border-radius:20px; padding:28px 22px; text-align:center; box-shadow:0 20px 70px rgba(0,0,0,.55); }
+        .delete-confirm-icon { width:58px; height:58px; margin:0 auto 12px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:rgba(255,60,60,.12); color:#ff5a5a; font-size:30px; font-weight:800; }
+        .delete-confirm-box h3 { color:#fff; margin:0 0 8px; font-size:20px; }
+        .delete-confirm-box p { color:var(--text-sub); margin:0 0 20px; }
+        .delete-confirm-actions { display:flex; gap:10px; justify-content:center; }
+        .delete-confirm-actions button { flex:1; border:0; border-radius:10px; padding:12px 14px; font-weight:700; cursor:pointer; }
+        .delete-cancel-btn { background:rgba(255,255,255,.08); color:#fff; }
+        .delete-yes-btn { background:#ff3d4f; color:#fff; }
+
         .folder-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
         .tab-btn { flex: 1; padding: 12px; background: rgba(11, 19, 43, 0.6); border: 1px solid var(--folder-border); border-radius: 12px; color: var(--text-sub); font-weight: 600; cursor: pointer; text-align: center; transition: all 0.2s; }
         .tab-btn.active { background: var(--primary-blue); color: #fff; border-color: var(--primary-blue); }
@@ -720,21 +735,21 @@
                 <button class="all-btn" id="selectAllHeaderBtn" onclick="toggleAllVisible()">Все</button>
             </div>
 
-            <!-- ИЗДӨӨ ТИЛКЕСИ -->
-            <div class="search-container">
-                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Аты-жөнү боюнча издөө..." oninput="applyFilters()">
+            <!-- ИЗДӨӨ + ПАПКАЛАР: ЫЛДЫЙ ЖЫЛГАНДА ДА ОРДУНДА КАЛАТ -->
+            <div class="sticky-list-controls">
+                <div class="search-container">
+                    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Ф.И.О. же Файл № боюнча издөө..." oninput="applyFilters()">
+                </div>
+                <div class="folder-tabs">
+                    <button id="tabExcel" class="tab-btn active" onclick="switchFolder('excel')">📁 1. Тизме (Excel системасы)</button>
+                    <button id="tabCards" class="tab-btn" onclick="switchFolder('cards')">📁 2. Сүрөттөр менен</button>
+                </div>
             </div>
             <div id="selectionToolbar" class="selection-toolbar">
                 <span id="selectionCount" class="selection-count">0 тандалды</span>
                 <button class="btn-action btn-icon-only icon-copy" title="Көчүрүү" aria-label="Көчүрүү" onclick="bulkCopySelected()"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 3h10a2 2 0 0 1 2 2v11h-2V5H8V3Zm-2 4h10a2 2 0 0 1 2 2v12H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Zm0 2v10h10V9H6Z"/></svg></button>
                 <button class="btn-action btn-icon-only icon-download" title="Скачать" aria-label="Скачать" onclick="bulkDownloadSelected()"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M11 3h2v10.17l3.59-3.58L18 11l-6 6-6-6 1.41-1.41L11 13.17V3ZM5 19h14v2H5v-2Z"/></svg></button>
                 <button class="btn-action btn-icon-only icon-trash" title="Удалить" aria-label="Удалить" onclick="bulkDeleteSelected()"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5h8l-1-2H9L8 5Zm-4 2h16v2H4V7Zm2 3h12v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V10Zm3 2v7h2v-7H9Zm4 0v7h2v-7h-2Z"/></svg></button>
-            </div>
-
-            <!-- ЭКИ ПАПКА (ӨТМӨКТӨР) -->
-            <div class="folder-tabs">
-                <button id="tabExcel" class="tab-btn active" onclick="switchFolder('excel')">📁 1. Тизме (Excel системасы)</button>
-                <button id="tabCards" class="tab-btn" onclick="switchFolder('cards')">📁 2. Сүрөттөр менен</button>
             </div>
 
             <!-- ПАПКА 1: ТОЛУК СИСТЕМАЛЫК EXCEL ТАБЛИЦА (СҮРӨТСҮЗ, ЫҢГАЙЛУУ) -->
@@ -897,7 +912,18 @@
             <div class="center-notice-icon" id="centerNoticeIcon">✓</div>
             <h3 id="centerNoticeTitle">Даяр</h3>
             <p id="centerNoticeText"></p>
-            <button class="center-notice-ok" onclick="closeCenterNotice()">OK</button>
+        </div>
+    </div>
+
+    <div id="deleteConfirmModal" class="delete-confirm-modal" aria-hidden="true">
+        <div class="delete-confirm-box">
+            <div class="delete-confirm-icon">!</div>
+            <h3 id="deleteConfirmTitle">Вы действительно хотите удалить?</h3>
+            <p id="deleteConfirmText">Бул маалымат өчүрүлөт.</p>
+            <div class="delete-confirm-actions">
+                <button type="button" class="delete-cancel-btn" onclick="closeDeleteConfirm(false)">Жок</button>
+                <button type="button" class="delete-yes-btn" onclick="closeDeleteConfirm(true)">Ооба, өчүрүү</button>
+            </div>
         </div>
     </div>
 
@@ -957,7 +983,7 @@
                 adminPanel:"Администратор Панели", logout:"🚪 Чыгуу", folderReg:"Катталгандар",
                 folderRegDesc:"Катталган колдонуучулар", folderSet:"Жөндөөлөр", folderSetDesc:"Системалык жөндөөлөр",
                 folderCur:"Кураторлор", folderCurDesc:"Кураторлордун тизмеси",
-                copyAll:"📋 Бардык ысымдарды көчүрүү (тизме катары)", searchPh:"🔍 Аты-жөнү боюнча издөө...",
+                copyAll:"📋 Бардык ысымдарды көчүрүү (тизме катары)", searchPh:"🔍 Ф.И.О. же Файл № боюнча издөө...",
                 tabExcel:"📁 1. Тизме (Excel системасы)", tabCards:"📁 2. Сүрөттөр менен",
                 setCopy:"Көчүрүп алуу (Копировать) функциясы", setCopyDesc:"Тизмедеги «Көчүрүү» баскычын күйгүзүү же өчүрүү",
                 setDown:"Сүрөттөрдү жүктөө функциясы", setDownDesc:"Тизмеден сүрөттөрдү жүктөө баскычы",
@@ -985,7 +1011,7 @@
                 adminPanel:"Панель администратора", logout:"🚪 Выйти", folderReg:"Зарегистрированные",
                 folderRegDesc:"Список зарегистрированных", folderSet:"Настройки", folderSetDesc:"Системные настройки",
                 folderCur:"Кураторы", folderCurDesc:"Список кураторов",
-                copyAll:"📋 Копировать все имена (списком)", searchPh:"🔍 Поиск по Ф.И.О...",
+                copyAll:"📋 Копировать все имена (списком)", searchPh:"🔍 Поиск по Ф.И.О. или Файл №...",
                 tabExcel:"📁 1. Список (Система Excel)", tabCards:"📁 2. С фото",
                 setCopy:"Функция копирования", setCopyDesc:"Включить или отключить кнопку «Копировать»",
                 setDown:"Функция скачивания фото", setDownDesc:"Кнопка скачивания фото из списка",
@@ -1012,7 +1038,7 @@
                 adminPanel:"لوحة الإدارة", logout:"🚪 خروج", folderReg:"المسجلون",
                 folderRegDesc:"قائمة المسجلين", folderSet:"الإعدادات", folderSetDesc:"إعدادات النظام",
                 folderCur:"المنسقون", folderCurDesc:"قائمة المنسقين",
-                copyAll:"📋 نسخ جميع الأسماء", searchPh:"🔍 البحث بالاسم...",
+                copyAll:"📋 نسخ جميع الأسماء", searchPh:"🔍 البحث بالاسم أو رقم الملف...",
                 tabExcel:"📁 1. القائمة (Excel)", tabCards:"📁 2. الصور",
                 setCopy:"وظيفة النسخ", setCopyDesc:"تشغيل أو إيقاف زر النسخ",
                 setDown:"وظيفة تنزيل الصور", setDownDesc:"زر تنزيل الصور من القائمة",
@@ -1262,39 +1288,13 @@
         let cameraFacingMode = 'environment';
         let cameraOrientationHandler = null;
 
-        async function triggerCamera(slotIndex) {
-            cameraActiveSlot = slotIndex;
-
-            // Браузер getUserMedia'ды колдобосо (эски телефон/десктоп), түз эле
-            // телефондун өздүк камерасын ачабыз (силуэтсиз, бирок иштейт).
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                useNativeCameraFallback();
-                return;
-            }
-
-            const titleEl = document.getElementById('cameraModalTitle');
-            titleEl.innerText = slotIndex === 1
-                ? (currentLang === 'ru' ? 'Фото по пояс' : currentLang === 'ar' ? 'صورة من الخصر' : 'Белинен өйдө сүрөт')
-                : (currentLang === 'ru' ? 'Фото в полный рост' : currentLang === 'ar' ? 'صورة كاملة' : 'Толук бою сүрөт');
-
-            setCameraGuide(slotIndex);
-
-            const modal = document.getElementById('cameraModal');
-            modal.classList.add('open');
-
-            try {
-                await startCameraStream(cameraFacingMode);
-                attachOrientationWatcher();
-            } catch (err) {
-                console.error('Камера ачылган жок:', err);
-                closeCameraModal();
-                alert(currentLang === 'ru'
-                    ? 'Не удалось получить доступ к камере. Разрешите доступ к камере в браузере или используйте другой способ.'
-                    : currentLang === 'ar'
-                        ? 'تعذر الوصول إلى الكاميرا.'
-                        : 'Камерага уруксат берилген жок. Браузердин жөндөөлөрүнөн камерага уруксат бериңиз же башка ыкманы колдонуңуз.');
-                useNativeCameraFallback();
-            }
+        // Телефондо сүрөт басылганда браузердин ичиндеги камера overlay ачылбайт.
+        // Түз эле телефондун өзүнүн камера колдонмосун ачабыз.
+        function triggerCamera(slotIndex) {
+            const input = document.getElementById('nativeCam' + slotIndex);
+            if (!input) return;
+            input.value = '';
+            input.click();
         }
 
         async function startCameraStream(facingMode) {
@@ -1844,7 +1844,9 @@
             const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
 
             currentFilteredRegistrations = allRegistrations.filter(item => {
-                return item.fullName.toLowerCase().includes(searchText);
+                const name = String(item.fullName || '').toLowerCase();
+                const fileNo = String(item.fileNumber || '').toLowerCase();
+                return name.includes(searchText) || fileNo.includes(searchText);
             });
 
             renderData(currentFilteredRegistrations);
@@ -1912,7 +1914,7 @@
                                 ${phoneText}
                             </div>
                         </div>
-                        <div class="list-header"><div></div><div class="card-meta">${safeFile?`<div class="card-file-number">Файл № ${safeFile}</div>`:''}<div class="list-date">${dateStr}</div></div></div>
+                        <div class="list-header"><div></div><div class="card-meta"><div class="list-date card-date-large">${dateStr}</div></div></div>
                         <div class="large-thumb-group">
                             ${item.photo1?`<img src="${item.photo1}" alt="Фото 1" onclick="event.stopPropagation();openImageViewer('${item.photo1}')">`:'<div class="empty-state">Сүрөт 1 жок</div>'}
                             ${item.photo2?`<img src="${item.photo2}" alt="Фото 2" onclick="event.stopPropagation();openImageViewer('${item.photo2}')">`:'<div class="empty-state">Сүрөт 2 жок</div>'}
@@ -2038,9 +2040,31 @@
             await downloadPhotosAsZip(items);
         }
 
+        let deleteConfirmResolver=null;
+        function askDeleteConfirmation(count=1){
+            return new Promise(resolve=>{
+                deleteConfirmResolver=resolve;
+                const modal=document.getElementById('deleteConfirmModal');
+                const title=document.getElementById('deleteConfirmTitle');
+                const text=document.getElementById('deleteConfirmText');
+                if(title) title.textContent=currentLang==='ru' ? 'Вы действительно хотите удалить?' : currentLang==='ar' ? 'هل تريد الحذف بالفعل؟' : 'Чын эле өчүргүңүз келеби?';
+                if(text) text.textContent=count>1 ? `${count} маалымат өчүрүлөт.` : 'Бул маалымат өчүрүлөт.';
+                modal.classList.add('open');
+                modal.setAttribute('aria-hidden','false');
+            });
+        }
+        function closeDeleteConfirm(result){
+            const modal=document.getElementById('deleteConfirmModal');
+            if(modal){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); }
+            const resolver=deleteConfirmResolver;
+            deleteConfirmResolver=null;
+            if(resolver) resolver(result);
+        }
+
         async function bulkDeleteSelected(){
             const items=getSelectedItems();
-            if(!items.length || !confirm(translations[currentLang].deleteConfirm))return;
+            if(!items.length)return;
+            if(!await askDeleteConfirmation(items.length))return;
             try{
                 await Promise.all(items.map(item=>db.collection("registrations").doc(item.id).delete()));
                 selectedIds.clear();
@@ -2067,7 +2091,7 @@
                 item.fileNumber=clean;
                 const filteredItem=currentFilteredRegistrations.find(x=>x.id===id);
                 if(filteredItem) filteredItem.fileNumber=clean;
-                showCenterNotice('✓','Сакталды',`Файл номери: ${clean || 'бош'}`);
+                showCenterNotice('✓','Сакталды','Файл № сакталды.');
             }catch(e){
                 console.error('Файл номерин сактоодо ката:',e);
                 showCenterNotice('❌','Ката','Файл номерин сактоо мүмкүн болбоду.');
@@ -2108,7 +2132,7 @@
                 item.phone=raw;
                 const filteredItem=currentFilteredRegistrations.find(x=>x.id===id);
                 if(filteredItem) filteredItem.phone=raw;
-                showCenterNotice('✓','Сакталды','Телефон номери өзгөртүлдү.');
+                showCenterNotice('✓','Сакталды','Телефон номери сакталды.');
             }catch(e){
                 console.error('Телефонду сактоодо ката:',e);
                 showCenterNotice('❌','Ката','Телефон номерин сактоо мүмкүн болбоду.');
@@ -2194,17 +2218,21 @@
             document.getElementById('imageViewerModal').style.display = 'none';
         }
 
+        let centerNoticeTimer=null;
         function showCenterNotice(icon,title,text){
             const modal=document.getElementById('centerNotice');
             if(!modal)return;
+            if(centerNoticeTimer) clearTimeout(centerNoticeTimer);
             document.getElementById('centerNoticeIcon').textContent=icon||'✓';
             document.getElementById('centerNoticeTitle').textContent=title||'Даяр';
             document.getElementById('centerNoticeText').textContent=text||'';
             modal.classList.add('open');
+            centerNoticeTimer=setTimeout(closeCenterNotice,2000);
         }
         function closeCenterNotice(){
             const modal=document.getElementById('centerNotice');
             if(modal) modal.classList.remove('open');
+            if(centerNoticeTimer){ clearTimeout(centerNoticeTimer); centerNoticeTimer=null; }
         }
 
         async function saveBlobWithPicker(blob,suggestedName,mime){
@@ -2238,7 +2266,7 @@
                 "№":index+1,
                 "Ф.И.О.":item.fullName||'',
                 "Телефон":item.phone||'',
-                "Файл номери":item.fileNumber||'',
+                "Файл №":item.fileNumber||'',
                 "Катталган күнү/убактысы":formatExportDate(item.createdAt)
             }));
             const ws=XLSX.utils.json_to_sheet(rows);
@@ -2317,19 +2345,19 @@
             restoreScreenAfterRefresh();
         });
 
-        function deleteRegistration(id) {
-            if (!confirm(currentLang === 'ky' ? "Бул колдонуучуну өчүрүүнү каалайсызбы?" : "Вы действительно хотите удалить запись?")) return;
-
-            db.collection("registrations").doc(id).delete()
-                .then(() => {
-                    allRegistrations = allRegistrations.filter(item => item.id !== id);
-                    applyFilters();
-                    showCenterNotice('✓','Успешно удалено',currentLang === 'ky' ? "Маалымат өчүрүлдү." : "Данные удалены.");
-                })
-                .catch((error) => {
-                    console.error("Өчүрүүдө ката: ", error);
-                    alert("Өчүрүүдө ката чыкты.");
-                });
+        async function deleteRegistration(id) {
+            if(!await askDeleteConfirmation(1)) return;
+            try{
+                await db.collection("registrations").doc(id).delete();
+                allRegistrations = allRegistrations.filter(item => item.id !== id);
+                currentFilteredRegistrations = currentFilteredRegistrations.filter(item => item.id !== id);
+                selectedIds.delete(id);
+                applyFilters();
+                showCenterNotice('✓','Успешно удалено',currentLang === 'ky' ? 'Маалымат өчүрүлдү.' : 'Данные удалены.');
+            }catch(error){
+                console.error('Өчүрүүдө ката: ', error);
+                showCenterNotice('❌','Ката',currentLang === 'ky' ? 'Өчүрүүдө ката чыкты.' : 'Ошибка при удалении.');
+            }
         }
     </script>
 </body>
