@@ -458,8 +458,12 @@
         }
         .all-btn:hover { text-decoration:underline; }
         .card-selected { outline:1px solid rgba(58,134,255,.55) !important; background:rgba(58,134,255,.12) !important; }
-        .card-meta { display:flex; flex-direction:column; align-items:flex-end; gap:3px; }
-        .card-file-number { color:var(--accent-glow); font-size:12px; font-weight:700; }
+        .card-meta { display:flex; flex-direction:column; align-items:flex-end; gap:3px; position:relative; }
+        .card-file-number { color:var(--accent-glow); font-size:26px; line-height:1; font-weight:900; letter-spacing:.5px; text-shadow:0 2px 12px rgba(0,245,212,.18); margin-bottom:4px; }
+        .list-item { position:relative; }
+        .card-number-corner { position:absolute; top:22px; right:24px; z-index:2; text-align:right; pointer-events:none; }
+        .card-number-corner .card-file-number { font-size:28px; }
+        @media (max-width:600px){ .card-number-corner{top:18px;right:18px}.card-number-corner .card-file-number{font-size:23px}.list-title{padding-right:90px} }
         .center-notice {
             position: fixed; inset: 0; z-index: 25000; display: none;
             align-items: center; justify-content: center; padding: 20px;
@@ -537,7 +541,57 @@
             border-radius: 20px; z-index: 3;
         }
 
-    </style>
+    
+        .selection-toolbar.active{position:sticky;top:0;z-index:1001;margin-bottom:8px;}
+        .sticky-list-controls{top:0;}
+        .selection-toolbar + .sticky-list-controls{top:0;}
+        .admin-password-modal{position:fixed;inset:0;z-index:15000;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;padding:20px;}
+        .admin-password-modal.open{display:flex;}
+        .admin-password-box{width:min(390px,100%);background:linear-gradient(180deg,#182442,#0f1830);border:1px solid rgba(58,134,255,.45);border-radius:24px;padding:30px 24px;text-align:center;box-shadow:0 25px 80px rgba(0,0,0,.55);}
+        .admin-password-box h3{margin:0 0 18px;color:#fff;font-size:22px;}
+        .admin-password-box input{width:100%;box-sizing:border-box;padding:14px 16px;border-radius:12px;border:1px solid var(--folder-border);background:rgba(11,19,43,.75);color:#fff;font-size:18px;text-align:center;outline:none;}
+        .admin-password-actions{display:flex;gap:10px;margin-top:15px;}
+        .admin-password-actions button{flex:1;border:0;border-radius:12px;padding:12px;font-weight:700;cursor:pointer;}
+        .admin-pass-cancel{background:rgba(255,255,255,.08);color:#fff;}
+        .admin-pass-enter{background:var(--primary-blue);color:#fff;}
+        .registration-closed{margin-top:18px;padding:18px;border-radius:16px;background:rgba(255,193,7,.09);border:1px solid rgba(255,193,7,.28);text-align:center;color:var(--text-main);}
+        .compare-match{color:#22c55e;font-size:20px;font-weight:800;text-align:center;}
+        .compare-miss{color:#ff6b6b;font-size:18px;font-weight:800;text-align:center;}
+        .excel-import-box{margin-bottom:18px;}
+        .excel-import-table{width:100%;border-collapse:collapse;font-size:13px;}
+        .excel-import-table th,.excel-import-table td{padding:10px 12px;border:1px solid rgba(255,255,255,.08);}
+        .excel-import-table th{color:var(--accent-glow);background:rgba(28,37,65,.95);}
+
+        
+        /* v8: Excel columns and sticky horizontal scrolling */
+        .excel-tools-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0;}
+        .excel-horizontal-scroll{position:sticky;top:0;z-index:40;overflow-x:auto;overflow-y:hidden;height:16px;margin:0 0 6px;background:rgba(11,19,43,.96);border-radius:8px;}
+        .excel-horizontal-scroll-inner{height:1px;min-width:1200px;}
+        .excel-table-container{overflow-x:auto;overflow-y:visible;max-width:100%;}
+        .excel-table{min-width:1050px;}
+        .excel-import-table{min-width:900px;}
+        .excel-editable{cursor:text;outline:none;}
+        .excel-editable:focus{box-shadow:inset 0 0 0 2px rgba(58,134,255,.55);background:rgba(58,134,255,.08);}
+        .excel-header-edit{cursor:text;min-width:90px;}
+        .excel-column-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px;}
+        .admin-quick-analytics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;}
+        .admin-quick-stat{padding:14px 10px;border:1px solid var(--folder-border);border-radius:14px;background:rgba(28,37,65,.65);text-align:center;}
+        .admin-quick-stat strong{display:block;font-size:26px;color:var(--accent-glow);line-height:1.1;}
+        .admin-quick-stat span{display:block;margin-top:5px;font-size:12px;color:var(--text-sub);}
+        @media(max-width:700px){.admin-quick-analytics{grid-template-columns:1fr;} .excel-table,.excel-import-table{min-width:900px;}}
+.analytics-card{margin-top:16px;display:flex;align-items:center;gap:14px;padding:16px 18px;border:1px solid var(--folder-border);border-radius:16px;background:rgba(28,37,65,.72);cursor:pointer;transition:.15s;}
+        .analytics-card:hover{background:var(--folder-hover);border-color:rgba(58,134,255,.55);}
+        .analytics-card-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(58,134,255,.14);color:#5bc0be;font-size:24px;font-weight:900;}
+        .analytics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+        .analytics-stat{padding:22px 16px;border:1px solid var(--folder-border);border-radius:18px;background:rgba(28,37,65,.72);text-align:center;}
+        .analytics-stat-number{font-size:34px;font-weight:900;color:var(--accent-glow);line-height:1.1;}
+        .analytics-stat-label{margin-top:8px;color:var(--text-sub);font-size:13px;}
+        .analytics-details{color:var(--text-main);line-height:1.7;}
+        .excel-editable{min-width:100px;outline:none;cursor:text;}
+        .excel-editable:focus{background:rgba(58,134,255,.10);box-shadow:inset 0 -2px 0 var(--accent-glow);}
+        @media(max-width:700px){.analytics-grid{grid-template-columns:1fr;}.analytics-card{margin-bottom:12px;}}
+
+</style>
 </head>
 <body>
 
@@ -576,7 +630,7 @@
             <div class="main-menu-layout">
                 <div>
                     <div class="hero-folder-title-outer" id="txtHeroSub">Байту закатка съемка</div>
-                    <div class="hero-folder-card" onclick="navigateTo('screenRegName')">
+                    <div class="hero-folder-card" onclick="handleRegistrationEntry()">
                         <svg class="hero-folder-icon" style="fill: #3a86ff;"><use href="#icon-folder"/></svg>
                         <div class="hero-folder-name" id="txtRegisterBtn">Каттоо</div>
                     </div>
@@ -718,6 +772,14 @@
                     </div>
                 </div>
 
+                <div class="folder-card" style="flex-direction: column; align-items: flex-start;" onclick="navigateTo('screenAdminExcel')">
+                    <svg class="folder-svg-icon" style="fill: #7c3aed;"><use href="#icon-folder"/></svg>
+                    <div>
+                        <div class="folder-name">Excel</div>
+                        <div class="folder-desc">Excel жүктөө жана салыштыруу</div>
+                    </div>
+                </div>
+
                 <div class="folder-card" style="flex-direction: column; align-items: flex-start;" onclick="navigateTo('screenAdminCurators')">
                     <svg class="folder-svg-icon" style="fill: #4cc9f0;"><use href="#icon-folder"/></svg>
                     <div>
@@ -725,6 +787,18 @@
                         <div class="folder-desc" id="folderCurDesc">Кураторлордун тизмеси</div>
                     </div>
                 </div>
+            </div>
+            <div class="analytics-card" onclick="navigateTo('screenAdminAnalytics')">
+                <div class="analytics-card-icon">▥</div>
+                <div>
+                    <div class="folder-name">Аналитика</div>
+                    <div class="folder-desc">Excel жана катталгандар боюнча статистика</div>
+                </div>
+            </div>
+            <div class="admin-quick-analytics" id="adminQuickAnalytics">
+                <div class="admin-quick-stat"><strong id="adminQuickImported">0</strong><span>Жүктөлгөн Excelде бала</span></div>
+                <div class="admin-quick-stat"><strong id="adminQuickRegistered">0</strong><span>Катталгандарда бала</span></div>
+                <div class="admin-quick-stat"><strong id="adminQuickOverlap">0</strong><span>Файл № окшош</span></div>
             </div>
         </div>
 
@@ -744,12 +818,13 @@
                     <button id="tabExcel" class="tab-btn active" onclick="switchFolder('excel')">📁 1. Тизме (Excel системасы)</button>
                     <button id="tabCards" class="tab-btn" onclick="switchFolder('cards')">📁 2. Сүрөттөр менен</button>
                 </div>
-            </div>
             <div id="selectionToolbar" class="selection-toolbar">
                 <span id="selectionCount" class="selection-count">0 тандалды</span>
                 <button class="btn-action btn-icon-only icon-copy" title="Көчүрүү" aria-label="Көчүрүү" onclick="bulkCopySelected()"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 3h10a2 2 0 0 1 2 2v11h-2V5H8V3Zm-2 4h10a2 2 0 0 1 2 2v12H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Zm0 2v10h10V9H6Z"/></svg></button>
                 <button class="btn-action btn-icon-only icon-download" title="Скачать" aria-label="Скачать" onclick="bulkDownloadSelected()"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M11 3h2v10.17l3.59-3.58L18 11l-6 6-6-6 1.41-1.41L11 13.17V3ZM5 19h14v2H5v-2Z"/></svg></button>
                 <button class="btn-action btn-icon-only icon-trash" title="Удалить" aria-label="Удалить" onclick="bulkDeleteSelected()"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5h8l-1-2H9L8 5Zm-4 2h16v2H4V7Zm2 3h12v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V10Zm3 2v7h2v-7H9Zm4 0v7h2v-7h-2Z"/></svg></button>
+            </div>
+
             </div>
 
             <!-- ПАПКА 1: ТОЛУК СИСТЕМАЛЫК EXCEL ТАБЛИЦА (СҮРӨТСҮЗ, ЫҢГАЙЛУУ) -->
@@ -761,13 +836,15 @@
                         <button class="btn-action btn-action-download" onclick="downloadExcelFile()" style="font-size:12px; padding:6px 12px;">📊 Excel скачать</button>
                     </div>
                 </div>
-                <div class="excel-table-container">
+                <div class="excel-horizontal-scroll" id="registeredExcelTopScroll"><div class="excel-horizontal-scroll-inner" id="registeredExcelTopScrollInner"></div></div>
+                <div class="excel-table-container" id="registeredExcelTableScroll">
                     <table class="excel-table">
                         <thead>
                             <tr>
                                 <th style="width:50px;">№</th>
                                 <th onclick="sortDataByName()" id="thName">Ф.И.О. ⇳</th>
                                 <th id="thFileNumber">Файл №</th>
+                                <th style="width:55px;text-align:center;">✓</th>
                                 <th id="thPhone">Телефон</th>
                                 <th onclick="sortDataByDate()" id="thDate">Дата/убакыт ⇳</th>
                                 <th style="text-align:right;" id="thActions">Аракеттер</th>
@@ -803,11 +880,22 @@
 
                 <div class="setting-item">
                     <div>
-                        <div class="setting-info" id="txtSetDownloadTitle">Сүрөттөрдү жүктөө функциясы</div>
-                        <div class="setting-desc" id="txtSetDownloadDesc">Тизмеден сүрөттөрдү жүктөө баскычы</div>
+                        <div class="setting-info" id="txtSetDownloadTitle">Сүрөттөрдү файлга сактоо функциясы</div>
+                        <div class="setting-desc" id="txtSetDownloadDesc">Сүрөттөрдү файлга сактоо баскычын күйгүзүү же өчүрүү</div>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="settingDownloadToggle" onchange="saveSettings()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-info">Каттоону убактылуу токтотуу</div>
+                        <div class="setting-desc">Өчүрүлгөндө башкы беттен каттоо жабылат жана кураторго кайрылуу көрсөтүлөт</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="settingRegistrationClosedToggle" onchange="saveSettings()">
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -838,7 +926,44 @@
             </div>
         </div>
 
-        <!-- 6-ЭКРАН: КУРАТОРЛОР -->
+        <!-- 6-ЭКРАН: EXCEL САЛЫШТЫРУУ -->
+        <div id="screenAdminExcel" class="screen">
+            <h3 style="margin-bottom:20px;">Excel</h3>
+            <div class="glass-box excel-import-box">
+                <div class="setting-info" style="margin-bottom:8px;">Excel файл жүктөө</div>
+                <div class="setting-desc" style="margin-bottom:14px;">Файл № колонкасы боюнча сайттагы катталгандар менен салыштырылат.</div>
+                <input type="file" id="comparisonExcelInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleComparisonExcel(this.files[0])">
+                <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                    <button class="btn btn-blue" onclick="document.getElementById('comparisonExcelInput').click()">📊 Excel файл тандоо</button>
+                    <button id="deleteImportedExcelBtn" class="btn-action btn-action-delete" onclick="deleteImportedExcel()" style="display:none;">🗑 Excel өчүрүү</button>
+                </div>
+                <div id="comparisonExcelStatus" style="margin-top:12px;color:var(--text-sub);"></div>
+            </div>
+            <div class="excel-column-actions">
+                <button class="btn-action btn-action-copy" onclick="addImportedExcelColumn()">＋ Ячейка/колонка кошуу</button>
+                <button class="btn-action btn-action-delete" onclick="removeImportedExcelColumn()">− Ячейка/колонка өчүрүү</button>
+                <span style="font-size:12px;color:var(--text-sub);">Колонканын атын жана ичиндеги маалыматтарды түз басып өзгөртүңүз.</span>
+            </div>
+            <div id="comparisonExcelResult"></div>
+        </div>
+
+        <!-- 6-ЭКРАН: АНАЛИТИКА -->
+        <div id="screenAdminAnalytics" class="screen">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h3 style="margin:0;">Аналитика</h3>
+                <button class="btn-action btn-action-copy" onclick="renderAnalytics()">↻ Жаңыртуу</button>
+            </div>
+            <div class="analytics-grid">
+                <div class="analytics-stat"><div class="analytics-stat-number" id="analyticsImportedCount">0</div><div class="analytics-stat-label">Жүктөлгөн Excelдеги бала</div></div>
+                <div class="analytics-stat"><div class="analytics-stat-number" id="analyticsRegisteredCount">0</div><div class="analytics-stat-label">Катталгандардагы бала</div></div>
+                <div class="analytics-stat"><div class="analytics-stat-number" id="analyticsOverlapCount">0</div><div class="analytics-stat-label">Файл № окшоштор</div></div>
+            </div>
+            <div class="glass-box" style="margin-top:18px;">
+                <div id="analyticsDetails" class="analytics-details">Маалымат эсептелүүдө...</div>
+            </div>
+        </div>
+
+        <!-- 7-ЭКРАН: КУРАТОРЛОР -->
         <div id="screenAdminCurators" class="screen">
             <h3 style="margin-bottom: 20px;" id="txtCuratorsTitle">Кураторлор тизмеси</h3>
             <div class="glass-box">
@@ -941,6 +1066,18 @@
         </div>
     </div>
 
+
+    <div id="adminPasswordModal" class="admin-password-modal" aria-hidden="true" onclick="if(event.target===this)closeAdminPasswordModal()">
+        <div class="admin-password-box">
+            <h3>Паролду киргизиңиз</h3>
+            <input id="adminPasswordModalInput" type="password" autocomplete="off" placeholder="Пароль" onkeydown="if(event.key==='Enter')submitAdminPassword()">
+            <div class="admin-password-actions">
+                <button class="admin-pass-cancel" onclick="closeAdminPasswordModal()">Жабуу</button>
+                <button class="admin-pass-enter" onclick="submitAdminPassword()">Кирүү</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDqFqR92LsaIROHMYRVY4jmEGWwP56OLRU",
@@ -964,6 +1101,8 @@
         let currentFilteredRegistrations = [];
         let sortAscending = true;
         let currentLang = 'ky';
+        let importedFileNumbers=new Set();
+        let importedExcelRows=[];
 
         const translations = {
             ky: {
@@ -986,7 +1125,7 @@
                 copyAll:"📋 Бардык ысымдарды көчүрүү (тизме катары)", searchPh:"🔍 Ф.И.О. же Файл № боюнча издөө...",
                 tabExcel:"📁 1. Тизме (Excel системасы)", tabCards:"📁 2. Сүрөттөр менен",
                 setCopy:"Көчүрүп алуу (Копировать) функциясы", setCopyDesc:"Тизмедеги «Көчүрүү» баскычын күйгүзүү же өчүрүү",
-                setDown:"Сүрөттөрдү жүктөө функциясы", setDownDesc:"Тизмеден сүрөттөрдү жүктөө баскычы",
+                setDown:"Сүрөттөрдү файлга сактоо функциясы", setDownDesc:"Сүрөттөрдү файлга сактоо баскычын күйгүзүү же өчүрүү",
                 setDel:"Өчүрүү функциясы", setDelDesc:"Тизмеден маалыматты өчүрүү баскычы",
                 setPass:"Админ паролун өзгөртүү", savePass:"Паролду сактоо",
                 actions:"Аракеттер", date:"Катталган күнү/убактысы", name:"Ф.И.О.", number:"№", fileNumber:"Файл №",
@@ -1014,7 +1153,7 @@
                 copyAll:"📋 Копировать все имена (списком)", searchPh:"🔍 Поиск по Ф.И.О. или Файл №...",
                 tabExcel:"📁 1. Список (Система Excel)", tabCards:"📁 2. С фото",
                 setCopy:"Функция копирования", setCopyDesc:"Включить или отключить кнопку «Копировать»",
-                setDown:"Функция скачивания фото", setDownDesc:"Кнопка скачивания фото из списка",
+                setDown:"Сохранение фото в файл", setDownDesc:"Включить или отключить сохранение фото в файл",
                 setDel:"Функция удаления", setDelDesc:"Кнопка удаления данных из списка",
                 setPass:"Изменить пароль админа", savePass:"Сохранить пароль",
                 actions:"Действия", date:"Дата/время регистрации", name:"Ф.И.О.", number:"№", fileNumber:"Файл №",
@@ -1041,7 +1180,7 @@
                 copyAll:"📋 نسخ جميع الأسماء", searchPh:"🔍 البحث بالاسم أو رقم الملف...",
                 tabExcel:"📁 1. القائمة (Excel)", tabCards:"📁 2. الصور",
                 setCopy:"وظيفة النسخ", setCopyDesc:"تشغيل أو إيقاف زر النسخ",
-                setDown:"وظيفة تنزيل الصور", setDownDesc:"زر تنزيل الصور من القائمة",
+                setDown:"حفظ الصور في ملف", setDownDesc:"تشغيل أو إيقاف حفظ الصور في ملف",
                 setDel:"وظيفة الحذف", setDelDesc:"زر حذف البيانات من القائمة",
                 setPass:"تغيير كلمة مرور المشرف", savePass:"حفظ كلمة المرور",
                 actions:"الإجراءات", date:"تاريخ/وقت التسجيل", name:"الاسم الكامل", number:"م", fileNumber:"رقم الملف",
@@ -1107,6 +1246,7 @@
                 allowCopy: localStorage.getItem('setting_copy') !== 'false',
                 allowDownload: localStorage.getItem('setting_download') !== 'false',
                 allowDelete: localStorage.getItem('setting_delete') !== 'false',
+                registrationClosed: localStorage.getItem('setting_registration_closed') === 'true',
                 adminPass: '1245'
             };
         }
@@ -1114,6 +1254,10 @@
         window.addEventListener('DOMContentLoaded', () => {
             navigateTo('screenMainMenu', false);
             initSettingsUI();
+            try { importedFileNumbers = new Set(JSON.parse(localStorage.getItem('imported_excel_file_numbers')||'[]')); } catch(e) {}
+            try { importedExcelRows = JSON.parse(localStorage.getItem('imported_excel_rows')||'[]'); } catch(e) { importedExcelRows=[]; }
+            renderComparisonExcel();
+            updateImportedExcelControls();
             const savedLang = localStorage.getItem('bait_language') || 'ky';
             document.getElementById('langSelector')?.remove();
             changeLanguage(savedLang);
@@ -1125,6 +1269,7 @@
             document.getElementById('settingCopyToggle').checked = settings.allowCopy;
             document.getElementById('settingDownloadToggle').checked = settings.allowDownload;
             document.getElementById('settingDeleteToggle').checked = settings.allowDelete;
+            document.getElementById('settingRegistrationClosedToggle').checked = settings.registrationClosed;
             
             const passInput = document.getElementById('newAdminPasswordInput');
             passInput.value = settings.adminPass;
@@ -1135,12 +1280,15 @@
             const allowCopy = document.getElementById('settingCopyToggle').checked;
             const allowDownload = document.getElementById('settingDownloadToggle').checked;
             const allowDelete = document.getElementById('settingDeleteToggle').checked;
+            const registrationClosed = document.getElementById('settingRegistrationClosedToggle').checked;
             
             localStorage.setItem('setting_copy', allowCopy);
             localStorage.setItem('setting_download', allowDownload);
             localStorage.setItem('setting_delete', allowDelete);
+            localStorage.setItem('setting_registration_closed', registrationClosed);
 
             renderData(currentFilteredRegistrations);
+            showCenterNotice('✓','Сакталды','Настройка сакталды.');
         }
 
         function togglePasswordVisibility() {
@@ -1702,14 +1850,34 @@
             status.innerText = "ⓘ Сүрөт кошуу >";
         }
 
-        function accessAdminPanel() {
-            const settings = getAppSettings();
-            const pass = prompt(currentLang === 'ky' ? "Администратор сыр сөзүн киргизиңиз:" : "Введите пароль администратора:");
-            if (pass === settings.adminPass) {
-                navigateTo('screenAdminMenu');
-            } else if (pass !== null) {
-                alert(currentLang === 'ky' ? "Сыр сөз туура эмес!" : "Неверный пароль!");
+        function handleRegistrationEntry(){
+            const settings=getAppSettings();
+            if(settings.registrationClosed){
+                showRegistrationClosedNotice();
+                return;
             }
+            navigateTo('screenRegName');
+        }
+        function showRegistrationClosedNotice(){
+            showCenterNotice('ℹ️','Каттоо убактылуу токтогон','Кураторго жазыңыз.');
+        }
+
+        function accessAdminPanel() {
+            const modal=document.getElementById('adminPasswordModal');
+            const input=document.getElementById('adminPasswordModalInput');
+            if(modal){ modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); setTimeout(()=>input?.focus(),80); }
+        }
+        function closeAdminPasswordModal(){
+            const modal=document.getElementById('adminPasswordModal');
+            if(modal){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); }
+            const input=document.getElementById('adminPasswordModalInput'); if(input) input.value='';
+        }
+        function submitAdminPassword(){
+            const settings=getAppSettings();
+            const input=document.getElementById('adminPasswordModalInput');
+            const pass=input?.value||'';
+            if(pass===settings.adminPass){ closeAdminPasswordModal(); navigateTo('screenAdminMenu'); }
+            else showCenterNotice('❌','Ката','Пароль туура эмес.');
         }
 
         function adminLogout() {
@@ -1840,6 +2008,183 @@
             }
         }
 
+        async function handleComparisonExcel(file){
+            if(!file || !window.XLSX)return;
+            try{
+                const buf=await file.arrayBuffer();
+                const wb=XLSX.read(buf,{type:'array'});
+                const ws=wb.Sheets[wb.SheetNames[0]];
+                const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+                importedExcelRows=rows;
+                importedFileNumbers=new Set();
+                rows.forEach(r=>{
+                    const key=Object.keys(r).find(k=>/файл\s*№|файл\s*номер|file\s*no|fileno/i.test(String(k)));
+                    if(key){ const n=String(r[key]).replace(/\D/g,'').slice(0,5); if(n) importedFileNumbers.add(n); }
+                });
+                localStorage.setItem('imported_excel_rows',JSON.stringify(importedExcelRows));
+                localStorage.setItem('imported_excel_file_numbers',JSON.stringify([...importedFileNumbers]));
+                const status=document.getElementById('comparisonExcelStatus');
+                if(status) status.textContent=`Жүктөлдү: ${rows.length} сап, файл №: ${importedFileNumbers.size}`;
+                updateImportedExcelControls();
+                renderComparisonExcel();
+                renderData(currentFilteredRegistrations);
+                renderAnalytics();
+            }catch(e){ console.error(e); showCenterNotice('❌','Ката','Excel файлды окуу мүмкүн болбоду.'); }
+        }
+
+        function updateImportedExcelControls(){
+            const btn=document.getElementById('deleteImportedExcelBtn');
+            if(btn) btn.style.display=importedExcelRows.length?'inline-flex':'none';
+            const status=document.getElementById('comparisonExcelStatus');
+            if(status && importedExcelRows.length) status.textContent=`Жүктөлгөн Excel: ${importedExcelRows.length} сап, файл №: ${importedFileNumbers.size}`;
+        }
+
+        async function deleteImportedExcel(){
+            if(!importedExcelRows.length)return;
+            if(!await askDeleteConfirmation(1))return;
+            importedExcelRows=[];
+            importedFileNumbers=new Set();
+            localStorage.removeItem('imported_excel_rows');
+            localStorage.removeItem('imported_excel_file_numbers');
+            const status=document.getElementById('comparisonExcelStatus');
+            if(status) status.textContent='Excel файл өчүрүлдү.';
+            updateImportedExcelControls();
+            renderComparisonExcel();
+            renderData(currentFilteredRegistrations);
+            renderAnalytics();
+            showCenterNotice('✓','Өчүрүлдү','Жүктөлгөн Excel өчүрүлдү.');
+        }
+
+        function renderComparisonExcel(){
+            const box=document.getElementById('comparisonExcelResult'); if(!box)return;
+            updateImportedExcelControls();
+            if(!importedExcelRows.length){box.innerHTML='';return;}
+            const headers=Object.keys(importedExcelRows[0]||{});
+            const fileKey=headers.find(k=>/файл\s*№|файл\s*номер|file\s*no|fileno/i.test(String(k)));
+            const registeredNumbers=new Set(allRegistrations.map(x=>String(x.fileNumber||'').trim()).filter(Boolean));
+            const rows=[...importedExcelRows].map((r,i)=>({r,i})).sort((a,b)=>{
+                const na=fileKey?String(a.r[fileKey]||'').replace(/\D/g,'').slice(0,5):'';
+                const nb=fileKey?String(b.r[fileKey]||'').replace(/\D/g,'').slice(0,5):'';
+                return Number(!registeredNumbers.has(na))-Number(!registeredNumbers.has(nb));
+            });
+            let html='<div class="excel-horizontal-scroll" id="comparisonExcelTopScroll"><div class="excel-horizontal-scroll-inner"></div></div><div class="excel-table-container" id="comparisonExcelTableScroll"><table class="excel-import-table"><thead><tr><th>✓</th>'+headers.map(h=>`<th class="excel-header-edit" contenteditable="true" data-header="${escapeHtml(h)}" onblur="renameImportedColumn(this.dataset.header, this.innerText)">${escapeHtml(h)}</th>`).join('')+'</tr></thead><tbody>';
+            rows.forEach(({r,i})=>{
+                const n=fileKey?String(r[fileKey]||'').replace(/\D/g,'').slice(0,5):'';
+                const ok=n&&registeredNumbers.has(n);
+                html+=`<tr><td class="${ok?'compare-match':'compare-miss'}">${ok?'✓':'—'}</td>`;
+                headers.forEach(h=>{
+                    const value=String(r[h]??'');
+                    html+=`<td class="excel-editable" contenteditable="true" data-row="${i}" data-col="${escapeHtml(h)}" onblur="saveImportedCell(${i}, this.dataset.col, this.innerText)">${escapeHtml(value)}</td>`;
+                });
+                html+='</tr>';
+            });
+            box.innerHTML=html+'</tbody></table></div>';
+            setupAllExcelScrolls();
+        }
+
+        function saveImportedCell(rowIndex,col,value){
+            if(!importedExcelRows[rowIndex])return;
+            importedExcelRows[rowIndex][col]=String(value||'').trim();
+            if(/файл\s*№|файл\s*номер|file\s*no|fileno/i.test(String(col))){
+                importedExcelRows[rowIndex][col]=String(value||'').replace(/\D/g,'').slice(0,5);
+            }
+            persistImportedExcel();
+            renderComparisonExcel();
+            renderData(currentFilteredRegistrations);
+            renderAnalytics();
+            showQuickNotice('✓','Сакталды');
+        }
+
+        function setupExcelHorizontalScroll(topId, tableId){
+            const top=document.getElementById(topId), table=document.getElementById(tableId);
+            if(!top||!table)return;
+            const inner=top.querySelector('.excel-horizontal-scroll-inner');
+            const refresh=()=>{ if(inner) inner.style.width=Math.max(table.scrollWidth,1200)+'px'; };
+            let syncing=false;
+            top.onscroll=()=>{ if(syncing)return; syncing=true; table.scrollLeft=top.scrollLeft; syncing=false; };
+            table.onscroll=()=>{ if(syncing)return; syncing=true; top.scrollLeft=table.scrollLeft; syncing=false; };
+            refresh(); setTimeout(refresh,50); setTimeout(refresh,300);
+        }
+
+        function setupAllExcelScrolls(){
+            setupExcelHorizontalScroll('registeredExcelTopScroll','registeredExcelTableScroll');
+            setupExcelHorizontalScroll('comparisonExcelTopScroll','comparisonExcelTableScroll');
+        }
+
+        function importedExcelHeaders(){
+            if(!importedExcelRows.length)return [];
+            const seen=new Set();
+            importedExcelRows.forEach(r=>Object.keys(r).forEach(k=>seen.add(k)));
+            return [...seen];
+        }
+
+        function addImportedExcelColumn(){
+            const headers=importedExcelHeaders();
+            let base='Жаңы колонка', n=1, name=base;
+            while(headers.includes(name)) name=base+' '+(++n);
+            if(!importedExcelRows.length){
+                importedExcelRows=[{[name]:''}];
+            }else{
+                importedExcelRows=importedExcelRows.map(r=>Object.assign({[name]:''},r));
+            }
+            persistImportedExcel();
+            renderComparisonExcel(); renderAnalytics();
+            showQuickNotice('✓','Колонка кошулду');
+        }
+
+        async function removeImportedExcelColumn(){
+            const headers=importedExcelHeaders();
+            if(!headers.length)return;
+            const name=prompt('Кайсы колонканы өчүрөбүз?\n\n'+headers.map((h,i)=>(i+1)+'. '+h).join('\n'));
+            if(name===null)return;
+            const idx=parseInt(name,10);
+            const col=(Number.isInteger(idx)&&idx>=1&&idx<=headers.length)?headers[idx-1]:name.trim();
+            if(!headers.includes(col))return showQuickNotice('!','Колонка табылган жок');
+            importedExcelRows=importedExcelRows.map(r=>{const x={...r}; delete x[col]; return x;});
+            persistImportedExcel(); renderComparisonExcel(); renderAnalytics();
+            showQuickNotice('✓','Колонка өчүрүлдү');
+        }
+
+        function renameImportedColumn(oldName,newName){
+            newName=String(newName||'').trim();
+            if(!newName||oldName===newName)return;
+            if(importedExcelHeaders().includes(newName))return showQuickNotice('!','Мындай колонка мурунтан бар');
+            importedExcelRows=importedExcelRows.map(r=>{
+                const x={}; Object.keys(r).forEach(k=>{x[k===oldName?newName:k]=r[k];}); return x;
+            });
+            persistImportedExcel(); renderComparisonExcel(); renderAnalytics();
+            showQuickNotice('✓','Колонка сакталды');
+        }
+
+        function persistImportedExcel(){
+            importedFileNumbers=new Set();
+            importedExcelRows.forEach(r=>{
+                const key=Object.keys(r).find(k=>/файл\s*№|файл\s*номер|file\s*no|fileno/i.test(String(k)));
+                if(key){const n=String(r[key]||'').replace(/\D/g,'').slice(0,5);if(n)importedFileNumbers.add(n);}
+            });
+            localStorage.setItem('imported_excel_rows',JSON.stringify(importedExcelRows));
+            localStorage.setItem('imported_excel_file_numbers',JSON.stringify([...importedFileNumbers]));
+        }
+
+        function renderAnalytics(){
+            const importedCount=importedExcelRows.length;
+            const registeredCount=allRegistrations.length;
+            const regSet=new Set(allRegistrations.map(x=>String(x.fileNumber||'').trim()).filter(Boolean));
+            const impSet=new Set([...importedFileNumbers].filter(Boolean));
+            let overlap=0; impSet.forEach(n=>{if(regSet.has(n))overlap++;});
+            const a=document.getElementById('analyticsImportedCount');
+            const b=document.getElementById('analyticsRegisteredCount');
+            const c=document.getElementById('analyticsOverlapCount');
+            if(a)a.textContent=importedCount;
+            if(b)b.textContent=registeredCount;
+            if(c)c.textContent=overlap;
+            const qa=document.getElementById('adminQuickImported'); if(qa)qa.textContent=importedCount;
+            const qb=document.getElementById('adminQuickRegistered'); if(qb)qb.textContent=registeredCount;
+            const qc=document.getElementById('adminQuickOverlap'); if(qc)qc.textContent=overlap;
+            const d=document.getElementById('analyticsDetails');
+            if(d)d.innerHTML=`Жүктөлгөн Excel: <b>${importedCount}</b> бала<br>Катталгандардагы Excel: <b>${registeredCount}</b> бала<br>Эки Excel/тизмеде Файл № боюнча окшош: <b>${overlap}</b> бала`;
+        }
+
         function applyFilters() {
             const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
 
@@ -1850,6 +2195,7 @@
             });
 
             renderData(currentFilteredRegistrations);
+            if(importedExcelRows.length) renderComparisonExcel();
         }
 
         // ТОЛУК EXCEL СОРТИРОВКА СИСТЕМАСЫ
@@ -1886,7 +2232,8 @@
             }
 
             let cardsHtml="", excelHtml="";
-            dataList.forEach((item,index)=>{
+            const orderedList=[...dataList].sort((a,b)=>Number(selectedIds.has(b.id))-Number(selectedIds.has(a.id)));
+            orderedList.forEach((item,index)=>{
                 let dateStr=translations[currentLang].newItem;
                 if(item.createdAt && item.createdAt.toDate){
                     const d=item.createdAt.toDate();
@@ -1908,6 +2255,7 @@
 
                 cardsHtml+=`
                     <div class="list-item${cardSelectedClass}" id="doc-${item.id}" onclick="toggleCardSelection('${item.id}',event)">
+                        <div class="card-number-corner">${safeFile ? `<div class="card-file-number">${safeFile}</div>` : ''}</div>
                         <div class="select-card-row" style="margin-bottom:8px;">
                             <div style="width:100%;">
                                 <div class="list-title">${safeName}</div>
@@ -1933,6 +2281,7 @@
                                    onkeydown="if(event.key==='Enter'){this.blur();}"
                                    onblur="saveFileNumber('${item.id}',this.value)">
                         </td>
+                        <td class="compare-match">${safeFile && importedFileNumbers.has(String(item.fileNumber)) ? '✓' : ''}</td>
                         <td class="phone-cell inline-edit-cell" onclick="event.stopPropagation()">
                             <input class="inline-edit-input" value="${escapeHtml(item.phone || '')}" placeholder="Телефон" autocomplete="off" inputmode="tel"
                                    onclick="event.stopPropagation()"
@@ -1946,6 +2295,7 @@
             listContainer.innerHTML=cardsHtml;
             excelTableBody.innerHTML=excelHtml;
             updateSelectionToolbar();
+            setupAllExcelScrolls();
         }
 
         function iconSvg(type){
@@ -2091,7 +2441,7 @@
                 item.fileNumber=clean;
                 const filteredItem=currentFilteredRegistrations.find(x=>x.id===id);
                 if(filteredItem) filteredItem.fileNumber=clean;
-                showCenterNotice('✓','Сакталды','Файл № сакталды.');
+                showQuickNotice('✓','Сакталды');
             }catch(e){
                 console.error('Файл номерин сактоодо ката:',e);
                 showCenterNotice('❌','Ката','Файл номерин сактоо мүмкүн болбоду.');
@@ -2132,7 +2482,7 @@
                 item.phone=raw;
                 const filteredItem=currentFilteredRegistrations.find(x=>x.id===id);
                 if(filteredItem) filteredItem.phone=raw;
-                showCenterNotice('✓','Сакталды','Телефон номери сакталды.');
+                showQuickNotice('✓','Сакталды');
             }catch(e){
                 console.error('Телефонду сактоодо ката:',e);
                 showCenterNotice('❌','Ката','Телефон номерин сактоо мүмкүн болбоду.');
@@ -2234,6 +2584,16 @@
             if(modal) modal.classList.remove('open');
             if(centerNoticeTimer){ clearTimeout(centerNoticeTimer); centerNoticeTimer=null; }
         }
+        let quickNoticeTimer=null;
+        function showQuickNotice(icon,title){
+            const modal=document.getElementById('centerNotice'); if(!modal)return;
+            if(quickNoticeTimer)clearTimeout(quickNoticeTimer);
+            document.getElementById('centerNoticeIcon').textContent=icon||'✓';
+            document.getElementById('centerNoticeTitle').textContent=title||'Сакталды';
+            document.getElementById('centerNoticeText').textContent='';
+            modal.classList.add('open');
+            quickNoticeTimer=setTimeout(()=>{modal.classList.remove('open');quickNoticeTimer=null;},650);
+        }
 
         async function saveBlobWithPicker(blob,suggestedName,mime){
             try{
@@ -2297,11 +2657,17 @@
                 showCenterNotice('❌','Ката','Сүрөт жүктөө модулу жүктөлгөн жок.');
                 return;
             }
+            const missingFile=items.find(item=>!String(item.fileNumber||'').trim());
+            if(missingFile){
+                showCenterNotice('⚠️','Файл № керек','Сүрөттү сактоо үчүн файл № жазылышы керек.');
+                return;
+            }
             const zip=new JSZip();
             let count=0;
             for(const item of items){
-                const folder=zip.folder((item.fileNumber||item.fullName||item.id).replace(/[\\/:*?"<>|]/g,'_'));
-                for(const [key,label] of [['photo1','белинен'],['photo2','толук_бою']]){
+                const folderName=String(item.fileNumber).trim().replace(/[\\/:*?"<>|]/g,'_');
+                const folder=zip.folder(folderName);
+                for(const [key,label] of [['photo1','1_белинен'],['photo2','2_толук_бою']]){
                     const src=item[key];
                     if(!src)continue;
                     try{
@@ -2318,7 +2684,7 @@
             }
             const blob=await zip.generateAsync({type:'blob'});
             const ok=await saveBlobWithPicker(blob,'Байту_закат_сүрөттөр.zip','application/zip');
-            if(ok) showCenterNotice('✓','Сүрөттөр даяр',`${count} сүрөт ZIP файлга салынды.`);
+            if(ok) showCenterNotice('✓','Сүрөттөр даяр',`${count} сүрөт файл номери боюнча папкаларга салынды.`);
         }
 
         // БАРАКЧА ЖАҢЫЛАНГАНДА (F5 / Ctrl+R) УШУЛ ЭЛЕ БЕТТЕ КАЛУУ.
@@ -2334,7 +2700,9 @@
                 'screenAdminMenu',
                 'screenAdminRegistered',
                 'screenAdminSettings',
-                'screenAdminCurators'
+                'screenAdminCurators',
+                'screenAdminExcel',
+                'screenAdminAnalytics'
             ];
             const screenId = allowed.includes(hash) ? hash : 'screenMainMenu';
             showScreenUI(screenId);
@@ -2360,5 +2728,6 @@
             }
         }
     </script>
+<script>document.addEventListener("DOMContentLoaded",()=>{setTimeout(setupAllExcelScrolls,300);});</script>
 </body>
 </html>
