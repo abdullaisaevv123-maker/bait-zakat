@@ -565,7 +565,15 @@
         
         /* v8: Excel columns and sticky horizontal scrolling */
         .excel-tools-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0;}
-        .excel-horizontal-scroll{position:sticky;top:0;z-index:40;overflow-x:auto;overflow-y:hidden;height:16px;margin:0 0 6px;background:rgba(11,19,43,.96);border-radius:8px;}
+        .excel-horizontal-scroll{position:sticky;top:var(--excel-sticky-top,112px);z-index:850;overflow-x:auto;overflow-y:hidden;height:16px;margin:0 0 6px;background:rgba(11,19,43,.98);border-radius:8px;box-shadow:0 3px 12px rgba(0,0,0,.18);}
+        .selection-toolbar.active + .sticky-list-controls{top:58px;}
+        .excel-horizontal-scroll::-webkit-scrollbar{height:10px;}
+        .excel-horizontal-scroll::-webkit-scrollbar-thumb{background:rgba(130,150,190,.72);border-radius:10px;}
+        .excel-horizontal-scroll::-webkit-scrollbar-track{background:rgba(255,255,255,.05);border-radius:10px;}
+        .imported-action-cell{white-space:nowrap;text-align:center;}
+        .imported-photo-thumb{width:58px;height:44px;object-fit:cover;border-radius:7px;border:1px solid rgba(255,255,255,.15);cursor:pointer;}
+        .whatsapp-small{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:9px;color:#25D366;background:rgba(37,211,102,.10);text-decoration:none;}
+        .whatsapp-small svg{width:21px;height:21px;}
         .excel-horizontal-scroll-inner{height:1px;min-width:1200px;}
         .excel-table-container{overflow-x:auto;overflow-y:visible;max-width:100%;}
         .excel-table{min-width:1050px;}
@@ -591,6 +599,15 @@
         .excel-editable:focus{background:rgba(58,134,255,.10);box-shadow:inset 0 -2px 0 var(--accent-glow);}
         @media(max-width:700px){.analytics-grid{grid-template-columns:1fr;}.analytics-card{margin-bottom:12px;}}
 
+
+        .folder-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+        .tab-btn{font-size:12px!important;padding:10px 12px!important;white-space:nowrap;}
+        .compact-download-btn{font-size:11px!important;padding:6px 9px!important;min-height:30px;}
+        .excel-import-head{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 0 4px;}
+        .excel-import-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+        @media(max-width:800px){.folder-grid{grid-template-columns:1fr 1fr;}.excel-import-head{align-items:flex-start;flex-direction:column;}}
+        @media(max-width:520px){.folder-grid{grid-template-columns:1fr;}.folder-tabs{overflow-x:auto;display:flex;gap:6px;padding-bottom:3px;}.tab-btn{flex:0 0 auto;}}
+        .admin-quick-analytics{margin-top:14px;}
 </style>
 </head>
 <body>
@@ -758,34 +775,19 @@
             <div class="folder-grid">
                 <div class="folder-card" style="flex-direction: column; align-items: flex-start;" onclick="navigateTo('screenAdminRegistered')">
                     <svg class="folder-svg-icon" style="fill: #00f5d4;"><use href="#icon-folder"/></svg>
-                    <div>
-                        <div class="folder-name" id="folderRegTitle">Катталгандар</div>
-                        <div class="folder-desc" id="folderRegDesc">Катталган колдонуучулар</div>
-                    </div>
+                    <div><div class="folder-name" id="folderRegTitle">Катталгандар</div><div class="folder-desc" id="folderRegDesc">Катталган колдонуучулар</div></div>
                 </div>
-
                 <div class="folder-card" style="flex-direction: column; align-items: flex-start;" onclick="navigateTo('screenAdminSettings')">
                     <svg class="folder-svg-icon" style="fill: #ffb703;"><use href="#icon-folder"/></svg>
-                    <div>
-                        <div class="folder-name" id="folderSetTitle">Жөндөөлөр</div>
-                        <div class="folder-desc" id="folderSetDesc">Системалык жөндөөлөр</div>
-                    </div>
+                    <div><div class="folder-name" id="folderSetTitle">Жөндөөлөр</div><div class="folder-desc" id="folderSetDesc">Системалык жөндөөлөр</div></div>
                 </div>
-
                 <div class="folder-card" style="flex-direction: column; align-items: flex-start;" onclick="navigateTo('screenAdminCurators')">
                     <svg class="folder-svg-icon" style="fill: #4cc9f0;"><use href="#icon-folder"/></svg>
-                    <div>
-                        <div class="folder-name" id="folderCurTitle">Кураторлор</div>
-                        <div class="folder-desc" id="folderCurDesc">Кураторлордун тизмеси</div>
-                    </div>
+                    <div><div class="folder-name" id="folderCurTitle">Кураторлор</div><div class="folder-desc" id="folderCurDesc">Кураторлордун тизмеси</div></div>
                 </div>
             </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;margin-bottom:10px;">
-                <div class="folder-name">Аналитика</div>
-                <button class="btn-action btn-action-copy" onclick="renderAnalytics()" title="Жаңыртуу">↻ Жаңыртуу</button>
-            </div>
             <div class="admin-quick-analytics" id="adminQuickAnalytics">
-                <div class="admin-quick-stat"><strong id="adminQuickImported">0</strong><span>Жүктөлгөн Excelде бала</span></div>
+                <div class="admin-quick-stat"><strong id="adminQuickImported">0</strong><span>Excelде бала</span></div>
                 <div class="admin-quick-stat"><strong id="adminQuickRegistered">0</strong><span>Катталгандарда бала</span></div>
                 <div class="admin-quick-stat"><strong id="adminQuickOverlap">0</strong><span>Файл № окшош</span></div>
             </div>
@@ -797,24 +799,22 @@
                 <h3 id="totalRegisteredHeader" style="margin:0;font-size:22px;">Катталгандар тизмеси</h3>
                 <button class="all-btn" id="selectAllHeaderBtn" onclick="toggleAllVisible()">Все</button>
             </div>
-
-            <!-- ИЗДӨӨ + ПАПКАЛАР: ЫЛДЫЙ ЖЫЛГАНДА ДА ОРДУНДА КАЛАТ -->
-            <div class="sticky-list-controls">
-                <div class="search-container">
-                    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Ф.И.О. же Файл № боюнча издөө..." oninput="applyFilters()">
-                </div>
-                <div class="folder-tabs">
-                    <button id="tabExcel" class="tab-btn active" onclick="switchFolder('excel')">📁 1. Тизме (Excel системасы)</button>
-                    <button id="tabCards" class="tab-btn" onclick="switchFolder('cards')">📁 2. Сүрөттөр менен</button>
-                    <button id="tabExcelImport" class="tab-btn" onclick="switchFolder('excelImport')">📁 3. Excel жүктөө/өчүрүү</button>
-                </div>
+            <!-- ТАНДОО + ИЗДӨӨ + ПАПКАЛАР: ЫЛДЫЙ ЖЫЛГАНДА ДА ОРДУНДА КАЛАТ -->
             <div id="selectionToolbar" class="selection-toolbar">
                 <span id="selectionCount" class="selection-count">0 тандалды</span>
                 <button class="btn-action btn-icon-only icon-copy" title="Көчүрүү" aria-label="Көчүрүү" onclick="bulkCopySelected()"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 3h10a2 2 0 0 1 2 2v11h-2V5H8V3Zm-2 4h10a2 2 0 0 1 2 2v12H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Zm0 2v10h10V9H6Z"/></svg></button>
                 <button class="btn-action btn-icon-only icon-download" title="Скачать" aria-label="Скачать" onclick="bulkDownloadSelected()"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M11 3h2v10.17l3.59-3.58L18 11l-6 6-6-6 1.41-1.41L11 13.17V3ZM5 19h14v2H5v-2Z"/></svg></button>
                 <button class="btn-action btn-icon-only icon-trash" title="Удалить" aria-label="Удалить" onclick="bulkDeleteSelected()"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5h8l-1-2H9L8 5Zm-4 2h16v2H4V7Zm2 3h12v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V10Zm3 2v7h2v-7H9Zm4 0v7h2v-7h-2Z"/></svg></button>
             </div>
-
+            <div class="sticky-list-controls">
+                <div class="search-container">
+                    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Ф.И.О. же Файл № боюнча издөө..." oninput="applyFilters()">
+                </div>
+                <div class="folder-tabs">
+                    <button id="tabExcel" class="tab-btn active" onclick="switchFolder('excel')">1. Тизме (Excel)</button>
+                    <button id="tabCards" class="tab-btn" onclick="switchFolder('cards')">2. Сүрөттөр</button>
+                    <button id="tabImported" class="tab-btn" onclick="switchFolder('imported')">3. Excel жүктөө</button>
+                </div>
             </div>
 
             <!-- ПАПКА 1: ТОЛУК СИСТЕМАЛЫК EXCEL ТАБЛИЦА (СҮРӨТСҮЗ, ЫҢГАЙЛУУ) -->
@@ -850,6 +850,28 @@
             <!-- ПАПКА 2: КАРТОЧКАЛАР (СҮРӨТТӨР МЕНЕН) -->
             <div id="folderViewCards" style="display: none;">
                 <div id="siteRegisteredList"></div>
+            </div>
+            <div id="loadMoreLoading" class="empty-state" style="display:none;padding:10px;font-size:12px;"><span class="spinner"></span></div>
+            <button id="loadMoreBtn" class="btn btn-blue" style="display:none!important;margin:12px auto 0;" onclick="loadMoreRegistrations()">Дагы 5 бала</button>
+
+            <div id="folderViewImportedExcel" style="display:none;">
+                <div class="excel-import-head">
+                    <div>
+                        <div class="setting-info">Excel жүктөө</div>
+                        <div class="setting-desc">Жүктөлгөн Excel ушул жерде сакталат жана Файл № боюнча катталгандар менен салыштырылат.</div>
+                    </div>
+                    <div class="excel-import-actions">
+                        <input type="file" id="comparisonExcelInputInline" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleComparisonExcel(this.files[0])">
+                        <button class="btn-action btn-action-download compact-download-btn" onclick="document.getElementById('comparisonExcelInputInline').click()">↓ Excel жүктөө</button>
+                        <button id="deleteImportedExcelBtnInline" class="btn-action btn-action-delete compact-download-btn" onclick="deleteImportedExcel()" style="display:none;">🗑 Өчүрүү</button>
+                    </div>
+                </div>
+                <div id="comparisonExcelStatus" style="margin:8px 0;color:var(--text-sub);font-size:12px;"></div>
+                <div class="excel-column-actions">
+                    <button class="btn-action btn-action-copy compact-download-btn" onclick="addImportedExcelColumn()">＋ Колонка</button>
+                    <button class="btn-action btn-action-delete compact-download-btn" onclick="removeImportedExcelColumn()">− Колонка</button>
+                </div>
+                <div id="comparisonExcelResult"></div>
             </div>
         </div>
 
@@ -916,31 +938,29 @@
             </div>
         </div>
 
-            <!-- ПАПКА 3: EXCEL ЖҮКТӨӨ/ӨЧҮРҮҮ ЖАНА ТҮЗӨТҮҮ -->
-            <div id="folderViewExcelImport" style="display:none;">
-                <div class="glass-box excel-import-box">
-                    <div class="setting-info" style="margin-bottom:8px;">Excel файл жүктөө</div>
-                    <div class="setting-desc" style="margin-bottom:14px;">Файл № колонкасы боюнча сайттагы катталгандар менен салыштырылат.</div>
-                    <input type="file" id="comparisonExcelInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleComparisonExcel(this.files[0])">
-                    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-                        <button class="btn btn-blue" onclick="document.getElementById('comparisonExcelInput').click()">📊 Excel файл тандоо</button>
-                        <button id="downloadImportedExcelBtn" class="btn-action btn-action-download" onclick="downloadImportedExcel()" style="display:none;">📥 Excel сактоо</button>
-                        <button id="deleteImportedExcelBtn" class="btn-action btn-action-delete" onclick="deleteImportedExcel()" style="display:none;">🗑 Excel өчүрүү</button>
-                    </div>
-                    <div id="comparisonExcelStatus" style="margin-top:12px;color:var(--text-sub);"></div>
+        <!-- 6-ЭКРАН: EXCEL САЛЫШТЫРУУ -->
+        <div id="screenAdminExcel" class="screen" style="display:none !important;">
+            <h3 style="margin-bottom:20px;">Excel</h3>
+            <div class="glass-box excel-import-box">
+                <div class="setting-info" style="margin-bottom:8px;">Excel файл жүктөө</div>
+                <div class="setting-desc" style="margin-bottom:14px;">Файл № колонкасы боюнча сайттагы катталгандар менен салыштырылат.</div>
+                <input type="file" id="comparisonExcelInputLegacy" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleComparisonExcel(this.files[0])">
+                <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                    <button class="btn btn-blue" onclick="document.getElementById('comparisonExcelInputLegacy').click()">📊 Excel файл тандоо</button>
+                    <button id="deleteImportedExcelBtnLegacy" class="btn-action btn-action-delete" onclick="deleteImportedExcel()" style="display:none;">🗑 Excel өчүрүү</button>
                 </div>
-                <div class="excel-column-actions">
-                    <button class="btn-action btn-action-copy" onclick="addImportedExcelColumn()">＋ Колонка кошуу</button>
-                    <button class="btn-action btn-action-copy" onclick="addImportedExcelRow()">＋ Сап кошуу</button>
-                    <button class="btn-action btn-action-delete" onclick="removeImportedExcelColumn()">− Колонка өчүрүү</button>
-                    <button class="btn-action btn-action-delete" onclick="removeImportedExcelRow()">− Сап өчүрүү</button>
-                    <span style="font-size:12px;color:var(--text-sub);">Excel сыяктуу: ячейканы, колонканын атын түз басып өзгөртүңүз.</span>
-                </div>
-                <div id="comparisonExcelResult"></div>
+                <div id="comparisonExcelStatusLegacy" style="margin-top:12px;color:var(--text-sub);"></div>
             </div>
+            <div class="excel-column-actions">
+                <button class="btn-action btn-action-copy" onclick="addImportedExcelColumn()">＋ Ячейка/колонка кошуу</button>
+                <button class="btn-action btn-action-delete" onclick="removeImportedExcelColumn()">− Ячейка/колонка өчүрүү</button>
+                <span style="font-size:12px;color:var(--text-sub);">Колонканын атын жана ичиндеги маалыматтарды түз басып өзгөртүңүз.</span>
+            </div>
+            <div id="comparisonExcelResultLegacy"></div>
+        </div>
 
         <!-- 6-ЭКРАН: АНАЛИТИКА -->
-        <div id="screenAdminAnalytics" class="screen">
+        <div id="screenAdminAnalytics" class="screen" style="display:none !important;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
                 <h3 style="margin:0;">Аналитика</h3>
                 <button class="btn-action btn-action-copy" onclick="renderAnalytics()">↻ Жаңыртуу</button>
@@ -1324,7 +1344,8 @@
 
         function showScreenUI(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            const target = document.getElementById(screenId) || document.getElementById('screenMainMenu');
+            const safeScreenId=(screenId==='screenAdminExcel'||screenId==='screenAdminAnalytics')?'screenAdminRegistered':screenId;
+            const target = document.getElementById(safeScreenId) || document.getElementById('screenMainMenu');
             target.classList.add('active');
             updateLanguageVisibility(target.id);
 
@@ -1334,8 +1355,11 @@
             } else if (screenId === 'screenRegPhone') {
                 document.getElementById('phoneErrorContainer').style.display = 'none';
                 document.getElementById('childPhoneInput').value = currentChildPhone;
+            } else if (screenId === 'screenAdminMenu') {
+                if(!allRegistrations.length && !registrationsPageLoading) loadRegisteredList(true);
             } else if (screenId === 'screenAdminRegistered') {
-                loadRegisteredList();
+                if(!allRegistrations.length && !registrationsPageLoading) loadRegisteredList(true);
+                else { applyFilters(); installRegistrationInfiniteScroll(); setupAllExcelScrolls(); }
             }
         }
 
@@ -1880,43 +1904,42 @@
         let registrationsLoading = false;
         let registrationsServerReceived = false;
 
-        function loadRegisteredList() {
+        let registrationsPageCursor = null;
+        let registrationsHasMore = true;
+        let registrationsPageLoading = false;
+        let registrationsScrollHandler = null;
+        let registrationAutoFillTimer = null;
+
+        async function loadRegisteredList(reset = true) {
             const listContainer = document.getElementById('siteRegisteredList');
             const excelTableBody = document.getElementById('excelTableBody');
             const header = document.getElementById('totalRegisteredHeader');
-            registrationsLoading = true;
-            registrationsServerReceived = false;
+            if (registrationsPageLoading) return;
+            registrationsPageLoading = true;
 
-            const loadingText = translations[currentLang].loading || 'Жүктөлүүдө...';
-            listContainer.innerHTML = `<div class="empty-state"><span class="spinner"></span> ${loadingText}</div>`;
-            excelTableBody.innerHTML = `<tr><td colspan="6" class="empty-state"><span class="spinner"></span> ${loadingText}</td></tr>`;
-            header.innerText = `${translations[currentLang].folderReg} (...)`;
-
-            if (registrationsUnsubscribe) {
-                registrationsUnsubscribe();
-                registrationsUnsubscribe = null;
+            if (reset) {
+                allRegistrations = [];
+                currentFilteredRegistrations = [];
+                registrationsPageCursor = null;
+                registrationsHasMore = true;
+                selectedIds = new Set();
+                listContainer.innerHTML = `<div class="empty-state"><span class="spinner"></span> ${translations[currentLang].loading || 'Жүктөлүүдө...'}</div>`;
+                excelTableBody.innerHTML = `<tr><td colspan="7" class="empty-state"><span class="spinner"></span> ${translations[currentLang].loading || 'Жүктөлүүдө...'}</td></tr>`;
+            } else {
+                const loading = document.getElementById('loadMoreLoading');
+                if (loading) loading.style.display='block';
             }
 
-            // МААНИЛҮҮ:
-            // orderBy('createdAt') колдонбойбуз. Эски документтердин айрымдарында
-            // createdAt жок болушу мүмкүн. Ошондуктан бүт registrations коллекциясын
-            // алып, сорттоону браузердин ичинде жасайбыз.
-            registrationsUnsubscribe = db.collection('registrations').onSnapshot(
-                { includeMetadataChanges: true },
-                (snapshot) => {
-                    const isServerSnapshot = !snapshot.metadata || snapshot.metadata.fromCache === false;
+            try {
+                // Ар дайым 5тен гана алабыз. Документ ID боюнча пагинация эски createdAt жок жазууларды да өткөрбөйт.
+                let q = db.collection('registrations').orderBy(firebase.firestore.FieldPath.documentId()).limit(5);
+                if (registrationsPageCursor) q = q.startAfter(registrationsPageCursor);
+                const snap = await q.get({source:'default'});
 
-                    // Бош cache келгенде 0 көрсөтпөйбүз. Сервердик snapshot'ты күтөбүз.
-                    if (snapshot.metadata && snapshot.metadata.fromCache && snapshot.empty && !registrationsServerReceived) {
-                        console.log('Firestore: бош cache. Сервердик маалымат күтүлүүдө...');
-                        return;
-                    }
-
-                    // Эгер cache ичинде маалымат бар болсо, аны да дароо көрсөтөбүз.
-                    // Кийин сервер snapshot келгенде ошол эле тизмени автоматтык жаңыртабыз.
-                    allRegistrations = [];
-
-                    snapshot.forEach((doc) => {
+                if (snap.empty) {
+                    registrationsHasMore = false;
+                } else {
+                    snap.forEach(doc => {
                         const data = doc.data() || {};
                         allRegistrations.push({
                             id: doc.id,
@@ -1929,81 +1952,65 @@
                             createdAt: data.createdAt || null
                         });
                     });
-
-                    // createdAt бар болсо дата боюнча жаңысы биринчи.
-                    // createdAt жок эски жазуулар да жоголбойт.
-                    allRegistrations.sort((a, b) => {
-                        const ta = a.createdAt && typeof a.createdAt.toMillis === 'function'
-                            ? a.createdAt.toMillis()
-                            : (a.createdAt && a.createdAt.seconds ? a.createdAt.seconds * 1000 : 0);
-                        const tb = b.createdAt && typeof b.createdAt.toMillis === 'function'
-                            ? b.createdAt.toMillis()
-                            : (b.createdAt && b.createdAt.seconds ? b.createdAt.seconds * 1000 : 0);
-                        return tb - ta;
-                    });
-
-                    if (isServerSnapshot) registrationsServerReceived = true;
-                    registrationsLoading = false;
-
-                    selectedIds = new Set(
-                        [...selectedIds].filter(id => allRegistrations.some(x => x.id === id))
-                    );
-
-                    header.innerText = `${translations[currentLang].folderReg} (${allRegistrations.length})`;
-                    applyFilters();
-                },
-                (error) => {
-                    console.error('FIREBASE REGISTRATIONS ERROR:', error);
-                    registrationsLoading = false;
-                    const code = error && error.code ? error.code : 'unknown';
-                    const message = currentLang === 'ru'
-                        ? `Ошибка Firebase: ${code}`
-                        : currentLang === 'ar'
-                            ? `خطأ Firebase: ${code}`
-                            : `Firebase катасы: ${code}`;
-
-                    listContainer.innerHTML = `<div class="glass-box" style="color:var(--danger-red);text-align:center;padding:25px;">❌ ${message}</div>`;
-                    excelTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--danger-red);padding:25px;">❌ ${message}</td></tr>`;
+                    registrationsPageCursor = snap.docs[snap.docs.length - 1];
+                    if (snap.size < 5) registrationsHasMore = false;
                 }
-            );
 
-            // 15 секунд ичинде серверден жооп келбесе гана диагностика чыгарабыз.
-            setTimeout(() => {
-                if (registrationsLoading && !registrationsServerReceived) {
-                    const msg = currentLang === 'ru'
-                        ? 'Firebase долго не отвечает. Проверьте интернет, Firestore и правила доступа.'
-                        : currentLang === 'ar'
-                            ? 'يستغرق Firebase وقتًا طويلاً. تحقق من الإنترنت وFirestore وقواعد الوصول.'
-                            : 'Firebase сервери жооп берүүгө көп убакыт кетти. Интернетти, Firestore жана уруксаттарды текшериңиз.';
-                    listContainer.innerHTML = `<div class="glass-box" style="color:var(--danger-red);text-align:center;padding:25px;">⚠️ ${msg}</div>`;
-                    excelTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--danger-red);padding:25px;">⚠️ ${msg}</td></tr>`;
+                allRegistrations.sort((a,b)=>{
+                    const ta=a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.createdAt?.seconds ? a.createdAt.seconds*1000:0);
+                    const tb=b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.createdAt?.seconds ? b.createdAt.seconds*1000:0);
+                    return tb-ta;
+                });
+                applyFilters();
+                registrationsPageLoading = false;
+                const loading = document.getElementById('loadMoreLoading'); if(loading) loading.style.display='none';
+                const more = document.getElementById('loadMoreBtn');
+                if (more) more.style.display = 'none';
+                if (header) header.innerText = `${translations[currentLang].folderReg} (${allRegistrations.length}${registrationsHasMore?'…':''})`;
+                renderAnalytics();
+                installRegistrationInfiniteScroll();
+                scheduleRegistrationAutoFill();
+            } catch(error) {
+                console.error('FIREBASE PAGED LOAD ERROR:', error);
+                registrationsPageLoading = false;
+                const loading = document.getElementById('loadMoreLoading'); if(loading) loading.style.display='none';
+                if (!allRegistrations.length) {
+                    listContainer.innerHTML = `<div class="glass-box" style="color:var(--danger-red);text-align:center;padding:25px;">❌ Firebase катасы: ${escapeHtml(error.code||'unknown')}</div>`;
+                    excelTableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--danger-red);padding:25px;">❌ Firebase катасы: ${escapeHtml(error.code||'unknown')}</td></tr>`;
                 }
-            }, 15000);
+            }
         }
 
+        function installRegistrationInfiniteScroll(){
+            if(registrationsScrollHandler) window.removeEventListener('scroll',registrationsScrollHandler);
+            registrationsScrollHandler=()=>{
+                const screen=document.getElementById('screenAdminRegistered');
+                if(!screen || !screen.classList.contains('active') || !registrationsHasMore || registrationsPageLoading) return;
+                if(window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 650){ loadRegisteredList(false); }
+                updateExcelStickyPosition();
+            };
+            window.addEventListener('scroll',registrationsScrollHandler,{passive:true});
+        }
+
+        function scheduleRegistrationAutoFill(){
+            clearTimeout(registrationAutoFillTimer);
+            registrationAutoFillTimer=setTimeout(()=>{
+                const screen=document.getElementById('screenAdminRegistered');
+                if(!screen || !screen.classList.contains('active') || !registrationsHasMore || registrationsPageLoading) return;
+                // Колдонуучу эч нерсе баспайт: серверден кийинки 5 бала өзүнөн-өзү келет.
+                // Ар бир сурам 5 документтен гана болгондуктан браузерге бир чоң сурам жүктөлбөйт.
+                loadRegisteredList(false);
+            },250);
+        }
+
+        async function loadMoreRegistrations(){ if(registrationsHasMore) await loadRegisteredList(false); }
+
         function switchFolder(folderType) {
-            const tabExcel = document.getElementById('tabExcel');
-            const tabCards = document.getElementById('tabCards');
-            const tabExcelImport = document.getElementById('tabExcelImport');
-            const folderExcel = document.getElementById('folderViewExcel');
-            const folderCards = document.getElementById('folderViewCards');
-            const folderExcelImport = document.getElementById('folderViewExcelImport');
-
-            [tabExcel, tabCards, tabExcelImport].forEach(el => el && el.classList.remove('active'));
-            [folderExcel, folderCards, folderExcelImport].forEach(el => { if(el) el.style.display='none'; });
-
-            if (folderType === 'excel') {
-                tabExcel.classList.add('active');
-                folderExcel.style.display = 'block';
-            } else if (folderType === 'cards') {
-                tabCards.classList.add('active');
-                folderCards.style.display = 'block';
-            } else {
-                tabExcelImport.classList.add('active');
-                folderExcelImport.style.display = 'block';
-                updateImportedExcelControls();
-                renderComparisonExcel();
-            }
+            const tabs={excel:'tabExcel',cards:'tabCards',imported:'tabImported'};
+            const views={excel:'folderViewExcel',cards:'folderViewCards',imported:'folderViewImportedExcel'};
+            Object.keys(tabs).forEach(k=>document.getElementById(tabs[k])?.classList.toggle('active',k===folderType));
+            Object.keys(views).forEach(k=>{const el=document.getElementById(views[k]); if(el)el.style.display=(k===folderType?'block':'none');});
+            if(folderType==='imported') { updateImportedExcelControls(); renderComparisonExcel(); }
         }
 
         async function handleComparisonExcel(file){
@@ -2031,16 +2038,10 @@
         }
 
         function updateImportedExcelControls(){
-            const btn=document.getElementById('deleteImportedExcelBtn');
-            const downloadBtn=document.getElementById('downloadImportedExcelBtn');
+            const btn=document.getElementById('deleteImportedExcelBtnInline') || document.getElementById('deleteImportedExcelBtn');
             if(btn) btn.style.display=importedExcelRows.length?'inline-flex':'none';
-            if(downloadBtn) downloadBtn.style.display=importedExcelRows.length?'inline-flex':'none';
-            const status=document.getElementById('comparisonExcelStatus');
-            if(status){
-                status.textContent=importedExcelRows.length
-                    ? `Жүктөлгөн Excel: ${importedExcelRows.length} сап, ${importedExcelHeaders().length} колонка, файл №: ${importedFileNumbers.size}`
-                    : 'Excel файл жүктөлө элек.';
-            }
+            const status=[...document.querySelectorAll('#comparisonExcelStatus')].find(x=>x.offsetParent!==null) || document.getElementById('comparisonExcelStatus');
+            if(status && importedExcelRows.length) status.textContent=`Жүктөлгөн Excel: ${importedExcelRows.length} сап, файл №: ${importedFileNumbers.size}`;
         }
 
         async function deleteImportedExcel(){
@@ -2063,27 +2064,53 @@
             const box=document.getElementById('comparisonExcelResult'); if(!box)return;
             updateImportedExcelControls();
             if(!importedExcelRows.length){box.innerHTML='';return;}
-            const headers=Object.keys(importedExcelRows[0]||{});
+            const headers=importedExcelHeaders();
             const fileKey=headers.find(k=>/файл\s*№|файл\s*номер|file\s*no|fileno/i.test(String(k)));
-            const registeredNumbers=new Set(allRegistrations.map(x=>String(x.fileNumber||'').trim()).filter(Boolean));
-            const rows=[...importedExcelRows].map((r,i)=>({r,i})).sort((a,b)=>{
+            const phoneKey=headers.find(k=>/телефон|phone|номер\s*тел/i.test(String(k)));
+            const nameKey=headers.find(k=>/ф\.\s*и\.\s*о|фио|name|аты|аты-жөн|ребен|child/i.test(String(k)));
+            const registeredByFile=new Map();
+            allRegistrations.forEach(x=>{
+                const n=String(x.fileNumber||'').replace(/\D/g,'').slice(0,5);
+                if(n) registeredByFile.set(n,x);
+            });
+            const registeredNumbers=new Set([...registeredByFile.keys()]);
+            const searchText=(document.getElementById('searchInput')?.value||'').toLowerCase().trim();
+            const rows=[...importedExcelRows].map((r,i)=>({r,i})).filter(({r})=>{
+                if(!searchText)return true;
+                return Object.values(r||{}).some(v=>String(v??'').toLowerCase().includes(searchText));
+            }).sort((a,b)=>{
                 const na=fileKey?String(a.r[fileKey]||'').replace(/\D/g,'').slice(0,5):'';
                 const nb=fileKey?String(b.r[fileKey]||'').replace(/\D/g,'').slice(0,5):'';
                 return Number(!registeredNumbers.has(na))-Number(!registeredNumbers.has(nb));
             });
-            let html='<div class="excel-horizontal-scroll" id="comparisonExcelTopScroll"><div class="excel-horizontal-scroll-inner"></div></div><div class="excel-table-container" id="comparisonExcelTableScroll"><table class="excel-import-table"><thead><tr><th style="width:45px;">№</th><th style="width:45px;">✓</th>'+headers.map(h=>`<th class="excel-header-edit" contenteditable="true" data-header="${escapeHtml(h)}" onblur="renameImportedColumn(this.dataset.header, this.innerText)">${escapeHtml(h)}</th>`).join('')+'</tr></thead><tbody>';
-            rows.forEach(({r,i},displayIndex)=>{
+            let html='<div class="excel-horizontal-scroll" id="comparisonExcelTopScroll"><div class="excel-horizontal-scroll-inner"></div></div><div class="excel-table-container" id="comparisonExcelTableScroll"><table class="excel-import-table"><thead><tr><th>✓</th>'+headers.map(h=>`<th class="excel-header-edit" contenteditable="true" data-header="${escapeHtml(h)}" onblur="renameImportedColumn(this.dataset.header, this.innerText)">${escapeHtml(h)}</th>`).join('')+'<th>Сүрөт</th><th>Аракеттер</th></tr></thead><tbody>';
+            rows.forEach(({r,i})=>{
                 const n=fileKey?String(r[fileKey]||'').replace(/\D/g,'').slice(0,5):'';
-                const ok=n&&registeredNumbers.has(n);
-                html+=`<tr><td style="text-align:center;color:var(--text-sub);">${displayIndex+1}</td><td class="${ok?'compare-match':'compare-miss'}">${ok?'✓':'—'}</td>`;
+                const matched=registeredByFile.get(n);
+                const ok=!!matched;
+                const importedPhone=phoneKey?String(r[phoneKey]||'').trim():'';
+                const phone=importedPhone || (matched?.phone||'');
+                const name=nameKey?String(r[nameKey]||'').trim():(matched?.fullName||'');
+                const p1=matched?.photo1||''; const p2=matched?.photo2||'';
+                const thumb=p1?`<img class="imported-photo-thumb" src="${escapeHtml(p1)}" alt="Сүрөт" onclick="event.stopPropagation();openImageViewer('${String(p1).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')">`:'—';
+                const wa=phone?`<a class="whatsapp-small" title="WhatsApp" aria-label="WhatsApp" target="_blank" rel="noopener" href="${whatsappUrlWithPhotos(phone,name,n,p1,p2)}" onclick="event.stopPropagation()">${iconSvg('whatsapp')}</a>`:'<span style="color:var(--text-sub);font-size:12px;">—</span>';
+                html+=`<tr><td class="${ok?'compare-match':'compare-miss'}">${ok?'✓':'—'}</td>`;
                 headers.forEach(h=>{
                     const value=String(r[h]??'');
                     html+=`<td class="excel-editable" contenteditable="true" data-row="${i}" data-col="${escapeHtml(h)}" onblur="saveImportedCell(${i}, this.dataset.col, this.innerText)">${escapeHtml(value)}</td>`;
                 });
-                html+='</tr>';
+                html+=`<td style="text-align:center;vertical-align:middle;">${thumb}</td><td class="imported-action-cell">${wa}</td></tr>`;
             });
             box.innerHTML=html+'</tbody></table></div>';
             setupAllExcelScrolls();
+        }
+
+        function whatsappUrlWithPhotos(phone,name,fileNo,photo1,photo2){
+            const clean=(phone||'').replace(/\D/g,'');
+            let message=currentLang==='ar' ? `اسم الطفل: ${name}\nرقم الملف: ${fileNo||'-'}\nالهاتف: ${phone}` : `Ф.И.О.: ${name}\nФайл №: ${fileNo||'-'}\nТелефон: ${phone}`;
+            if(photo1) message += `\nСүрөт 1: ${photo1}`;
+            if(photo2) message += `\nСүрөт 2: ${photo2}`;
+            return `https://wa.me/${clean}?text=${encodeURIComponent(message)}`;
         }
 
         function saveImportedCell(rowIndex,col,value){
@@ -2110,10 +2137,21 @@
             refresh(); setTimeout(refresh,50); setTimeout(refresh,300);
         }
 
+        function updateExcelStickyPosition(){
+            const controls=document.querySelector('.sticky-list-controls');
+            if(!controls)return;
+            const bottom=Math.max(78,Math.ceil(controls.getBoundingClientRect().bottom));
+            document.documentElement.style.setProperty('--excel-sticky-top',(bottom+4)+'px');
+        }
         function setupAllExcelScrolls(){
             setupExcelHorizontalScroll('registeredExcelTopScroll','registeredExcelTableScroll');
             setupExcelHorizontalScroll('comparisonExcelTopScroll','comparisonExcelTableScroll');
+            updateExcelStickyPosition();
+            setTimeout(updateExcelStickyPosition,60);
+            setTimeout(updateExcelStickyPosition,300);
         }
+        window.addEventListener('resize',updateExcelStickyPosition,{passive:true});
+        window.addEventListener('scroll',updateExcelStickyPosition,{passive:true});
 
         function importedExcelHeaders(){
             if(!importedExcelRows.length)return [];
@@ -2134,61 +2172,6 @@
             persistImportedExcel();
             renderComparisonExcel(); renderAnalytics();
             showQuickNotice('✓','Колонка кошулду');
-        }
-
-        function addImportedExcelRow(){
-            const headers=importedExcelHeaders();
-            if(!headers.length){
-                importedExcelRows=[{'Жаңы колонка':''}];
-            }else{
-                const row={};
-                headers.forEach(h=>row[h]='');
-                importedExcelRows.push(row);
-            }
-            persistImportedExcel();
-            renderComparisonExcel();
-            renderAnalytics();
-            showQuickNotice('✓','Сап кошулду');
-        }
-
-        async function removeImportedExcelRow(){
-            if(!importedExcelRows.length)return;
-            const value=prompt('Өчүрүлө турган саптын № номерин жазыңыз (1ден башталат):');
-            if(value===null)return;
-            const index=parseInt(value,10)-1;
-            if(!Number.isInteger(index) || index<0 || index>=importedExcelRows.length){
-                return showQuickNotice('!','Сап табылган жок');
-            }
-            importedExcelRows.splice(index,1);
-            persistImportedExcel();
-            renderComparisonExcel();
-            renderAnalytics();
-            showQuickNotice('✓','Сап өчүрүлдү');
-        }
-
-        async function downloadImportedExcel(){
-            if(!window.XLSX || !importedExcelRows.length){
-                showCenterNotice('ℹ️','Excel жок','Алгач Excel файл жүктөңүз.');
-                return;
-            }
-            try{
-                const headers=importedExcelHeaders();
-                const normalizedRows=importedExcelRows.map(r=>{
-                    const x={};
-                    headers.forEach(h=>x[h]=r[h]??'');
-                    return x;
-                });
-                const ws=XLSX.utils.json_to_sheet(normalizedRows,{header:headers});
-                const wb=XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb,ws,'Excel');
-                const out=XLSX.write(wb,{bookType:'xlsx',type:'array'});
-                const blob=new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-                const ok=await saveBlobWithPicker(blob,'Байту_закат_Excel.xlsx','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                if(ok)showCenterNotice('✓','Excel даяр','Өзгөртүлгөн Excel сакталды.');
-            }catch(e){
-                console.error('Excel сактоодо ката:',e);
-                showCenterNotice('❌','Ката','Өзгөртүлгөн Excel сакталбай калды.');
-            }
         }
 
         async function removeImportedExcelColumn(){
@@ -2255,6 +2238,7 @@
 
             renderData(currentFilteredRegistrations);
             if(importedExcelRows.length) renderComparisonExcel();
+            renderAnalytics();
         }
 
         // ТОЛУК EXCEL СОРТИРОВКА СИСТЕМАСЫ
@@ -2285,7 +2269,7 @@
             if(!dataList || dataList.length===0){
                 const empty=translations[currentLang].noData;
                 listContainer.innerHTML=`<div class="glass-box empty-state">${empty}</div>`;
-                excelTableBody.innerHTML=`<tr><td colspan="6" class="empty-state">${empty}</td></tr>`;
+                excelTableBody.innerHTML=`<tr><td colspan="7" class="empty-state">${empty}</td></tr>`;
                 updateSelectionToolbar();
                 return;
             }
@@ -2760,6 +2744,7 @@
                 'screenAdminRegistered',
                 'screenAdminSettings',
                 'screenAdminCurators',
+                'screenAdminExcel',
                 'screenAdminAnalytics'
             ];
             const screenId = allowed.includes(hash) ? hash : 'screenMainMenu';
