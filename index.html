@@ -772,14 +772,6 @@
                     </div>
                 </div>
 
-                <div class="folder-card" style="flex-direction: column; align-items: flex-start;" onclick="navigateTo('screenAdminExcel')">
-                    <svg class="folder-svg-icon" style="fill: #7c3aed;"><use href="#icon-folder"/></svg>
-                    <div>
-                        <div class="folder-name">Excel</div>
-                        <div class="folder-desc">Excel жүктөө жана салыштыруу</div>
-                    </div>
-                </div>
-
                 <div class="folder-card" style="flex-direction: column; align-items: flex-start;" onclick="navigateTo('screenAdminCurators')">
                     <svg class="folder-svg-icon" style="fill: #4cc9f0;"><use href="#icon-folder"/></svg>
                     <div>
@@ -788,12 +780,9 @@
                     </div>
                 </div>
             </div>
-            <div class="analytics-card" onclick="navigateTo('screenAdminAnalytics')">
-                <div class="analytics-card-icon">▥</div>
-                <div>
-                    <div class="folder-name">Аналитика</div>
-                    <div class="folder-desc">Excel жана катталгандар боюнча статистика</div>
-                </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;margin-bottom:10px;">
+                <div class="folder-name">Аналитика</div>
+                <button class="btn-action btn-action-copy" onclick="renderAnalytics()" title="Жаңыртуу">↻ Жаңыртуу</button>
             </div>
             <div class="admin-quick-analytics" id="adminQuickAnalytics">
                 <div class="admin-quick-stat"><strong id="adminQuickImported">0</strong><span>Жүктөлгөн Excelде бала</span></div>
@@ -817,6 +806,7 @@
                 <div class="folder-tabs">
                     <button id="tabExcel" class="tab-btn active" onclick="switchFolder('excel')">📁 1. Тизме (Excel системасы)</button>
                     <button id="tabCards" class="tab-btn" onclick="switchFolder('cards')">📁 2. Сүрөттөр менен</button>
+                    <button id="tabExcelImport" class="tab-btn" onclick="switchFolder('excelImport')">📁 3. Excel жүктөө/өчүрүү</button>
                 </div>
             <div id="selectionToolbar" class="selection-toolbar">
                 <span id="selectionCount" class="selection-count">0 тандалды</span>
@@ -926,26 +916,28 @@
             </div>
         </div>
 
-        <!-- 6-ЭКРАН: EXCEL САЛЫШТЫРУУ -->
-        <div id="screenAdminExcel" class="screen">
-            <h3 style="margin-bottom:20px;">Excel</h3>
-            <div class="glass-box excel-import-box">
-                <div class="setting-info" style="margin-bottom:8px;">Excel файл жүктөө</div>
-                <div class="setting-desc" style="margin-bottom:14px;">Файл № колонкасы боюнча сайттагы катталгандар менен салыштырылат.</div>
-                <input type="file" id="comparisonExcelInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleComparisonExcel(this.files[0])">
-                <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-                    <button class="btn btn-blue" onclick="document.getElementById('comparisonExcelInput').click()">📊 Excel файл тандоо</button>
-                    <button id="deleteImportedExcelBtn" class="btn-action btn-action-delete" onclick="deleteImportedExcel()" style="display:none;">🗑 Excel өчүрүү</button>
+            <!-- ПАПКА 3: EXCEL ЖҮКТӨӨ/ӨЧҮРҮҮ ЖАНА ТҮЗӨТҮҮ -->
+            <div id="folderViewExcelImport" style="display:none;">
+                <div class="glass-box excel-import-box">
+                    <div class="setting-info" style="margin-bottom:8px;">Excel файл жүктөө</div>
+                    <div class="setting-desc" style="margin-bottom:14px;">Файл № колонкасы боюнча сайттагы катталгандар менен салыштырылат.</div>
+                    <input type="file" id="comparisonExcelInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleComparisonExcel(this.files[0])">
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                        <button class="btn btn-blue" onclick="document.getElementById('comparisonExcelInput').click()">📊 Excel файл тандоо</button>
+                        <button id="downloadImportedExcelBtn" class="btn-action btn-action-download" onclick="downloadImportedExcel()" style="display:none;">📥 Excel сактоо</button>
+                        <button id="deleteImportedExcelBtn" class="btn-action btn-action-delete" onclick="deleteImportedExcel()" style="display:none;">🗑 Excel өчүрүү</button>
+                    </div>
+                    <div id="comparisonExcelStatus" style="margin-top:12px;color:var(--text-sub);"></div>
                 </div>
-                <div id="comparisonExcelStatus" style="margin-top:12px;color:var(--text-sub);"></div>
+                <div class="excel-column-actions">
+                    <button class="btn-action btn-action-copy" onclick="addImportedExcelColumn()">＋ Колонка кошуу</button>
+                    <button class="btn-action btn-action-copy" onclick="addImportedExcelRow()">＋ Сап кошуу</button>
+                    <button class="btn-action btn-action-delete" onclick="removeImportedExcelColumn()">− Колонка өчүрүү</button>
+                    <button class="btn-action btn-action-delete" onclick="removeImportedExcelRow()">− Сап өчүрүү</button>
+                    <span style="font-size:12px;color:var(--text-sub);">Excel сыяктуу: ячейканы, колонканын атын түз басып өзгөртүңүз.</span>
+                </div>
+                <div id="comparisonExcelResult"></div>
             </div>
-            <div class="excel-column-actions">
-                <button class="btn-action btn-action-copy" onclick="addImportedExcelColumn()">＋ Ячейка/колонка кошуу</button>
-                <button class="btn-action btn-action-delete" onclick="removeImportedExcelColumn()">− Ячейка/колонка өчүрүү</button>
-                <span style="font-size:12px;color:var(--text-sub);">Колонканын атын жана ичиндеги маалыматтарды түз басып өзгөртүңүз.</span>
-            </div>
-            <div id="comparisonExcelResult"></div>
-        </div>
 
         <!-- 6-ЭКРАН: АНАЛИТИКА -->
         <div id="screenAdminAnalytics" class="screen">
@@ -1992,19 +1984,25 @@
         function switchFolder(folderType) {
             const tabExcel = document.getElementById('tabExcel');
             const tabCards = document.getElementById('tabCards');
+            const tabExcelImport = document.getElementById('tabExcelImport');
             const folderExcel = document.getElementById('folderViewExcel');
             const folderCards = document.getElementById('folderViewCards');
+            const folderExcelImport = document.getElementById('folderViewExcelImport');
+
+            [tabExcel, tabCards, tabExcelImport].forEach(el => el && el.classList.remove('active'));
+            [folderExcel, folderCards, folderExcelImport].forEach(el => { if(el) el.style.display='none'; });
 
             if (folderType === 'excel') {
                 tabExcel.classList.add('active');
-                tabCards.classList.remove('active');
                 folderExcel.style.display = 'block';
-                folderCards.style.display = 'none';
-            } else {
+            } else if (folderType === 'cards') {
                 tabCards.classList.add('active');
-                tabExcel.classList.remove('active');
                 folderCards.style.display = 'block';
-                folderExcel.style.display = 'none';
+            } else {
+                tabExcelImport.classList.add('active');
+                folderExcelImport.style.display = 'block';
+                updateImportedExcelControls();
+                renderComparisonExcel();
             }
         }
 
@@ -2034,9 +2032,15 @@
 
         function updateImportedExcelControls(){
             const btn=document.getElementById('deleteImportedExcelBtn');
+            const downloadBtn=document.getElementById('downloadImportedExcelBtn');
             if(btn) btn.style.display=importedExcelRows.length?'inline-flex':'none';
+            if(downloadBtn) downloadBtn.style.display=importedExcelRows.length?'inline-flex':'none';
             const status=document.getElementById('comparisonExcelStatus');
-            if(status && importedExcelRows.length) status.textContent=`Жүктөлгөн Excel: ${importedExcelRows.length} сап, файл №: ${importedFileNumbers.size}`;
+            if(status){
+                status.textContent=importedExcelRows.length
+                    ? `Жүктөлгөн Excel: ${importedExcelRows.length} сап, ${importedExcelHeaders().length} колонка, файл №: ${importedFileNumbers.size}`
+                    : 'Excel файл жүктөлө элек.';
+            }
         }
 
         async function deleteImportedExcel(){
@@ -2067,11 +2071,11 @@
                 const nb=fileKey?String(b.r[fileKey]||'').replace(/\D/g,'').slice(0,5):'';
                 return Number(!registeredNumbers.has(na))-Number(!registeredNumbers.has(nb));
             });
-            let html='<div class="excel-horizontal-scroll" id="comparisonExcelTopScroll"><div class="excel-horizontal-scroll-inner"></div></div><div class="excel-table-container" id="comparisonExcelTableScroll"><table class="excel-import-table"><thead><tr><th>✓</th>'+headers.map(h=>`<th class="excel-header-edit" contenteditable="true" data-header="${escapeHtml(h)}" onblur="renameImportedColumn(this.dataset.header, this.innerText)">${escapeHtml(h)}</th>`).join('')+'</tr></thead><tbody>';
-            rows.forEach(({r,i})=>{
+            let html='<div class="excel-horizontal-scroll" id="comparisonExcelTopScroll"><div class="excel-horizontal-scroll-inner"></div></div><div class="excel-table-container" id="comparisonExcelTableScroll"><table class="excel-import-table"><thead><tr><th style="width:45px;">№</th><th style="width:45px;">✓</th>'+headers.map(h=>`<th class="excel-header-edit" contenteditable="true" data-header="${escapeHtml(h)}" onblur="renameImportedColumn(this.dataset.header, this.innerText)">${escapeHtml(h)}</th>`).join('')+'</tr></thead><tbody>';
+            rows.forEach(({r,i},displayIndex)=>{
                 const n=fileKey?String(r[fileKey]||'').replace(/\D/g,'').slice(0,5):'';
                 const ok=n&&registeredNumbers.has(n);
-                html+=`<tr><td class="${ok?'compare-match':'compare-miss'}">${ok?'✓':'—'}</td>`;
+                html+=`<tr><td style="text-align:center;color:var(--text-sub);">${displayIndex+1}</td><td class="${ok?'compare-match':'compare-miss'}">${ok?'✓':'—'}</td>`;
                 headers.forEach(h=>{
                     const value=String(r[h]??'');
                     html+=`<td class="excel-editable" contenteditable="true" data-row="${i}" data-col="${escapeHtml(h)}" onblur="saveImportedCell(${i}, this.dataset.col, this.innerText)">${escapeHtml(value)}</td>`;
@@ -2130,6 +2134,61 @@
             persistImportedExcel();
             renderComparisonExcel(); renderAnalytics();
             showQuickNotice('✓','Колонка кошулду');
+        }
+
+        function addImportedExcelRow(){
+            const headers=importedExcelHeaders();
+            if(!headers.length){
+                importedExcelRows=[{'Жаңы колонка':''}];
+            }else{
+                const row={};
+                headers.forEach(h=>row[h]='');
+                importedExcelRows.push(row);
+            }
+            persistImportedExcel();
+            renderComparisonExcel();
+            renderAnalytics();
+            showQuickNotice('✓','Сап кошулду');
+        }
+
+        async function removeImportedExcelRow(){
+            if(!importedExcelRows.length)return;
+            const value=prompt('Өчүрүлө турган саптын № номерин жазыңыз (1ден башталат):');
+            if(value===null)return;
+            const index=parseInt(value,10)-1;
+            if(!Number.isInteger(index) || index<0 || index>=importedExcelRows.length){
+                return showQuickNotice('!','Сап табылган жок');
+            }
+            importedExcelRows.splice(index,1);
+            persistImportedExcel();
+            renderComparisonExcel();
+            renderAnalytics();
+            showQuickNotice('✓','Сап өчүрүлдү');
+        }
+
+        async function downloadImportedExcel(){
+            if(!window.XLSX || !importedExcelRows.length){
+                showCenterNotice('ℹ️','Excel жок','Алгач Excel файл жүктөңүз.');
+                return;
+            }
+            try{
+                const headers=importedExcelHeaders();
+                const normalizedRows=importedExcelRows.map(r=>{
+                    const x={};
+                    headers.forEach(h=>x[h]=r[h]??'');
+                    return x;
+                });
+                const ws=XLSX.utils.json_to_sheet(normalizedRows,{header:headers});
+                const wb=XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb,ws,'Excel');
+                const out=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+                const blob=new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+                const ok=await saveBlobWithPicker(blob,'Байту_закат_Excel.xlsx','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                if(ok)showCenterNotice('✓','Excel даяр','Өзгөртүлгөн Excel сакталды.');
+            }catch(e){
+                console.error('Excel сактоодо ката:',e);
+                showCenterNotice('❌','Ката','Өзгөртүлгөн Excel сакталбай калды.');
+            }
         }
 
         async function removeImportedExcelColumn(){
@@ -2701,7 +2760,6 @@
                 'screenAdminRegistered',
                 'screenAdminSettings',
                 'screenAdminCurators',
-                'screenAdminExcel',
                 'screenAdminAnalytics'
             ];
             const screenId = allowed.includes(hash) ? hash : 'screenMainMenu';
