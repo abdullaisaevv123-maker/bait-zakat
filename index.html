@@ -39,7 +39,22 @@
             padding: 25px 15px;
         }
 
-        .app-container { width: 100%; max-width: 800px; position: relative; }
+        .app-container { width: 100%; max-width: 1400px; position: relative; }
+        body.admin-wide .app-container { max-width: 100%; }
+        body.admin-wide { padding: 14px 14px 24px; }
+        body.admin-wide #screenAdminRegistered { width: 100%; }
+        body.admin-wide #screenAdminRegistered > .three-pane-layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr); gap:12px; align-items:stretch; width:100%; }
+        body.admin-wide #screenAdminRegistered .three-pane { min-width:0; height:calc(100vh - 230px); min-height:520px; overflow:hidden; background:rgba(11,19,43,.58); border:1px solid var(--folder-border); border-radius:16px; padding:10px; display:flex !important; flex-direction:column; }
+        body.admin-wide #screenAdminRegistered .three-pane > .pane-title { flex:0 0 auto; font-size:15px; font-weight:800; color:var(--accent-glow); padding:5px 8px 10px; }
+        body.admin-wide #screenAdminRegistered .three-pane .excel-table-container, body.admin-wide #screenAdminRegistered .three-pane #siteRegisteredList, body.admin-wide #screenAdminRegistered .three-pane #comparisonExcelResult { flex:1 1 auto; min-height:0; overflow:auto; }
+        body.admin-wide #screenAdminRegistered .three-pane .excel-horizontal-scroll { flex:0 0 auto; position:sticky; top:0; z-index:12; }
+        body.admin-wide #screenAdminRegistered .three-pane .list-item { margin-bottom:12px; padding:14px; }
+        body.admin-wide #screenAdminRegistered .three-pane .large-thumb-group { grid-template-columns:1fr; }
+        body.admin-wide #screenAdminRegistered .sticky-list-controls { position:sticky; top:0; z-index:1200; }
+        body.admin-wide #screenAdminRegistered .selection-toolbar { position:sticky; top:0; z-index:1250; }
+        body.admin-wide #screenAdminRegistered .folder-tabs { display:flex !important; gap:10px; margin-bottom:12px; position:sticky; top:0; z-index:1300; background:rgba(11,19,43,.96); padding:4px 0 8px; }
+        body.admin-wide #screenAdminRegistered .excel-toolbar { flex:0 0 auto; }
+        @media(max-width:1100px){ body.admin-wide #screenAdminRegistered > .three-pane-layout { grid-template-columns:1fr; } body.admin-wide #screenAdminRegistered .three-pane { height:auto; min-height:480px; } }
 
         .header-top-bar {
             display: flex;
@@ -608,6 +623,49 @@
         @media(max-width:800px){.folder-grid{grid-template-columns:1fr 1fr;}.excel-import-head{align-items:flex-start;flex-direction:column;}}
         @media(max-width:520px){.folder-grid{grid-template-columns:1fr;}.folder-tabs{overflow-x:auto;display:flex;gap:6px;padding-bottom:3px;}.tab-btn{flex:0 0 auto;}}
         .admin-quick-analytics{margin-top:14px;}
+
+        /* v12: 1-Система Excel + 2-Excel жүктөө бирге, 3-Сүрөттөр өзүнчө */
+        body.admin-wide #screenAdminRegistered .three-pane-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;width:100%;height:calc(100vh - 230px);min-height:560px;}
+        body.admin-wide #screenAdminRegistered .three-pane{height:100%;min-height:0;}
+        body.admin-wide #screenAdminRegistered #folderViewCards{grid-column:1 / -1;height:calc(100vh - 230px);}
+        body.admin-wide #screenAdminRegistered #folderViewCards[style*="display: none"]{display:none!important;}
+        body.admin-wide #screenAdminRegistered #folderViewExcel[style*="display: none"],
+        body.admin-wide #screenAdminRegistered #folderViewImportedExcel[style*="display: none"]{display:none!important;}
+        @media(max-width:900px){body.admin-wide #screenAdminRegistered .three-pane-layout{grid-template-columns:1fr;height:auto;}body.admin-wide #screenAdminRegistered .three-pane{min-height:520px;}}
+
+        /* v14: Сүрөттөр бөлүмү — эки баланын карточкасы бир катарда, кийинки экөө астында */
+        body.admin-wide #screenAdminRegistered #folderViewCards #siteRegisteredList{
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:16px;
+            align-items:start;
+            padding:4px;
+        }
+        body.admin-wide #screenAdminRegistered #folderViewCards #siteRegisteredList .list-item{
+            margin:0;
+            padding:14px;
+            min-width:0;
+            height:auto;
+        }
+        body.admin-wide #screenAdminRegistered #folderViewCards .large-thumb-group{
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:10px;
+            margin-top:12px;
+            margin-bottom:12px;
+        }
+        body.admin-wide #screenAdminRegistered #folderViewCards .large-thumb-group img{
+            width:100%;
+            height:auto;
+            aspect-ratio:16 / 9;
+            max-height:none;
+            object-fit:contain;
+            background:rgba(0,0,0,.18);
+            border-radius:12px;
+        }
+        @media(max-width:900px){
+            body.admin-wide #screenAdminRegistered #folderViewCards #siteRegisteredList{grid-template-columns:1fr;}
+        }
+
 </style>
 </head>
 <body>
@@ -812,13 +870,15 @@
                 </div>
                 <div class="folder-tabs">
                     <button id="tabExcel" class="tab-btn active" onclick="switchFolder('excel')">1. Тизме (Excel)</button>
-                    <button id="tabCards" class="tab-btn" onclick="switchFolder('cards')">2. Сүрөттөр</button>
-                    <button id="tabImported" class="tab-btn" onclick="switchFolder('imported')">3. Excel жүктөө</button>
+                    <button id="tabImported" class="tab-btn" onclick="switchFolder('imported')">2. Excel жүктөө</button>
+                    <button id="tabCards" class="tab-btn" onclick="switchFolder('cards')">3. Сүрөттөрдү көрүү</button>
                 </div>
             </div>
 
-            <!-- ПАПКА 1: ТОЛУК СИСТЕМАЛЫК EXCEL ТАБЛИЦА (СҮРӨТСҮЗ, ЫҢГАЙЛУУ) -->
-            <div id="folderViewExcel">
+            <div class="three-pane-layout">
+            <!-- ПАНЕЛЬ 1: ТОЛУК СИСТЕМАЛЫК EXCEL -->
+            <div id="folderViewExcel" class="three-pane">
+                <div class="pane-title">📊 1. Тизме (Excel системасы)</div>
                 <div class="excel-toolbar">
                     <span style="font-size: 13px; color: var(--text-sub);" id="txtExcelBarInfo">📊 Иреттөө үчүн тилкелерди басыңыз</span>
                     <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;">
@@ -847,14 +907,16 @@
                 </div>
             </div>
 
-            <!-- ПАПКА 2: КАРТОЧКАЛАР (СҮРӨТТӨР МЕНЕН) -->
-            <div id="folderViewCards" style="display: none;">
+            <!-- ПАНЕЛЬ 3: СҮРӨТТӨР -->
+            <div id="folderViewCards" class="three-pane" style="display: none;">
+                <div class="pane-title">🖼️ 3. Сүрөттөр</div>
                 <div id="siteRegisteredList"></div>
             </div>
             <div id="loadMoreLoading" class="empty-state" style="display:none;padding:10px;font-size:12px;"><span class="spinner"></span></div>
-            <button id="loadMoreBtn" class="btn btn-blue" style="display:none!important;margin:12px auto 0;" onclick="loadMoreRegistrations()">Дагы 5 бала</button>
+            <button id="loadMoreBtn" class="btn btn-blue" style="display:none!important;margin:12px auto 0;" onclick="loadMoreRegistrations()"></button>
 
-            <div id="folderViewImportedExcel" style="display:none;">
+            <div id="folderViewImportedExcel" class="three-pane" style="display:flex;">
+                <div class="pane-title">📥 2. Excel жүктөө</div>
                 <div class="excel-import-head">
                     <div>
                         <div class="setting-info">Excel жүктөө</div>
@@ -872,6 +934,7 @@
                     <button class="btn-action btn-action-delete compact-download-btn" onclick="removeImportedExcelColumn()">− Колонка</button>
                 </div>
                 <div id="comparisonExcelResult"></div>
+            </div>
             </div>
         </div>
 
@@ -1135,7 +1198,7 @@
                 folderRegDesc:"Катталган колдонуучулар", folderSet:"Жөндөөлөр", folderSetDesc:"Системалык жөндөөлөр",
                 folderCur:"Кураторлор", folderCurDesc:"Кураторлордун тизмеси",
                 copyAll:"📋 Бардык ысымдарды көчүрүү (тизме катары)", searchPh:"🔍 Ф.И.О. же Файл № боюнча издөө...",
-                tabExcel:"📁 1. Тизме (Excel системасы)", tabCards:"📁 2. Сүрөттөр менен",
+                tabExcel:"📁 1. Тизме (Excel системасы)", tabCards:"📁 3. Сүрөттөр менен",
                 setCopy:"Көчүрүп алуу (Копировать) функциясы", setCopyDesc:"Тизмедеги «Көчүрүү» баскычын күйгүзүү же өчүрүү",
                 setDown:"Сүрөттөрдү файлга сактоо функциясы", setDownDesc:"Сүрөттөрдү файлга сактоо баскычын күйгүзүү же өчүрүү",
                 setDel:"Өчүрүү функциясы", setDelDesc:"Тизмеден маалыматты өчүрүү баскычы",
@@ -1163,7 +1226,7 @@
                 folderRegDesc:"Список зарегистрированных", folderSet:"Настройки", folderSetDesc:"Системные настройки",
                 folderCur:"Кураторы", folderCurDesc:"Список кураторов",
                 copyAll:"📋 Копировать все имена (списком)", searchPh:"🔍 Поиск по Ф.И.О. или Файл №...",
-                tabExcel:"📁 1. Список (Система Excel)", tabCards:"📁 2. С фото",
+                tabExcel:"📁 1. Список (Система Excel)", tabCards:"📁 3. С фото",
                 setCopy:"Функция копирования", setCopyDesc:"Включить или отключить кнопку «Копировать»",
                 setDown:"Сохранение фото в файл", setDownDesc:"Включить или отключить сохранение фото в файл",
                 setDel:"Функция удаления", setDelDesc:"Кнопка удаления данных из списка",
@@ -1190,7 +1253,7 @@
                 folderRegDesc:"قائمة المسجلين", folderSet:"الإعدادات", folderSetDesc:"إعدادات النظام",
                 folderCur:"المنسقون", folderCurDesc:"قائمة المنسقين",
                 copyAll:"📋 نسخ جميع الأسماء", searchPh:"🔍 البحث بالاسم أو رقم الملف...",
-                tabExcel:"📁 1. القائمة (Excel)", tabCards:"📁 2. الصور",
+                tabExcel:"📁 1. القائمة (Excel)", tabCards:"📁 3. الصور",
                 setCopy:"وظيفة النسخ", setCopyDesc:"تشغيل أو إيقاف زر النسخ",
                 setDown:"حفظ الصور في ملف", setDownDesc:"تشغيل أو إيقاف حفظ الصور في ملف",
                 setDel:"وظيفة الحذف", setDelDesc:"زر حذف البيانات من القائمة",
@@ -1264,10 +1327,12 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
+            loadRegistrationsCache();
             navigateTo('screenMainMenu', false);
             initSettingsUI();
             try { importedFileNumbers = new Set(JSON.parse(localStorage.getItem('imported_excel_file_numbers')||'[]')); } catch(e) {}
             try { importedExcelRows = JSON.parse(localStorage.getItem('imported_excel_rows')||'[]'); } catch(e) { importedExcelRows=[]; }
+            updateImportedExcelButtons();
             renderComparisonExcel();
             updateImportedExcelControls();
             const savedLang = localStorage.getItem('bait_language') || 'ky';
@@ -1344,6 +1409,7 @@
 
         function showScreenUI(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.body.classList.toggle('admin-wide', screenId==='screenAdminRegistered');
             const safeScreenId=(screenId==='screenAdminExcel'||screenId==='screenAdminAnalytics')?'screenAdminRegistered':screenId;
             const target = document.getElementById(safeScreenId) || document.getElementById('screenMainMenu');
             target.classList.add('active');
@@ -1356,10 +1422,14 @@
                 document.getElementById('phoneErrorContainer').style.display = 'none';
                 document.getElementById('childPhoneInput').value = currentChildPhone;
             } else if (screenId === 'screenAdminMenu') {
+                loadRegistrationsCache();
                 if(!allRegistrations.length && !registrationsPageLoading) loadRegisteredList(true);
+                startRegistrationsRealtime();
             } else if (screenId === 'screenAdminRegistered') {
+                loadRegistrationsCache();
                 if(!allRegistrations.length && !registrationsPageLoading) loadRegisteredList(true);
-                else { applyFilters(); installRegistrationInfiniteScroll(); setupAllExcelScrolls(); }
+                else { applyFilters(); installRegistrationInfiniteScroll(); setupAllExcelScrolls(); switchFolder('excel'); }
+                startRegistrationsRealtime();
             }
         }
 
@@ -1909,6 +1979,46 @@
         let registrationsPageLoading = false;
         let registrationsScrollHandler = null;
         let registrationAutoFillTimer = null;
+        let registrationsRealtimeUnsubscribe = null;
+        let registrationsBackgroundLoading = false;
+        const REG_CACHE_KEY = 'bait_registrations_cache_v12';
+
+        function saveRegistrationsCache(){
+            try{
+                const safe=allRegistrations.map(x=>({id:x.id,fullName:x.fullName||'',fullNameNormalized:x.fullNameNormalized||'',phone:x.phone||'',fileNumber:x.fileNumber||'',photo1:x.photo1||null,photo2:x.photo2||null,createdAtMillis:(x.createdAt?.toMillis?x.createdAt.toMillis():(x.createdAt?.seconds?x.createdAt.seconds*1000:(typeof x.createdAtMillis==='number'?x.createdAtMillis:0)))}));
+                localStorage.setItem(REG_CACHE_KEY,JSON.stringify(safe));
+            }catch(e){ console.warn('Cache save error',e); }
+        }
+        function loadRegistrationsCache(){
+            try{
+                const raw=localStorage.getItem(REG_CACHE_KEY); if(!raw)return false;
+                const arr=JSON.parse(raw); if(!Array.isArray(arr)||!arr.length)return false;
+                allRegistrations=arr.map(x=>({...x,createdAtMillis:Number(x.createdAtMillis||0),createdAt:{seconds:Math.floor(Number(x.createdAtMillis||0)/1000)}}));
+                currentFilteredRegistrations=allRegistrations.slice();
+                applyFilters();
+                return true;
+            }catch(e){ return false; }
+        }
+        function mergeRegistrationData(item){
+            const idx=allRegistrations.findIndex(x=>x.id===item.id);
+            if(idx>=0) allRegistrations[idx]={...allRegistrations[idx],...item}; else allRegistrations.push(item);
+            allRegistrations.sort((a,b)=>Number(b.createdAtMillis||0)-Number(a.createdAtMillis||0));
+        }
+        function startRegistrationsRealtime(){
+            if(registrationsRealtimeUnsubscribe) return;
+            try{
+                registrationsRealtimeUnsubscribe=db.collection('registrations').orderBy('createdAt','desc').limit(1).onSnapshot(snap=>{
+                    let changed=false;
+                    snap.docChanges().forEach(ch=>{
+                        const d=ch.doc.data()||{};
+                        const item={id:ch.doc.id,fullName:d.fullName||d.name||'',fullNameNormalized:d.fullNameNormalized||normalizeName(d.fullName||d.name||''),phone:d.phone||'',fileNumber:d.fileNumber||'',photo1:d.photo1||null,photo2:d.photo2||null,createdAt:d.createdAt||null,createdAtMillis:d.createdAt?.toMillis?d.createdAt.toMillis():(d.createdAt?.seconds?d.createdAt.seconds*1000:Date.now())};
+                        if(ch.type==='removed'){ const before=allRegistrations.length; allRegistrations=allRegistrations.filter(x=>x.id!==ch.doc.id); changed=changed||before!==allRegistrations.length; }
+                        else { mergeRegistrationData(item); changed=true; }
+                    });
+                    if(changed){ saveRegistrationsCache(); applyFilters(); renderAnalytics(); }
+                },err=>console.warn('Realtime listener error',err));
+            }catch(e){ console.warn('Realtime setup error',e); }
+        }
 
         async function loadRegisteredList(reset = true) {
             const listContainer = document.getElementById('siteRegisteredList');
@@ -1918,21 +2028,24 @@
             registrationsPageLoading = true;
 
             if (reset) {
-                allRegistrations = [];
-                currentFilteredRegistrations = [];
+                const hadCache=allRegistrations.length>0 || loadRegistrationsCache();
                 registrationsPageCursor = null;
                 registrationsHasMore = true;
                 selectedIds = new Set();
-                listContainer.innerHTML = `<div class="empty-state"><span class="spinner"></span> ${translations[currentLang].loading || 'Жүктөлүүдө...'}</div>`;
-                excelTableBody.innerHTML = `<tr><td colspan="7" class="empty-state"><span class="spinner"></span> ${translations[currentLang].loading || 'Жүктөлүүдө...'}</td></tr>`;
+                if(!hadCache){
+                    allRegistrations = []; currentFilteredRegistrations = [];
+                    listContainer.innerHTML = `<div class="empty-state"><span class="spinner"></span> ${translations[currentLang].loading || 'Жүктөлүүдө...'}</div>`;
+                    excelTableBody.innerHTML = `<tr><td colspan="7" class="empty-state"><span class="spinner"></span> ${translations[currentLang].loading || 'Жүктөлүүдө...'}</td></tr>`;
+                }
             } else {
                 const loading = document.getElementById('loadMoreLoading');
                 if (loading) loading.style.display='block';
             }
 
             try {
-                // Ар дайым 5тен гана алабыз. Документ ID боюнча пагинация эски createdAt жок жазууларды да өткөрбөйт.
-                let q = db.collection('registrations').orderBy(firebase.firestore.FieldPath.documentId()).limit(5);
+                // Башында экранга 5 бала тез көрсөтүлөт. Андан кийинки фондо жүктөөлөр Firebase'ден бирден алынат.
+                const batchSize = reset ? 5 : 1;
+                let q = db.collection('registrations').orderBy(firebase.firestore.FieldPath.documentId()).limit(batchSize);
                 if (registrationsPageCursor) q = q.startAfter(registrationsPageCursor);
                 const snap = await q.get({source:'default'});
 
@@ -1941,7 +2054,7 @@
                 } else {
                     snap.forEach(doc => {
                         const data = doc.data() || {};
-                        allRegistrations.push({
+                        mergeRegistrationData({
                             id: doc.id,
                             fullName: data.fullName || data.name || '',
                             fullNameNormalized: data.fullNameNormalized || normalizeName(data.fullName || data.name || ''),
@@ -1949,11 +2062,12 @@
                             fileNumber: data.fileNumber || '',
                             photo1: data.photo1 || null,
                             photo2: data.photo2 || null,
-                            createdAt: data.createdAt || null
+                            createdAt: data.createdAt || null,
+                            createdAtMillis: data.createdAt?.toMillis ? data.createdAt.toMillis() : (data.createdAt?.seconds ? data.createdAt.seconds*1000 : 0)
                         });
                     });
                     registrationsPageCursor = snap.docs[snap.docs.length - 1];
-                    if (snap.size < 5) registrationsHasMore = false;
+                    if (snap.size < batchSize) registrationsHasMore = false;
                 }
 
                 allRegistrations.sort((a,b)=>{
@@ -1962,6 +2076,7 @@
                     return tb-ta;
                 });
                 applyFilters();
+                saveRegistrationsCache();
                 registrationsPageLoading = false;
                 const loading = document.getElementById('loadMoreLoading'); if(loading) loading.style.display='none';
                 const more = document.getElementById('loadMoreBtn');
@@ -1994,70 +2109,145 @@
 
         function scheduleRegistrationAutoFill(){
             clearTimeout(registrationAutoFillTimer);
-            registrationAutoFillTimer=setTimeout(()=>{
-                const screen=document.getElementById('screenAdminRegistered');
-                if(!screen || !screen.classList.contains('active') || !registrationsHasMore || registrationsPageLoading) return;
-                // Колдонуучу эч нерсе баспайт: серверден кийинки 5 бала өзүнөн-өзү келет.
-                // Ар бир сурам 5 документтен гана болгондуктан браузерге бир чоң сурам жүктөлбөйт.
-                loadRegisteredList(false);
-            },250);
+            registrationAutoFillTimer=setTimeout(async()=>{
+                const regScreen=document.getElementById('screenAdminRegistered');
+                const menuScreen=document.getElementById('screenAdminMenu');
+                const adminVisible=(regScreen?.classList.contains('active')||menuScreen?.classList.contains('active'));
+                if(!adminVisible || !registrationsHasMore || registrationsBackgroundLoading) return;
+                registrationsBackgroundLoading=true;
+                try{
+                    while(registrationsHasMore && !registrationsPageLoading){
+                        await loadRegisteredList(false);
+                        await new Promise(r=>setTimeout(r,25));
+                    }
+                }finally{ registrationsBackgroundLoading=false; }
+            },120);
         }
 
         async function loadMoreRegistrations(){ if(registrationsHasMore) await loadRegisteredList(false); }
 
         function switchFolder(folderType) {
-            const tabs={excel:'tabExcel',cards:'tabCards',imported:'tabImported'};
-            const views={excel:'folderViewExcel',cards:'folderViewCards',imported:'folderViewImportedExcel'};
+            const tabs={excel:'tabExcel',imported:'tabImported',cards:'tabCards'};
             Object.keys(tabs).forEach(k=>document.getElementById(tabs[k])?.classList.toggle('active',k===folderType));
-            Object.keys(views).forEach(k=>{const el=document.getElementById(views[k]); if(el)el.style.display=(k===folderType?'block':'none');});
-            if(folderType==='imported') { updateImportedExcelControls(); renderComparisonExcel(); }
+
+            const excel=document.getElementById('folderViewExcel');
+            const imported=document.getElementById('folderViewImportedExcel');
+            const cards=document.getElementById('folderViewCards');
+            const layout=document.querySelector('#screenAdminRegistered .three-pane-layout');
+
+            // 1. Система Excel + 2. Excel жүктөө — бир экранда чогуу.
+            // 3. Сүрөттөрдү басканда сүрөттөр өзүнчө, чоң терезеде ачылат.
+            if(folderType==='cards'){
+                if(excel) excel.style.display='none';
+                if(imported) imported.style.display='none';
+                if(cards) cards.style.display='flex';
+                if(layout){
+                    layout.style.gridTemplateColumns='minmax(0,1fr)';
+                    layout.style.height='calc(100vh - 230px)';
+                }
+                applyFilters();
+                return;
+            }
+
+            if(excel) excel.style.display='flex';
+            if(imported) imported.style.display='flex';
+            if(cards) cards.style.display='none';
+            if(layout){
+                layout.style.gridTemplateColumns='minmax(0,1fr) minmax(0,1fr)';
+                layout.style.height='calc(100vh - 230px)';
+            }
+            updateImportedExcelControls();
+            renderComparisonExcel();
+            setupAllExcelScrolls();
+        }
+
+        function normalizeExcelHeader(value){
+            return String(value ?? '').replace(/\s+/g,' ').trim();
+        }
+
+        function detectExcelRows(rows){
+            if(!Array.isArray(rows)) return [];
+            return rows.map(row=>{
+                const out={};
+                Object.keys(row||{}).forEach(k=>{
+                    const key=normalizeExcelHeader(k);
+                    if(key) out[key]=row[k] == null ? '' : String(row[k]);
+                });
+                return out;
+            }).filter(row=>Object.values(row).some(v=>String(v).trim()!==''));
         }
 
         async function handleComparisonExcel(file){
-            if(!file || !window.XLSX)return;
-            try{
-                const buf=await file.arrayBuffer();
-                const wb=XLSX.read(buf,{type:'array'});
-                const ws=wb.Sheets[wb.SheetNames[0]];
-                const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
-                importedExcelRows=rows;
-                importedFileNumbers=new Set();
-                rows.forEach(r=>{
-                    const key=Object.keys(r).find(k=>/файл\s*№|файл\s*номер|file\s*no|fileno/i.test(String(k)));
-                    if(key){ const n=String(r[key]).replace(/\D/g,'').slice(0,5); if(n) importedFileNumbers.add(n); }
-                });
-                localStorage.setItem('imported_excel_rows',JSON.stringify(importedExcelRows));
-                localStorage.setItem('imported_excel_file_numbers',JSON.stringify([...importedFileNumbers]));
-                const status=document.getElementById('comparisonExcelStatus');
-                if(status) status.textContent=`Жүктөлдү: ${rows.length} сап, файл №: ${importedFileNumbers.size}`;
-                updateImportedExcelControls();
-                renderComparisonExcel();
-                renderData(currentFilteredRegistrations);
-                renderAnalytics();
-            }catch(e){ console.error(e); showCenterNotice('❌','Ката','Excel файлды окуу мүмкүн болбоду.'); }
-        }
-
-        function updateImportedExcelControls(){
-            const btn=document.getElementById('deleteImportedExcelBtnInline') || document.getElementById('deleteImportedExcelBtn');
-            if(btn) btn.style.display=importedExcelRows.length?'inline-flex':'none';
-            const status=[...document.querySelectorAll('#comparisonExcelStatus')].find(x=>x.offsetParent!==null) || document.getElementById('comparisonExcelStatus');
-            if(status && importedExcelRows.length) status.textContent=`Жүктөлгөн Excel: ${importedExcelRows.length} сап, файл №: ${importedFileNumbers.size}`;
-        }
-
-        async function deleteImportedExcel(){
-            if(!importedExcelRows.length)return;
-            if(!await askDeleteConfirmation(1))return;
-            importedExcelRows=[];
-            importedFileNumbers=new Set();
-            localStorage.removeItem('imported_excel_rows');
-            localStorage.removeItem('imported_excel_file_numbers');
             const status=document.getElementById('comparisonExcelStatus');
-            if(status) status.textContent='Excel файл өчүрүлдү.';
-            updateImportedExcelControls();
-            renderComparisonExcel();
-            renderData(currentFilteredRegistrations);
-            renderAnalytics();
-            showCenterNotice('✓','Өчүрүлдү','Жүктөлгөн Excel өчүрүлдү.');
+            const legacyStatus=document.getElementById('comparisonExcelStatusLegacy');
+            const setStatus=(msg,ok=false)=>{
+                [status,legacyStatus].forEach(el=>{ if(el){el.textContent=msg; el.style.color=ok?'#16a34a':'var(--text-sub)';} });
+            };
+            if(!file) return;
+            if(typeof XLSX==='undefined'){
+                setStatus('❌ Excel модулу жүктөлгөн жок. Интернет байланышын текшериңиз.');
+                showQuickNotice('!','Excel модулу жүктөлгөн жок');
+                return;
+            }
+            try{
+                setStatus('Excel окулуп жатат...');
+                const buffer=await file.arrayBuffer();
+                const workbook=XLSX.read(buffer,{type:'array',cellDates:true});
+                if(!workbook.SheetNames.length) throw new Error('empty-workbook');
+                const sheet=workbook.Sheets[workbook.SheetNames[0]];
+                const raw=XLSX.utils.sheet_to_json(sheet,{defval:'',raw:false,blankrows:false});
+                const rows=detectExcelRows(raw);
+                if(!rows.length){
+                    importedExcelRows=[];
+                    importedFileNumbers=new Set();
+                    persistImportedExcel();
+                    renderComparisonExcel();
+                    renderAnalytics();
+                    updateImportedExcelButtons();
+                    setStatus('Excel файл бош же маалымат табылган жок.');
+                    return;
+                }
+                importedExcelRows=rows;
+                localStorage.setItem('imported_excel_name',file.name||'Excel');
+                persistImportedExcel();
+                renderComparisonExcel();
+                renderAnalytics();
+                updateImportedExcelButtons();
+                setStatus(`✓ ${rows.length} бала жүктөлдү: ${file.name||'Excel'}`,true);
+                showQuickNotice('✓','Excel жүктөлдү');
+            }catch(error){
+                console.error('Excel import error:',error);
+                setStatus('❌ Excel окууда ката кетти. .xlsx, .xls же .csv файл тандаңыз.');
+                showQuickNotice('!','Excel жүктөлгөн жок');
+            }
+        }
+
+        function updateImportedExcelButtons(){
+            const has=Array.isArray(importedExcelRows)&&importedExcelRows.length>0;
+            ['deleteImportedExcelBtnInline','deleteImportedExcelBtnLegacy'].forEach(id=>{
+                const el=document.getElementById(id); if(el) el.style.display=has?'inline-flex':'none';
+            });
+        }
+
+        function deleteImportedExcel(){
+            const has=Array.isArray(importedExcelRows)&&importedExcelRows.length>0;
+            if(!has) return;
+            askDeleteConfirmation(1).then(ok=>{ if(!ok)return;
+                importedExcelRows=[];
+                importedFileNumbers=new Set();
+                localStorage.removeItem('imported_excel_rows');
+                localStorage.removeItem('imported_excel_file_numbers');
+                localStorage.removeItem('imported_excel_name');
+                const input1=document.getElementById('comparisonExcelInputInline');
+                const input2=document.getElementById('comparisonExcelInputLegacy');
+                if(input1) input1.value='';
+                if(input2) input2.value='';
+                renderComparisonExcel();
+                renderAnalytics();
+                updateImportedExcelButtons();
+                ['comparisonExcelStatus','comparisonExcelStatusLegacy'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='';});
+                showQuickNotice('✓','Excel өчүрүлдү');
+            });
         }
 
         function renderComparisonExcel(){
