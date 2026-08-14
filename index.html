@@ -811,9 +811,9 @@
                     <input type="text" id="searchInput" class="search-input" placeholder="🔍 Ф.И.О. же Файл № боюнча издөө..." oninput="applyFilters()">
                 </div>
                 <div class="folder-tabs">
-                    <button id="tabExcel" class="tab-btn active" onclick="switchFolder('excel')">1. Тизме (Excel)</button>
-                    <button id="tabCards" class="tab-btn" onclick="switchFolder('cards')">2. Сүрөттөр</button>
-                    <button id="tabImported" class="tab-btn" onclick="switchFolder('imported')">3. Excel жүктөө</button>
+                    <button id="tabExcel" class="tab-btn active" onclick="switchFolder('excel')">1. Excel система</button>
+                    <button id="tabImported" class="tab-btn" onclick="switchFolder('imported')">2. Excel жүктөө</button>
+                    <button id="tabCards" class="tab-btn" onclick="switchFolder('cards')">3. Сүрөттөр</button>
                 </div>
             </div>
 
@@ -1356,7 +1356,10 @@
                 document.getElementById('phoneErrorContainer').style.display = 'none';
                 document.getElementById('childPhoneInput').value = currentChildPhone;
             } else if (screenId === 'screenAdminMenu') {
+                // Админ панель ачылганда Катталгандар папкасына кирбестен
+                // Firebase'ден маалымат 5тен автоматтык түрдө келе берет.
                 if(!allRegistrations.length && !registrationsPageLoading) loadRegisteredList(true);
+                else scheduleRegistrationAutoFill();
             } else if (screenId === 'screenAdminRegistered') {
                 if(!allRegistrations.length && !registrationsPageLoading) loadRegisteredList(true);
                 else { applyFilters(); installRegistrationInfiniteScroll(); setupAllExcelScrolls(); }
@@ -1952,6 +1955,13 @@
                             createdAt: data.createdAt || null
                         });
                     });
+                    // Сүрөттөрдү браузер фондук режимде алдын ала жүктөй баштайт.
+                    snap.forEach(doc => {
+                        const d = doc.data() || {};
+                        [d.photo1, d.photo2].forEach(src => {
+                            if (src) { const img = new Image(); img.decoding = 'async'; img.src = src; }
+                        });
+                    });
                     registrationsPageCursor = snap.docs[snap.docs.length - 1];
                     if (snap.size < 5) registrationsHasMore = false;
                 }
@@ -1995,8 +2005,11 @@
         function scheduleRegistrationAutoFill(){
             clearTimeout(registrationAutoFillTimer);
             registrationAutoFillTimer=setTimeout(()=>{
-                const screen=document.getElementById('screenAdminRegistered');
-                if(!screen || !screen.classList.contains('active') || !registrationsHasMore || registrationsPageLoading) return;
+                const registeredScreen=document.getElementById('screenAdminRegistered');
+                const adminScreen=document.getElementById('screenAdminMenu');
+                if((!registeredScreen || !registeredScreen.classList.contains('active')) &&
+                   (!adminScreen || !adminScreen.classList.contains('active'))) return;
+                if(!registrationsHasMore || registrationsPageLoading) return;
                 // Колдонуучу эч нерсе баспайт: серверден кийинки 5 бала өзүнөн-өзү келет.
                 // Ар бир сурам 5 документтен гана болгондуктан браузерге бир чоң сурам жүктөлбөйт.
                 loadRegisteredList(false);
