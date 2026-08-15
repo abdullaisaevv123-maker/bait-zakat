@@ -8,7 +8,6 @@
     <!-- FIREBASE КИТЕПКАНАЛАРЫ -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
@@ -1103,7 +1102,20 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        const storage = firebase.storage();
+
+        // ============================================================
+        // CLOUDINARY — ЖАҢЫ СҮРӨТТӨР УШУЛ ЖЕРГЕ САКТАЛАТ
+        // Firebase Firestore эски маалыматтарды жана жаңы каттоонун
+        // аты/телефону/сүрөт URL даректерин сактоо үчүн калат.
+        //
+        // Бул 2 маанини Cloudinary Dashboard'дан өзүңүз коёсуз:
+        // 1) cloudName
+        // 2) unsigned upload preset
+        // ============================================================
+        const CLOUDINARY_CLOUD_NAME = "lubzzsqe";
+        const CLOUDINARY_UPLOAD_PRESET = "ml_default";
+        const CLOUDINARY_UPLOAD_URL =
+            `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
 
         let currentChildName = "";
         let currentChildPhone = "";
@@ -1548,7 +1560,7 @@
             // толук бойдо/белинен өйдө сүрөт табигый көрүнүшү үчүн mirror кылбайбыз.
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.96);
             const img = new Image();
             img.onload = function () {
                 closeCameraModal();
@@ -1605,28 +1617,20 @@
 
             document.getElementById('photoErrorWhatsAppContainer').style.display = 'none';
 
-            // Firestore документине өтө чоң Base64 кирбеши үчүн сүрөттү кичирейтебиз.
+            // Сүрөттүн горизонталдык пропорциясын өзгөртпөйбүз.
+            // Мурда 650px + JPEG 0.52 болуп катуу кысылып жаткан.
+            // Эми сапатты мүмкүн болушунча сактап, Cloudinaryге жүктөйбүз.
             const canvas = document.createElement('canvas');
-            const maxDim = 650;
-            let width = img.width;
-            let height = img.height;
-
-            if (width > maxDim || height > maxDim) {
-                if (width > height) {
-                    height = Math.round((height * maxDim) / width);
-                    width = maxDim;
-                } else {
-                    width = Math.round((width * maxDim) / height);
-                    height = maxDim;
-                }
-            }
+            const width = img.naturalWidth || img.width;
+            const height = img.naturalHeight || img.height;
 
             canvas.width = width;
             canvas.height = height;
             const ctx = canvas.getContext('2d', { alpha: false });
             ctx.drawImage(img, 0, 0, width, height);
 
-            const resizedBase64 = canvas.toDataURL('image/jpeg', 0.52);
+            // 0.92 — сапаттуу JPEG. Пропорциясы/горизонтал форматы сакталат.
+            const resizedBase64 = canvas.toDataURL('image/jpeg', 0.92);
             capturedPhotos[slotIndex] = resizedBase64;
 
             const card = document.getElementById('photoCard' + slotIndex);
@@ -1664,10 +1668,10 @@
             const code = error && error.code ? error.code : '';
             const msg = error && error.message ? error.message : '';
             if (code === 'storage/unauthorized' || code === 'storage/permission-denied') {
-                return 'Firebase Storage уруксат бербей жатат. Автоматтык түрдө сүрөттү кичирейтип Firestore аркылуу сактоого аракет кылабыз.';
+                return 'Сүрөт серверине туташууда ката кетти. Cloudinary жөндөөлөрүн текшериңиз.';
             }
             if (code === 'storage/bucket-not-found') {
-                return 'Firebase Storage күйгүзүлгөн эмес же Storage bucket табылган жок. Автоматтык резервдик сактоо колдонулат.';
+                return 'Cloudinary жөндөөсү табылган жок. Cloud Name жана Upload Preset текшериңиз.';
             }
             if (code === 'permission-denied') {
                 return 'Firestore уруксаты берилген жок (permission-denied). Firebase Rules текшерилиши керек.';
@@ -1742,38 +1746,61 @@
                     .slice(0, 80) || 'child';
                 const uniqueId = `${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
 
-                async function uploadPhoto(slot) {
-                    const ref = storage.ref(`registrations/${uniqueId}/${safeFileName}_${slot}.jpg`);
-                    // Жүктөө өзүнө 8 секунд чейин убакыт беребиз.
-                    const snapshot = await withTimeout(
-                        ref.putString(capturedPhotos[slot], 'data_url', {
-                            contentType: 'image/jpeg',
-                            customMetadata: { fullName: currentChildName, phone: currentChildPhone }
-                        }),
-                        8000,
-                        'storage-upload-timeout'
+                async function uploadPhotoToCloudinary(slot) {
+                    if (!CLOUDINARY_CLOUD_NAME || CLOUDINARY_CLOUD_NAME === "YOUR_CLOUD_NAME" ||
+                        !CLOUDINARY_UPLOAD_PRESET || CLOUDINARY_UPLOAD_PRESET === "YOUR_UNSIGNED_UPLOAD_PRESET") {
+                        throw new Error('cloudinary-config-missing');
+                    }
+
+                    // Base64 data URL -> Blob. Сүрөт Cloudinaryге түз браузерден кетет.
+                    const response = await fetch(capturedPhotos[slot]);
+                    const blob = await response.blob();
+
+                    const formData = new FormData();
+                    formData.append('file', blob, `${safeFileName}_${slot}.jpg`);
+                    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+                    formData.append('folder', `bait-zakat/registrations/${uniqueId}`);
+                    formData.append('context', `fullName=${currentChildName}|phone=${currentChildPhone}|slot=${slot}`);
+
+                    const uploadResponse = await withTimeout(
+                        fetch(CLOUDINARY_UPLOAD_URL, { method: 'POST', body: formData }),
+                        20000,
+                        'cloudinary-upload-timeout'
                     );
-                    // URL алууга дагы 8 секунд.
-                    return await withTimeout(snapshot.ref.getDownloadURL(), 8000, 'storage-url-timeout');
+
+                    if (!uploadResponse.ok) {
+                        const errorText = await uploadResponse.text().catch(() => '');
+                        throw new Error(`cloudinary-upload-${uploadResponse.status}: ${errorText}`);
+                    }
+
+                    const result = await uploadResponse.json();
+                    if (!result.secure_url) throw new Error('cloudinary-no-url');
+
+                    return {
+                        url: result.secure_url,
+                        publicId: result.public_id || null,
+                        width: result.width || null,
+                        height: result.height || null,
+                        format: result.format || 'jpg'
+                    };
                 }
 
                 let photo1Url = null;
                 let photo2Url = null;
-                let usedStorage = false;
+                let cloudinaryPublicId1 = null;
+                let cloudinaryPublicId2 = null;
 
-                // Биринчи тандоо: Firebase Storage. Эгер 8 секунддан ашык убакыт
-                // алса же катага учураса, автоматтык түрдө Firestore base64
-                // резервдик режимине өтөбүз — спиннер эч качан асылып калбайт.
-                try {
-                    btn.innerHTML = `<span class="spinner spinner-dark"></span> Сүрөттөр жүктөлүүдө...`;
-                    [photo1Url, photo2Url] = await Promise.all([uploadPhoto(1), uploadPhoto(2)]);
-                    usedStorage = true;
-                } catch (storageError) {
-                    console.warn('Storage upload иштеген жок (же убакыт чегинен ашты), резервдик Firestore сактоо колдонулат:', storageError);
-                    // Сүрөттөр буга чейин 650px жана JPEG 0.52 болуп кысылган.
-                    photo1Url = capturedPhotos[1];
-                    photo2Url = capturedPhotos[2];
-                }
+                btn.innerHTML = `<span class="spinner spinner-dark"></span> Сүрөттөр Cloudinaryге жүктөлүүдө...`;
+
+                const [cloudPhoto1, cloudPhoto2] = await Promise.all([
+                    uploadPhotoToCloudinary(1),
+                    uploadPhotoToCloudinary(2)
+                ]);
+
+                photo1Url = cloudPhoto1.url;
+                photo2Url = cloudPhoto2.url;
+                cloudinaryPublicId1 = cloudPhoto1.publicId;
+                cloudinaryPublicId2 = cloudPhoto2.publicId;
 
                 btn.innerHTML = `<span class="spinner spinner-dark"></span> Сакталууда...`;
 
@@ -1783,8 +1810,11 @@
                     phone: currentChildPhone,
                     photo1: photo1Url,
                     photo2: photo2Url,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    photoStorage: usedStorage ? 'storage' : 'firestore-base64'
+                    cloudinaryPublicId1,
+                    cloudinaryPublicId2,
+                    photoStorage: 'cloudinary',
+                    photoFormat: 'jpg',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
 
                 // Firestore'го жазуу сурамына да убакыт чеги коёбуз.
