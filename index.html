@@ -8,6 +8,7 @@
     <!-- FIREBASE КИТЕПКАНАЛАРЫ -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-functions-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
@@ -922,6 +923,12 @@
                     </label>
                 </div>
 
+                <div class="setting-item" style="display:block;">
+                    <div class="setting-info">☁️ Cloudinary сүрөт сактагычтары</div>
+                    <div class="setting-desc" style="margin-bottom:12px;">Жаңы сүрөттөр үч Cloudinary аккаунтка кезек менен сакталат. Firebase'деги эски маалыматтар өзгөрбөйт.</div>
+                    <div id="cloudinarySettingsStatus" style="display:grid;gap:8px;"></div>
+                </div>
+
                 <div style="margin-top: 20px;">
                     <div class="setting-info" style="margin-bottom: 8px;" id="txtSetPassTitle">Админ паролун өзгөртүү</div>
                     <div class="input-group">
@@ -1103,19 +1110,18 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // ============================================================
-        // CLOUDINARY — ЖАҢЫ СҮРӨТТӨР УШУЛ ЖЕРГЕ САКТАЛАТ
-        // Firebase Firestore эски маалыматтарды жана жаңы каттоонун
-        // аты/телефону/сүрөт URL даректерин сактоо үчүн калат.
-        //
-        // Бул 2 маанини Cloudinary Dashboard'дан өзүңүз коёсуз:
-        // 1) cloudName
-        // 2) unsigned upload preset
-        // ============================================================
-        const CLOUDINARY_CLOUD_NAME = "lubzzsqe";
-        const CLOUDINARY_UPLOAD_PRESET = "ml_default";
-        const CLOUDINARY_UPLOAD_URL =
-            `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+        // === CLOUDINARY: 3 АККАУНТ, ЖАҢЫ СҮРӨТТӨР ҮЧҮН ===
+        // 1) oojjfj4c / pamyat2
+        // 2) tfjn735t / pamyat3
+        // 3) lubzzsqe / ml_default
+        const CLOUDINARY_ACCOUNTS = [
+            { id: 'cloud1', label: 'Cloudinary 1 — pamyat2', cloudName: 'oojjfj4c', uploadPreset: 'pamyat2' },
+            { id: 'cloud2', label: 'Cloudinary 2 — pamyat3', cloudName: 'tfjn735t', uploadPreset: 'pamyat3' },
+            { id: 'cloud3', label: 'Cloudinary 3 — ml_default', cloudName: 'lubzzsqe', uploadPreset: 'ml_default' }
+        ];
+        const CLOUDINARY_ROTATION_KEY = 'bait_cloudinary_rotation_index_v1';
+        let lastCloudinaryUpload = null;
+
 
         let currentChildName = "";
         let currentChildPhone = "";
@@ -1294,10 +1300,31 @@
             document.getElementById('settingDownloadToggle').checked = settings.allowDownload;
             document.getElementById('settingDeleteToggle').checked = settings.allowDelete;
             document.getElementById('settingRegistrationClosedToggle').checked = settings.registrationClosed;
+            renderCloudinarySettings();
             
             const passInput = document.getElementById('newAdminPasswordInput');
             passInput.value = settings.adminPass;
             passInput.type = 'password';
+        }
+
+        function renderCloudinarySettings(){
+            const box=document.getElementById('cloudinarySettingsStatus');
+            if(!box)return;
+            const nextIndex=parseInt(localStorage.getItem(CLOUDINARY_ROTATION_KEY)||'0',10);
+            const next=CLOUDINARY_ACCOUNTS[(Number.isFinite(nextIndex)?nextIndex:0)%CLOUDINARY_ACCOUNTS.length];
+            box.innerHTML=CLOUDINARY_ACCOUNTS.map((a,i)=>{
+                const isNext=a.id===next.id;
+                const isLast=lastCloudinaryUpload && lastCloudinaryUpload.id===a.id;
+                return `<div style="padding:10px 12px;border:1px solid rgba(91,192,190,.18);border-radius:12px;background:rgba(11,19,43,.55);display:flex;justify-content:space-between;gap:10px;align-items:center;">
+                    <div><b>${escapeHtml(a.label)}</b><div style="font-size:11px;color:var(--text-sub);">Cloud name: ${escapeHtml(a.cloudName)} · preset: ${escapeHtml(a.uploadPreset)}</div></div>
+                    <span style="font-size:11px;color:${isNext?'var(--accent-glow)':'var(--text-sub)'};font-weight:700;white-space:nowrap;">${isLast?'✓ Акыркы сакталды':isNext?'● Кийинки':'Даяр'}</span>
+                </div>`;
+            }).join('');
+        }
+
+        function getCloudinarySummary(item){
+            if(!item || !item.cloudinary) return '';
+            return item.cloudinary.accountLabel || item.cloudinary.cloudName || '';
         }
 
         function saveSettings() {
@@ -1560,7 +1587,7 @@
             // толук бойдо/белинен өйдө сүрөт табигый көрүнүшү үчүн mirror кылбайбыз.
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.96);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
             const img = new Image();
             img.onload = function () {
                 closeCameraModal();
@@ -1617,31 +1644,23 @@
 
             document.getElementById('photoErrorWhatsAppContainer').style.display = 'none';
 
-            // Сүрөттүн горизонталдык пропорциясын өзгөртпөйбүз.
-            // Мурда 650px + JPEG 0.52 болуп катуу кысылып жаткан.
-            // Эми сапатты мүмкүн болушунча сактап, Cloudinaryге жүктөйбүз.
+            // ЭСКИ ВЕРСИЯДАГЫ 650px / JPEG 0.52 КЫСУУ АЛЫП САЛЫНДЫ.
+            // Камерадан келген сүрөт толук canvas өлчөмүндө, сапат 1.0 менен гана коддолот.
             const canvas = document.createElement('canvas');
-            const width = img.naturalWidth || img.width;
-            const height = img.naturalHeight || img.height;
-
-            canvas.width = width;
-            canvas.height = height;
+            canvas.width = img.naturalWidth || img.width;
+            canvas.height = img.naturalHeight || img.height;
             const ctx = canvas.getContext('2d', { alpha: false });
-            ctx.drawImage(img, 0, 0, width, height);
-
-            // 0.92 — сапаттуу JPEG. Пропорциясы/горизонтал форматы сакталат.
-            const resizedBase64 = canvas.toDataURL('image/jpeg', 0.92);
-            capturedPhotos[slotIndex] = resizedBase64;
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            const originalQualityJpeg = canvas.toDataURL('image/jpeg', 1.0);
+            capturedPhotos[slotIndex] = originalQualityJpeg;
 
             const card = document.getElementById('photoCard' + slotIndex);
             const box = document.getElementById('box' + slotIndex);
             const status = document.getElementById('status' + slotIndex);
-
             card.classList.add('done');
-            box.innerHTML = `<img src="${resizedBase64}" class="photo-slot-img" alt="Сүрөт ${slotIndex}">`;
+            box.innerHTML = `<img src="${originalQualityJpeg}" class="photo-slot-img" alt="Сүрөт ${slotIndex}" style="object-fit:contain;">`;
             status.classList.add('done');
             status.innerText = currentLang === 'ky' ? "✓ Сүрөт кошулду" : "✓ Фото добавлено";
-
             checkSaveButtonState();
         }
 
@@ -1668,10 +1687,10 @@
             const code = error && error.code ? error.code : '';
             const msg = error && error.message ? error.message : '';
             if (code === 'storage/unauthorized' || code === 'storage/permission-denied') {
-                return 'Сүрөт серверине туташууда ката кетти. Cloudinary жөндөөлөрүн текшериңиз.';
+                return 'Cloudinary сүрөт жүктөөдө уруксат же конфигурация катасы чыкты.';
             }
             if (code === 'storage/bucket-not-found') {
-                return 'Cloudinary жөндөөсү табылган жок. Cloud Name жана Upload Preset текшериңиз.';
+                return 'Cloudinary конфигурациясын текшериңиз.';
             }
             if (code === 'permission-denied') {
                 return 'Firestore уруксаты берилген жок (permission-denied). Firebase Rules текшерилиши керек.';
@@ -1746,63 +1765,60 @@
                     .slice(0, 80) || 'child';
                 const uniqueId = `${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
 
-                async function uploadPhotoToCloudinary(slot) {
-                    if (!CLOUDINARY_CLOUD_NAME || CLOUDINARY_CLOUD_NAME === "YOUR_CLOUD_NAME" ||
-                        !CLOUDINARY_UPLOAD_PRESET || CLOUDINARY_UPLOAD_PRESET === "YOUR_UNSIGNED_UPLOAD_PRESET") {
-                        throw new Error('cloudinary-config-missing');
+                function getNextCloudinaryAccount() {
+                    let index = parseInt(localStorage.getItem(CLOUDINARY_ROTATION_KEY) || '0', 10);
+                    if (!Number.isFinite(index) || index < 0) index = 0;
+                    const account = CLOUDINARY_ACCOUNTS[index % CLOUDINARY_ACCOUNTS.length];
+                    localStorage.setItem(CLOUDINARY_ROTATION_KEY, String((index + 1) % CLOUDINARY_ACCOUNTS.length));
+                    return account;
+                }
+
+                async function uploadToCloudinary(dataUrl, account, slot) {
+                    const endpoint = `https://api.cloudinary.com/v1_1/${encodeURIComponent(account.cloudName)}/image/upload`;
+                    const form = new FormData();
+                    form.append('file', dataUrl);
+                    form.append('upload_preset', account.uploadPreset);
+                    form.append('folder', `bait-zakat/registrations/${uniqueId}`);
+                    form.append('public_id', `${safeFileName}_${slot}_${Date.now()}`);
+                    const response = await withTimeout(fetch(endpoint, { method:'POST', body:form }), 60000, 'cloudinary-upload-timeout');
+                    if (!response.ok) {
+                        const text = await response.text().catch(()=> '');
+                        throw new Error(`Cloudinary HTTP ${response.status}: ${text}`);
                     }
-
-                    // Base64 data URL -> Blob. Сүрөт Cloudinaryге түз браузерден кетет.
-                    const response = await fetch(capturedPhotos[slot]);
-                    const blob = await response.blob();
-
-                    const formData = new FormData();
-                    formData.append('file', blob, `${safeFileName}_${slot}.jpg`);
-                    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-                    formData.append('folder', `bait-zakat/registrations/${uniqueId}`);
-                    formData.append('context', `fullName=${currentChildName}|phone=${currentChildPhone}|slot=${slot}`);
-
-                    const uploadResponse = await withTimeout(
-                        fetch(CLOUDINARY_UPLOAD_URL, { method: 'POST', body: formData }),
-                        20000,
-                        'cloudinary-upload-timeout'
-                    );
-
-                    if (!uploadResponse.ok) {
-                        const errorText = await uploadResponse.text().catch(() => '');
-                        throw new Error(`cloudinary-upload-${uploadResponse.status}: ${errorText}`);
-                    }
-
-                    const result = await uploadResponse.json();
-                    if (!result.secure_url) throw new Error('cloudinary-no-url');
-
+                    const result = await response.json();
+                    if (!result.secure_url || !result.public_id) throw new Error('Cloudinary жоопто secure_url/public_id жок.');
                     return {
                         url: result.secure_url,
-                        publicId: result.public_id || null,
+                        publicId: result.public_id,
+                        resourceType: result.resource_type || 'image',
+                        version: result.version || null,
+                        cloudName: account.cloudName,
+                        accountId: account.id,
+                        accountLabel: account.label,
+                        bytes: result.bytes || null,
                         width: result.width || null,
                         height: result.height || null,
-                        format: result.format || 'jpg'
+                        format: result.format || null
                     };
                 }
 
-                let photo1Url = null;
-                let photo2Url = null;
-                let cloudinaryPublicId1 = null;
-                let cloudinaryPublicId2 = null;
+                // Эки сүрөт бир эле Cloudinary аккаунтка кетет, кийинки каттоо кийинки аккаунттан башталат.
+                const selectedCloudinary = getNextCloudinaryAccount();
+                let cloudinaryPhoto1, cloudinaryPhoto2;
+                try {
+                    btn.innerHTML = `<span class="spinner spinner-dark"></span> Cloudinary'ге сүрөттөр жүктөлүүдө...`;
+                    [cloudinaryPhoto1, cloudinaryPhoto2] = await Promise.all([
+                        uploadToCloudinary(capturedPhotos[1], selectedCloudinary, 1),
+                        uploadToCloudinary(capturedPhotos[2], selectedCloudinary, 2)
+                    ]);
+                    lastCloudinaryUpload = selectedCloudinary;
+                } catch (cloudinaryError) {
+                    console.error('Cloudinary upload error:', cloudinaryError);
+                    throw cloudinaryError;
+                }
 
-                btn.innerHTML = `<span class="spinner spinner-dark"></span> Сүрөттөр Cloudinaryге жүктөлүүдө...`;
-
-                const [cloudPhoto1, cloudPhoto2] = await Promise.all([
-                    uploadPhotoToCloudinary(1),
-                    uploadPhotoToCloudinary(2)
-                ]);
-
-                photo1Url = cloudPhoto1.url;
-                photo2Url = cloudPhoto2.url;
-                cloudinaryPublicId1 = cloudPhoto1.publicId;
-                cloudinaryPublicId2 = cloudPhoto2.publicId;
-
-                btn.innerHTML = `<span class="spinner spinner-dark"></span> Сакталууда...`;
+                const photo1Url = cloudinaryPhoto1.url;
+                const photo2Url = cloudinaryPhoto2.url;
 
                 const docData = {
                     fullName: currentChildName,
@@ -1810,11 +1826,15 @@
                     phone: currentChildPhone,
                     photo1: photo1Url,
                     photo2: photo2Url,
-                    cloudinaryPublicId1,
-                    cloudinaryPublicId2,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     photoStorage: 'cloudinary',
-                    photoFormat: 'jpg',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    cloudinary: {
+                        accountId: selectedCloudinary.id,
+                        accountLabel: selectedCloudinary.label,
+                        cloudName: selectedCloudinary.cloudName,
+                        photo1: { publicId: cloudinaryPhoto1.publicId, resourceType: cloudinaryPhoto1.resourceType, version: cloudinaryPhoto1.version, bytes: cloudinaryPhoto1.bytes, width: cloudinaryPhoto1.width, height: cloudinaryPhoto1.height, format: cloudinaryPhoto1.format },
+                        photo2: { publicId: cloudinaryPhoto2.publicId, resourceType: cloudinaryPhoto2.resourceType, version: cloudinaryPhoto2.version, bytes: cloudinaryPhoto2.bytes, width: cloudinaryPhoto2.width, height: cloudinaryPhoto2.height, format: cloudinaryPhoto2.format }
+                    }
                 };
 
                 // Firestore'го жазуу сурамына да убакыт чеги коёбуз.
@@ -1982,6 +2002,7 @@
                             fileNumber: data.fileNumber || '',
                             photo1: data.photo1 || null,
                             photo2: data.photo2 || null,
+                            cloudinary: data.cloudinary || null,
                             createdAt: data.createdAt || null
                         });
                     });
@@ -2348,7 +2369,7 @@
                                 ${phoneText}
                             </div>
                         </div>
-                        <div class="list-header"><div></div><div class="card-meta"><div class="list-date card-date-large">${dateStr}</div></div></div>
+                        <div class="list-header"><div></div><div class="card-meta"><div class="list-date card-date-large">${dateStr}</div>${getCloudinarySummary(item)?`<div style="font-size:11px;color:var(--accent-glow);margin-top:4px;">☁️ ${escapeHtml(getCloudinarySummary(item))}</div>`:''}</div></div>
                         <div class="large-thumb-group">
                             ${item.photo1?`<img src="${item.photo1}" alt="Фото 1" onclick="event.stopPropagation();openImageViewer('${item.photo1}')">`:'<div class="empty-state">Сүрөт 1 жок</div>'}
                             ${item.photo2?`<img src="${item.photo2}" alt="Фото 2" onclick="event.stopPropagation();openImageViewer('${item.photo2}')">`:'<div class="empty-state">Сүрөт 2 жок</div>'}
@@ -2502,7 +2523,7 @@
             if(!items.length)return;
             if(!await askDeleteConfirmation(items.length))return;
             try{
-                await Promise.all(items.map(item=>db.collection("registrations").doc(item.id).delete()));
+                await Promise.all(items.map(item=>deleteCloudinaryForRegistration(item).then(()=>db.collection("registrations").doc(item.id).delete())));
                 selectedIds.clear();
                 applyFilters();
                 showCenterNotice('✓','Успешно удалено',`${items.length} маалымат өчүрүлдү.`);
@@ -2799,9 +2820,23 @@
             restoreScreenAfterRefresh();
         });
 
+        async function deleteCloudinaryForRegistration(item){
+            if(!item || !item.cloudinary) return;
+            const assets=[];
+            if(item.cloudinary.photo1?.publicId) assets.push({publicId:item.cloudinary.photo1.publicId,resourceType:item.cloudinary.photo1.resourceType||'image'});
+            if(item.cloudinary.photo2?.publicId) assets.push({publicId:item.cloudinary.photo2.publicId,resourceType:item.cloudinary.photo2.resourceType||'image'});
+            if(!assets.length) return;
+            // Коопсуздук үчүн API Secret браузерге жазылбайт. Firebase callable function өчүрөт.
+            if(!window.firebase?.functions){ throw new Error('Firebase Functions SDK кошулган эмес.'); }
+            const fn = firebase.functions().httpsCallable('deleteCloudinaryAssets');
+            await withTimeout(fn({cloudName:item.cloudinary.cloudName, assets}), 30000, 'cloudinary-delete-timeout');
+        }
+
         async function deleteRegistration(id) {
             if(!await askDeleteConfirmation(1)) return;
             try{
+                const itemToDelete = allRegistrations.find(item => item.id === id);
+                await deleteCloudinaryForRegistration(itemToDelete);
                 await db.collection("registrations").doc(id).delete();
                 allRegistrations = allRegistrations.filter(item => item.id !== id);
                 currentFilteredRegistrations = currentFilteredRegistrations.filter(item => item.id !== id);
