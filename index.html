@@ -2523,7 +2523,8 @@
             if(!items.length)return;
             if(!await askDeleteConfirmation(items.length))return;
             try{
-                await Promise.all(items.map(item=>deleteCloudinaryForRegistration(item).then(()=>db.collection("registrations").doc(item.id).delete())));
+                // Сайттан гана өчүрүлөт. Cloudinary'деги сүрөттөр сакталат.
+                await Promise.all(items.map(item=>db.collection("registrations").doc(item.id).delete()));
                 selectedIds.clear();
                 applyFilters();
                 showCenterNotice('✓','Успешно удалено',`${items.length} маалымат өчүрүлдү.`);
@@ -2820,23 +2821,16 @@
             restoreScreenAfterRefresh();
         });
 
-        async function deleteCloudinaryForRegistration(item){
-            if(!item || !item.cloudinary) return;
-            const assets=[];
-            if(item.cloudinary.photo1?.publicId) assets.push({publicId:item.cloudinary.photo1.publicId,resourceType:item.cloudinary.photo1.resourceType||'image'});
-            if(item.cloudinary.photo2?.publicId) assets.push({publicId:item.cloudinary.photo2.publicId,resourceType:item.cloudinary.photo2.resourceType||'image'});
-            if(!assets.length) return;
-            // Коопсуздук үчүн API Secret браузерге жазылбайт. Firebase callable function өчүрөт.
-            if(!window.firebase?.functions){ throw new Error('Firebase Functions SDK кошулган эмес.'); }
-            const fn = firebase.functions().httpsCallable('deleteCloudinaryAssets');
-            await withTimeout(fn({cloudName:item.cloudinary.cloudName, assets}), 30000, 'cloudinary-delete-timeout');
-        }
+        // ЭСКЕРТҮҮ:
+        // Каттоону өчүргөндө Cloudinary'деги сүрөттөр ӨЧҮРҮЛБӨЙТ.
+        // Бул жерде бир гана Firestore'догу каттоо документи өчүрүлөт.
+        // Ошондуктан сайттан каттоо жана анын сүрөттөрү кайра көрүнбөйт,
+        // ал эми Cloudinary'деги оригинал сүрөттөр сакталат.
 
         async function deleteRegistration(id) {
             if(!await askDeleteConfirmation(1)) return;
             try{
-                const itemToDelete = allRegistrations.find(item => item.id === id);
-                await deleteCloudinaryForRegistration(itemToDelete);
+                // Сайттан толук өчүрүлөт. Cloudinary'деги сүрөттөргө тийишпейбиз.
                 await db.collection("registrations").doc(id).delete();
                 allRegistrations = allRegistrations.filter(item => item.id !== id);
                 currentFilteredRegistrations = currentFilteredRegistrations.filter(item => item.id !== id);
