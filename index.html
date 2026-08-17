@@ -297,6 +297,11 @@
             transform: scale(1.02);
             border-color: var(--accent-glow);
         }
+        .large-thumb-group img {
+            min-height: 120px;
+            background: #0b132b;
+        }
+        .photo-hidden { display:none !important; }
 
         .item-actions { display:flex; gap:12px; margin-top:15px; flex-wrap:wrap; align-items:center; }
         .btn-action { padding:0; border:0; background:transparent !important; font-size:13px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; }
@@ -1282,7 +1287,7 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            navigateTo('screenMainMenu', false);
+            // F5/Ctrl+R болгондо hash/localStorage аркылуу мурунку экран калыбына келет.
             initSettingsUI();
             try { importedFileNumbers = new Set(JSON.parse(localStorage.getItem('imported_excel_file_numbers')||'[]')); } catch(e) {}
             try { importedExcelRows = JSON.parse(localStorage.getItem('imported_excel_rows')||'[]'); } catch(e) { importedExcelRows=[]; }
@@ -1291,7 +1296,7 @@
             const savedLang = localStorage.getItem('bait_language') || 'ky';
             document.getElementById('langSelector')?.remove();
             changeLanguage(savedLang);
-            updateLanguageVisibility('screenMainMenu');
+            restoreScreenAfterRefresh();
         });
 
         function initSettingsUI() {
@@ -1372,7 +1377,10 @@
         function navigateTo(screenId, pushHistory = true) {
             if (pushHistory) {
                 history.pushState({ screen: screenId }, '', '#' + screenId);
+            } else {
+                history.replaceState({ screen: screenId }, '', '#' + screenId);
             }
+            try { sessionStorage.setItem('bait_last_screen', screenId); } catch(e) {}
             showScreenUI(screenId);
         }
 
@@ -1400,8 +1408,9 @@
                 if(!allRegistrations.length && !registrationsPageLoading) loadRegisteredList(true);
                 else scheduleRegistrationAutoFill();
             } else if (screenId === 'screenAdminRegistered') {
-                if(!allRegistrations.length && !registrationsPageLoading) loadRegisteredList(true);
-                else { applyFilters(); installRegistrationInfiniteScroll(); setupAllExcelScrolls(); }
+                // Катталгандарга кирген сайын Firestore'дон жаңы маалыматты алып,
+                // Cloudinary сүрөттөрүн алдын ала жүктөп анан көрсөтөбүз.
+                if(!registrationsPageLoading) loadRegisteredList(true);
             }
         }
 
@@ -1967,6 +1976,7 @@
             const listContainer = document.getElementById('siteRegisteredList');
             const excelTableBody = document.getElementById('excelTableBody');
             const header = document.getElementById('totalRegisteredHeader');
+            if (!listContainer || !excelTableBody) return;
             if (registrationsPageLoading) return;
             registrationsPageLoading = true;
 
@@ -1974,83 +1984,124 @@
                 allRegistrations = [];
                 currentFilteredRegistrations = [];
                 registrationsPageCursor = null;
-                registrationsHasMore = true;
+                registrationsHasMore = false;
                 selectedIds = new Set();
                 listContainer.innerHTML = `<div class="empty-state"><span class="spinner"></span> ${translations[currentLang].loading || 'Жүктөлүүдө...'}</div>`;
                 excelTableBody.innerHTML = `<tr><td colspan="7" class="empty-state"><span class="spinner"></span> ${translations[currentLang].loading || 'Жүктөлүүдө...'}</td></tr>`;
-            } else {
-                const loading = document.getElementById('loadMoreLoading');
-                if (loading) loading.style.display='block';
             }
 
             try {
-                // Ар дайым 5тен гана алабыз. Документ ID боюнча пагинация эски createdAt жок жазууларды да өткөрбөйт.
-                let q = db.collection('registrations').orderBy(firebase.firestore.FieldPath.documentId()).limit(5);
-                if (registrationsPageCursor) q = q.startAfter(registrationsPageCursor);
-                const snap = await q.get({source:'default'});
+                /*
+                 * МААНИЛҮҮ ОҢДОО:
+                 * Мурун 5 документтен гана алып, кийинкилерин scroll/таймер аркылуу
+                 * жүктөө болгон. Ошондуктан айрым учурда жаңы катталгандар жана
+                 * Cloudinary сүрөттөрү дароо көрүнбөй калган.
+                 *
+                 * Эми бардык registrations бир сурамда алынат. Андан кийин
+                 * Cloudinary сүрөттөрүнүн URL'дери браузерде алдын ала жүктөлөт.
+                 */
+                const snap = await db.collection('registrations')
+                    .orderBy(firebase.firestore.FieldPath.documentId())
+                    .get({ source: 'default' });
 
-                if (snap.empty) {
-                    registrationsHasMore = false;
-                } else {
-                    snap.forEach(doc => {
-                        const data = doc.data() || {};
-                        allRegistrations.push({
-                            id: doc.id,
-                            fullName: data.fullName || data.name || '',
-                            fullNameNormalized: data.fullNameNormalized || normalizeName(data.fullName || data.name || ''),
-                            phone: data.phone || '',
-                            fileNumber: data.fileNumber || '',
-                            photo1: data.photo1 || null,
-                            photo2: data.photo2 || null,
-                            cloudinary: data.cloudinary || null,
-                            createdAt: data.createdAt || null
-                        });
+                allRegistrations = [];
+                snap.forEach(doc => {
+                    const data = doc.data() || {};
+                    allRegistrations.push({
+                        id: doc.id,
+                        fullName: data.fullName || data.name || '',
+                        fullNameNormalized: data.fullNameNormalized || normalizeName(data.fullName || data.name || ''),
+                        phone: data.phone || '',
+                        fileNumber: data.fileNumber || '',
+                        photo1: data.photo1 || null,
+                        photo2: data.photo2 || null,
+                        cloudinary: data.cloudinary || null,
+                        createdAt: data.createdAt || null
                     });
-                    // Сүрөттөрдү браузер фондук режимде алдын ала жүктөй баштайт.
-                    snap.forEach(doc => {
-                        const d = doc.data() || {};
-                        [d.photo1, d.photo2].forEach(src => {
-                            if (src) { const img = new Image(); img.decoding = 'async'; img.src = src; }
-                        });
-                    });
-                    registrationsPageCursor = snap.docs[snap.docs.length - 1];
-                    if (snap.size < 5) registrationsHasMore = false;
-                }
-
-                allRegistrations.sort((a,b)=>{
-                    const ta=a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.createdAt?.seconds ? a.createdAt.seconds*1000:0);
-                    const tb=b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.createdAt?.seconds ? b.createdAt.seconds*1000:0);
-                    return tb-ta;
                 });
-                applyFilters();
+
+                allRegistrations.sort((a,b) => {
+                    const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() :
+                        (a.createdAt?.seconds ? a.createdAt.seconds * 1000 : 0);
+                    const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() :
+                        (b.createdAt?.seconds ? b.createdAt.seconds * 1000 : 0);
+                    return tb - ta;
+                });
+
+                // Cloudinary сүрөттөрүн толук жүктөп бүткөнгө чейин күтүп,
+                // андан кийин тизмени чыгарабыз. Бир сүрөт бузулса калганына тоскоол болбойт.
+                const photoUrls = [];
+                allRegistrations.forEach(item => {
+                    if (item.photo1) photoUrls.push(item.photo1);
+                    if (item.photo2) photoUrls.push(item.photo2);
+                });
+
+                const uniqueUrls = [...new Set(photoUrls)];
+                await Promise.all(uniqueUrls.map(src => preloadCloudinaryImage(src)));
+
+                registrationsPageCursor = null;
+                registrationsHasMore = false;
                 registrationsPageLoading = false;
-                const loading = document.getElementById('loadMoreLoading'); if(loading) loading.style.display='none';
+
+                applyFilters();
+
+                const loading = document.getElementById('loadMoreLoading');
+                if (loading) loading.style.display = 'none';
                 const more = document.getElementById('loadMoreBtn');
                 if (more) more.style.display = 'none';
-                if (header) header.innerText = `${translations[currentLang].folderReg} (${allRegistrations.length}${registrationsHasMore?'…':''})`;
+
+                if (header) {
+                    header.innerText = `${translations[currentLang].folderReg} (${allRegistrations.length})`;
+                }
+
                 renderAnalytics();
                 installRegistrationInfiniteScroll();
-                scheduleRegistrationAutoFill();
             } catch(error) {
-                console.error('FIREBASE PAGED LOAD ERROR:', error);
+                console.error('FIREBASE / CLOUDINARY LOAD ERROR:', error);
                 registrationsPageLoading = false;
-                const loading = document.getElementById('loadMoreLoading'); if(loading) loading.style.display='none';
+                const loading = document.getElementById('loadMoreLoading');
+                if (loading) loading.style.display = 'none';
+
                 if (!allRegistrations.length) {
-                    listContainer.innerHTML = `<div class="glass-box" style="color:var(--danger-red);text-align:center;padding:25px;">❌ Firebase катасы: ${escapeHtml(error.code||'unknown')}</div>`;
-                    excelTableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--danger-red);padding:25px;">❌ Firebase катасы: ${escapeHtml(error.code||'unknown')}</td></tr>`;
+                    listContainer.innerHTML = `<div class="glass-box" style="color:var(--danger-red);text-align:center;padding:25px;">❌ Firebase катасы: ${escapeHtml(error.code || error.message || 'unknown')}</div>`;
+                    excelTableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--danger-red);padding:25px;">❌ Firebase катасы: ${escapeHtml(error.code || error.message || 'unknown')}</td></tr>`;
                 }
             }
         }
 
+        // Cloudinary URL'деги сүрөттү алдын ала жүктөө.
+        // decode() иштебеген браузерлер үчүн onload/onerror fallback бар.
+        function preloadCloudinaryImage(src) {
+            return new Promise(resolve => {
+                if (!src) return resolve(false);
+                const img = new Image();
+                img.decoding = 'async';
+
+                let finished = false;
+                const done = ok => {
+                    if (finished) return;
+                    finished = true;
+                    resolve(ok);
+                };
+
+                img.onload = async () => {
+                    try { if (img.decode) await img.decode(); } catch (_) {}
+                    done(true);
+                };
+                img.onerror = () => done(false);
+
+                // Өтө жай/жооп бербеген Cloudinary URL бир сүрөт үчүн
+                // бүт тизмени кармап калбашы үчүн 15 секунддук чек.
+                setTimeout(() => done(false), 15000);
+
+                img.src = src;
+            });
+        }
+
         function installRegistrationInfiniteScroll(){
-            if(registrationsScrollHandler) window.removeEventListener('scroll',registrationsScrollHandler);
-            registrationsScrollHandler=()=>{
-                const screen=document.getElementById('screenAdminRegistered');
-                if(!screen || !screen.classList.contains('active') || !registrationsHasMore || registrationsPageLoading) return;
-                if(window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 650){ loadRegisteredList(false); }
-                updateExcelStickyPosition();
-            };
-            window.addEventListener('scroll',registrationsScrollHandler,{passive:true});
+            if(registrationsScrollHandler) window.removeEventListener('scroll', registrationsScrollHandler);
+            registrationsScrollHandler = () => updateExcelStickyPosition();
+            window.addEventListener('scroll', registrationsScrollHandler, {passive:true});
         }
 
         function scheduleRegistrationAutoFill(){
@@ -2371,8 +2422,8 @@
                         </div>
                         <div class="list-header"><div></div><div class="card-meta"><div class="list-date card-date-large">${dateStr}</div>${getCloudinarySummary(item)?`<div style="font-size:11px;color:var(--accent-glow);margin-top:4px;">☁️ ${escapeHtml(getCloudinarySummary(item))}</div>`:''}</div></div>
                         <div class="large-thumb-group">
-                            ${item.photo1?`<img src="${item.photo1}" alt="Фото 1" onclick="event.stopPropagation();openImageViewer('${item.photo1}')">`:'<div class="empty-state">Сүрөт 1 жок</div>'}
-                            ${item.photo2?`<img src="${item.photo2}" alt="Фото 2" onclick="event.stopPropagation();openImageViewer('${item.photo2}')">`:'<div class="empty-state">Сүрөт 2 жок</div>'}
+                            ${item.photo1?`<img src="${escapeHtml(item.photo1)}" loading="eager" decoding="async" alt="Фото 1" onerror="this.style.display='none';this.nextElementSibling?.classList.remove('photo-hidden');" onclick="event.stopPropagation();openImageViewer('${escapeQuotes(item.photo1)}')">`:'<div class="empty-state">Сүрөт 1 жок</div>'}
+                            ${item.photo2?`<img src="${escapeHtml(item.photo2)}" loading="eager" decoding="async" alt="Фото 2" onerror="this.style.display='none';this.nextElementSibling?.classList.remove('photo-hidden');" onclick="event.stopPropagation();openImageViewer('${escapeQuotes(item.photo2)}')">`:'<div class="empty-state">Сүрөт 2 жок</div>'}
                         </div>
                         <div class="item-actions">${actionButtons}</div>
                     </div>`;
@@ -2668,6 +2719,13 @@
         function openImageViewer(src) {
             const modal = document.getElementById('imageViewerModal');
             const img = document.getElementById('enlargedImg');
+            if (!modal || !img || !src) return;
+            img.onerror = function(){
+                // Cloudinary кээде биринчи суроодо жай жооп берсе, кайра аракет.
+                setTimeout(() => {
+                    img.src = src + (src.includes('?') ? '&' : '?') + '_retry=' + Date.now();
+                }, 300);
+            };
             img.src = src;
             modal.style.display = 'flex';
         }
@@ -2798,7 +2856,14 @@
         // БАРАКЧА ЖАҢЫЛАНГАНДА (F5 / Ctrl+R) УШУЛ ЭЛЕ БЕТТЕ КАЛУУ.
         // navigateTo() history/hash колдонот, бул код ошол hash'ты кайра ачат.
         function restoreScreenAfterRefresh() {
-            const hash = (window.location.hash || '').replace(/^#/, '');
+            let hash = (window.location.hash || '').replace(/^#/, '');
+
+            // Айрым браузер/hosting шарттарында hash убактылуу жоголсо,
+            // акыркы ачылган экранды sessionStorage'ден алабыз.
+            if (!hash) {
+                try { hash = sessionStorage.getItem('bait_last_screen') || ''; } catch(e) {}
+            }
+
             const allowed = [
                 'screenMainMenu',
                 'screenRegName',
@@ -2812,14 +2877,21 @@
                 'screenAdminExcel',
                 'screenAdminAnalytics'
             ];
-            const screenId = allowed.includes(hash) ? hash : 'screenMainMenu';
-            showScreenUI(screenId);
-            history.replaceState({ screen: screenId }, '', '#' + screenId);
-        }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            restoreScreenAfterRefresh();
-        });
+            const screenId = allowed.includes(hash) ? hash : 'screenMainMenu';
+
+            if (screenId === 'screenAdminRegistered') {
+                showScreenUI(screenId);
+                // Refresh болгондо мурунку "Катталгандар" бетинде калып,
+                // Firestore + Cloudinary маалыматтарын кайра толук жүктөйбүз.
+                setTimeout(() => loadRegisteredList(true), 0);
+            } else {
+                showScreenUI(screenId);
+            }
+
+            history.replaceState({ screen: screenId }, '', '#' + screenId);
+            try { sessionStorage.setItem('bait_last_screen', screenId); } catch(e) {}
+        }
 
         // ЭСКЕРТҮҮ:
         // Каттоону өчүргөндө Cloudinary'деги сүрөттөр ӨЧҮРҮЛБӨЙТ.
