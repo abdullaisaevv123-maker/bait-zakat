@@ -613,58 +613,6 @@
         @media(max-width:800px){.folder-grid{grid-template-columns:1fr 1fr;}.excel-import-head{align-items:flex-start;flex-direction:column;}}
         @media(max-width:520px){.folder-grid{grid-template-columns:1fr;}.folder-tabs{overflow-x:auto;display:flex;gap:6px;padding-bottom:3px;}.tab-btn{flex:0 0 auto;}}
         .admin-quick-analytics{margin-top:14px;}
-
-        /* ============================================================
-           BAITU ZAKAT SMART UI v10 — КОЛДОНУУЧУ + АДМИН ҮЧҮН ЖАҢЫ UI
-           ============================================================ */
-        .smart-match-panel{margin:14px 0;padding:16px;border:1px solid rgba(0,245,212,.22);
-            border-radius:18px;background:linear-gradient(135deg,rgba(20,31,55,.92),rgba(11,19,43,.92));
-            box-shadow:0 12px 35px rgba(0,0,0,.22)}
-        .smart-match-title{display:flex;align-items:center;gap:9px;font-weight:800;color:var(--accent-glow);font-size:15px}
-        .smart-match-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:12px}
-        .smart-match-stat{padding:11px 9px;border-radius:13px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);text-align:center}
-        .smart-match-stat b{display:block;font-size:23px;color:#fff}
-        .smart-match-stat span{display:block;margin-top:3px;font-size:10px;color:var(--text-sub)}
-        .smart-match-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:800}
-        .smart-match-badge.file{background:rgba(58,134,255,.16);color:#7db0ff}
-        .smart-match-badge.name{background:rgba(0,245,212,.12);color:var(--accent-glow)}
-        .smart-match-badge.none{background:rgba(255,77,77,.12);color:#ff7a7a}
-        .unified-no-cell{font-weight:900!important;color:var(--accent-glow)!important;text-align:center!important;min-width:62px}
-        .unified-no-pill{display:inline-flex;align-items:center;justify-content:center;min-width:38px;height:30px;
-            padding:0 8px;border-radius:9px;background:rgba(0,245,212,.10);border:1px solid rgba(0,245,212,.2);
-            color:var(--accent-glow);font-weight:900;font-size:15px}
-        .name7-cell{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:.7px;color:#b9c4d8}
-        .match-row-file{box-shadow:inset 4px 0 0 #3a86ff}
-        .match-row-name{box-shadow:inset 4px 0 0 #00f5d4}
-        .match-row-none{box-shadow:inset 4px 0 0 #ff4d4d}
-        .smart-import-actions{display:flex;gap:7px;flex-wrap:wrap;margin:9px 0}
-        .smart-mini-btn{border:1px solid var(--folder-border);background:rgba(255,255,255,.04);color:var(--text-main);
-            border-radius:9px;padding:8px 10px;font-size:11px;font-weight:700;cursor:pointer}
-        .smart-mini-btn:hover{background:var(--folder-hover);border-color:rgba(0,245,212,.35)}
-        .smart-mini-btn.primary{background:rgba(58,134,255,.16);border-color:rgba(58,134,255,.35)}
-        .smart-mini-btn.green{background:rgba(0,245,212,.10);border-color:rgba(0,245,212,.28)}
-        .smart-mini-btn.danger{background:rgba(255,77,77,.08);border-color:rgba(255,77,77,.25)}
-        .smart-filter-bar{display:flex;gap:7px;flex-wrap:wrap;margin:9px 0}
-        .smart-filter-chip{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);
-            color:var(--text-sub);border-radius:999px;padding:7px 10px;font-size:11px;cursor:pointer}
-        .smart-filter-chip.active{color:#fff;background:rgba(58,134,255,.18);border-color:rgba(58,134,255,.38)}
-        .smart-toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);z-index:50000;
-            opacity:0;pointer-events:none;padding:11px 15px;border-radius:12px;background:#111b31;color:#fff;
-            border:1px solid rgba(0,245,212,.28);box-shadow:0 15px 40px rgba(0,0,0,.4);transition:.22s;font-size:12px;font-weight:700}
-        .smart-toast.open{opacity:1;transform:translate(-50%,0)}
-        .smart-progress{height:5px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:10px}
-        .smart-progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3a86ff,#00f5d4);transition:width .18s}
-        .smart-empty{padding:24px;text-align:center;color:var(--text-sub);border:1px dashed rgba(255,255,255,.09);border-radius:15px}
-        .smart-help{font-size:11px;line-height:1.55;color:var(--text-sub);margin-top:8px}
-        @media(max-width:720px){.smart-match-grid{grid-template-columns:repeat(2,1fr)}}
-        @media(max-width:440px){.smart-match-grid{grid-template-columns:1fr 1fr}.smart-mini-btn{flex:1;min-width:125px}}
-        /* Smart Excel: чоң сан экранда дароо көрүнөт. */
-        #excelTableBody .unified-no-cell{font-size:15px}
-        #comparisonExcelResult .smart-match-panel{margin-top:8px}
-        #comparisonExcelResult table th:first-child,#comparisonExcelResult table td:first-child{min-width:60px}
-        #comparisonExcelResult table th.smart-unified-head{min-width:72px}
-        #comparisonExcelResult table th.smart-name7-head{min-width:95px}
-
 </style>
 </head>
 <body>
@@ -888,7 +836,7 @@
                     <table class="excel-table">
                         <thead>
                             <tr>
-                                <th style="width:68px;">№</th>
+                                <th style="width:50px;">№</th>
                                 <th onclick="sortDataByName()" id="thName">Ф.И.О. ⇳</th>
                                 <th id="thFileNumber">Файл №</th>
                                 <th style="width:55px;text-align:center;">✓</th>
@@ -923,13 +871,7 @@
                         <button id="deleteImportedExcelBtnInline" class="btn-action btn-action-delete compact-download-btn" onclick="deleteImportedExcel()" style="display:none;">🗑 Өчүрүү</button>
                     </div>
                 </div>
-                <div id="smartImportControls" class="smart-import-actions">
-                    <button class="smart-mini-btn primary" type="button" onclick="smartReconcileAll()">⚡ 7 тамга + Файл № менен автоматтык бириктир</button>
-                    <button class="smart-mini-btn green" type="button" onclick="smartExportImportedExcel()">↓ Жүктөлгөн Excelди кайра скачать</button>
-                    <button class="smart-mini-btn" type="button" onclick="smartShowMatchReport()">📊 Салыштыруу отчёту</button>
-                </div>
                 <div id="comparisonExcelStatus" style="margin:8px 0;color:var(--text-sub);font-size:12px;"></div>
-                <div id="smartImportSummary"></div>
                 <div class="excel-column-actions">
                     <button class="btn-action btn-action-copy compact-download-btn" onclick="addImportedExcelColumn()">＋ Колонка</button>
                     <button class="btn-action btn-action-delete compact-download-btn" onclick="removeImportedExcelColumn()">− Колонка</button>
@@ -1174,13 +1116,13 @@
         const db = firebase.firestore();
 
         // === CLOUDINARY: 3 АККАУНТ, ЖАҢЫ СҮРӨТТӨР ҮЧҮН ===
-        // 1) oojjfj4c / pamyat2
-        // 2) tfjn735t / pamyat3
-        // 3) lubzzsqe / ml_default
+        // 1) oojjfj4c / pamyat1
+        // 2) tfjn735t / pamyat2
+        // 3) lubzzsqe / pamyat3
         const CLOUDINARY_ACCOUNTS = [
-            { id: 'cloud1', label: 'Cloudinary 1 — pamyat2', cloudName: 'oojjfj4c', uploadPreset: 'pamyat2' },
-            { id: 'cloud2', label: 'Cloudinary 2 — pamyat3', cloudName: 'tfjn735t', uploadPreset: 'pamyat3' },
-            { id: 'cloud3', label: 'Cloudinary 3 — ml_default', cloudName: 'lubzzsqe', uploadPreset: 'ml_default' }
+            { id: 'cloud1', label: 'Cloudinary 1 — pamyat1', cloudName: 'oojjfj4c', uploadPreset: 'pamyat1' },
+            { id: 'cloud2', label: 'Cloudinary 2 — pamyat2', cloudName: 'tfjn735t', uploadPreset: 'pamyat2' },
+            { id: 'cloud3', label: 'Cloudinary 3 — pamyat3', cloudName: 'lubzzsqe', uploadPreset: 'pamyat3' }
         ];
         const CLOUDINARY_ROTATION_KEY = 'bait_cloudinary_rotation_index_v1';
         let lastCloudinaryUpload = null;
@@ -2846,24 +2788,21 @@
                 showCenterNotice('❌','Ката','Excel модулу жүктөлгөн жок. Интернет байланышын текшериңиз.');
                 return;
             }
-            smartEnsureIndexes();
             const rows=allRegistrations.map((item,index)=>({
-                "№": smartUnifiedNumberForRegistration(item,index),
+                "№":index+1,
                 "Ф.И.О.":item.fullName||'',
-                "Фамилия + имя (7)":smartName7(item.fullName||''),
                 "Телефон":item.phone||'',
-                "Файл №":smartCleanFileNumber(item.fileNumber||''),
-                "Салыштыруу ачкычы":smartMatchKey(item),
+                "Файл №":item.fileNumber||'',
                 "Катталган күнү/убактысы":formatExportDate(item.createdAt)
             }));
             const ws=XLSX.utils.json_to_sheet(rows);
-            ws['!cols']=[{wch:7},{wch:32},{wch:20},{wch:18},{wch:16},{wch:24},{wch:24}];
+            ws['!cols']=[{wch:7},{wch:32},{wch:18},{wch:18},{wch:24}];
             const wb=XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb,ws,'Байту закат');
             const out=XLSX.write(wb,{bookType:'xlsx',type:'array'});
             const blob=new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-            const ok=await saveBlobWithPicker(blob,'Байту_закат_тизме_номерлөө.xlsx','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            if(ok) showCenterNotice('✓','Excel даяр','№, Ф.И.О., 7 тамга, Файл № жана салыштыруу ачкычы менен сакталды.');
+            const ok=await saveBlobWithPicker(blob,'Байту_закат_тизме.xlsx','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            if(ok) showCenterNotice('✓','Excel даяр','Файл сакталды.');
         }
 
         function formatExportDate(createdAt){
@@ -2899,8 +2838,31 @@
                     if(!src)continue;
                     try{
                         const resp=await fetch(src);
+                        if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
                         const blob=await resp.blob();
-                        folder.file(`${label}.jpg`,blob);
+
+                        // Cloudinary кээде WebP/AVIF кайтарышы мүмкүн.
+                        // Ошондуктан ZIP ичинде кеңейтүүсү гана эмес, өзү да чыныгы JPEG болот.
+                        const imageUrl=URL.createObjectURL(blob);
+                        try{
+                            const image=await new Promise((resolve,reject)=>{
+                                const im=new Image();
+                                im.onload=()=>resolve(im);
+                                im.onerror=()=>reject(new Error('Сүрөттү ачуу мүмкүн болгон жок'));
+                                im.src=imageUrl;
+                            });
+                            const canvas=document.createElement('canvas');
+                            canvas.width=image.naturalWidth||image.width;
+                            canvas.height=image.naturalHeight||image.height;
+                            const ctx=canvas.getContext('2d',{alpha:false});
+                            ctx.drawImage(image,0,0,canvas.width,canvas.height);
+                            const jpegBlob=await new Promise((resolve,reject)=>{
+                                canvas.toBlob(b=>b?resolve(b):reject(new Error('JPEG түзүлгөн жок')),'image/jpeg',0.95);
+                            });
+                            folder.file(`${label}.jpg`,jpegBlob);
+                        } finally {
+                            URL.revokeObjectURL(imageUrl);
+                        }
                         count++;
                     }catch(e){ console.error('Сүрөт жүктөөдө ката:',e); }
                 }
@@ -2975,641 +2937,6 @@
                 showCenterNotice('❌','Ката',currentLang === 'ky' ? 'Өчүрүүдө ката чыкты.' : 'Ошибка при удалении.');
             }
         }
-
-        /* =====================================================================
-           BAITU ZAKAT SMART MATCH ENGINE v10
-           ---------------------------------------------------------------------
-           Негизги логика:
-           1) Файл № бар болсо — негизги дал келтирүү ачкычы.
-           2) Файл № жок болсо — Фамилия + Имя бөлүгүнөн биринчи 7 тамга.
-           3) Сайттагы Excel системасы менен жүктөлгөн Excel бирдиктүү № алат.
-           4) Бирдей Файл № бир эле № болот.
-           5) Файл № жок, бирок 7 тамга дал келсе — бир эле № болот.
-           6) Импорттолгон Excelдеги № жана сайттагы № бири-бирине туураланат.
-           7) Экспортто да ошол эле № сакталат.
-           ===================================================================== */
-
-        const SMART_MATCH_VERSION = '10.0.0';
-        const SMART_STORAGE_KEY = 'bait_smart_match_v10';
-        let smartMatchIndex = null;
-        let smartMatchReport = null;
-
-        function smartText(value){
-            return String(value ?? '').replace(/\u00A0/g,' ').replace(/\s+/g,' ').trim();
-        }
-
-        function smartLower(value){
-            return smartText(value).toLocaleLowerCase('ru-RU');
-        }
-
-        function smartCleanFileNumber(value){
-            const s=smartText(value);
-            const digits=s.replace(/[^\d]/g,'');
-            return digits.slice(0,12);
-        }
-
-        function smartRemoveTitles(value){
-            return smartText(value)
-                .replace(/^(мырза|мистер|мисс|миссис|г-н|г-жа|ребёнок|ребенок|бала|child|mr|mrs|ms)\.?\s+/iu,'')
-                .trim();
-        }
-
-        function smartTransliterateForKey(value){
-            const map={
-                'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'e','ж':'zh','з':'z','и':'i','й':'y',
-                'к':'k','л':'l','м':'m','н':'n','ң':'n','о':'o','ө':'o','п':'p','р':'r','с':'s','т':'t',
-                'у':'u','ү':'u','ф':'f','х':'h','һ':'h','ц':'c','ч':'ch','ш':'sh','щ':'sh','ъ':'','ы':'y',
-                'ь':'','э':'e','ю':'yu','я':'ya','қ':'q','ғ':'g','і':'i'
-            };
-            return Array.from(smartLower(value)).map(ch=>map[ch]!==undefined?map[ch]:ch).join('');
-        }
-
-        function smartLettersOnly(value){
-            return smartTransliterateForKey(value).replace(/[^a-z0-9]/g,'');
-        }
-
-        function smartNameParts(fullName){
-            const cleaned=smartRemoveTitles(fullName);
-            const parts=cleaned.split(/\s+/).filter(Boolean);
-            return {
-                full:cleaned,
-                surname:parts[0]||'',
-                firstName:parts[1]||'',
-                patronymic:parts.slice(2).join(' ')
-            };
-        }
-
-        function smartSurnameFirstName(value){
-            const p=smartNameParts(value);
-            return [p.surname,p.firstName].filter(Boolean).join(' ');
-        }
-
-        function smartName7(value){
-            const source=smartSurnameFirstName(value);
-            const letters=smartLettersOnly(source);
-            return letters.slice(0,7).toUpperCase();
-        }
-
-        function smartName7Variants(value){
-            const p=smartNameParts(value);
-            const a=smartLettersOnly([p.surname,p.firstName].filter(Boolean).join(''));
-            const b=smartLettersOnly([p.firstName,p.surname].filter(Boolean).join(''));
-            return [...new Set([a.slice(0,7),b.slice(0,7)].filter(Boolean).map(x=>x.toUpperCase()))];
-        }
-
-        function smartExtractColumn(headers, regex){
-            return (headers||[]).find(h=>regex.test(String(h)))||'';
-        }
-
-        function smartFileColumn(headers){
-            return smartExtractColumn(headers,/файл\s*(?:№|номер|no)?|file\s*(?:no|number)|fileno|код\s*файл/i);
-        }
-
-        function smartNameColumn(headers){
-            return smartExtractColumn(headers,/ф\.?\s*и\.?\s*о|фио|аты[\s-]*жөн|аты|ребен|ребён|child|full\s*name|name|surname/i);
-        }
-
-        function smartPhoneColumn(headers){
-            return smartExtractColumn(headers,/телефон|phone|mobile|номер\s*тел/i);
-        }
-
-        function smartRowFile(row,headers){
-            const key=smartFileColumn(headers);
-            return key?smartCleanFileNumber(row?.[key]):'';
-        }
-
-        function smartRowName(row,headers){
-            const key=smartNameColumn(headers);
-            return key?smartText(row?.[key]):'';
-        }
-
-        function smartMatchKeyFromValues(fileNo,name){
-            const f=smartCleanFileNumber(fileNo);
-            if(f)return 'F:'+f;
-            const n=smartName7(name);
-            return n?'N:'+n:'';
-        }
-
-        function smartMatchKey(item){
-            return smartMatchKeyFromValues(item?.fileNumber,item?.fullName);
-        }
-
-        function smartMatchKeyImported(row,headers){
-            return smartMatchKeyFromValues(smartRowFile(row,headers),smartRowName(row,headers));
-        }
-
-        function smartStableSortRows(rows){
-            return [...rows].sort((a,b)=>{
-                const ak=smartMatchKeyFromValues(a.fileNumber,a.fullName);
-                const bk=smartMatchKeyFromValues(b.fileNumber,b.fullName);
-                return ak.localeCompare(bk,'en');
-            });
-        }
-
-        function smartBuildRegistrationGroups(){
-            const groups=new Map();
-            const duplicateFile=new Map();
-            const duplicateName=new Map();
-            (allRegistrations||[]).forEach(item=>{
-                const file=smartCleanFileNumber(item.fileNumber);
-                const name7=smartName7(item.fullName);
-                if(file){
-                    if(!duplicateFile.has(file))duplicateFile.set(file,[]);
-                    duplicateFile.get(file).push(item.id);
-                }
-                if(name7){
-                    if(!duplicateName.has(name7))duplicateName.set(name7,[]);
-                    duplicateName.get(name7).push(item.id);
-                }
-            });
-            const add=(key,item)=>{
-                if(!key)return;
-                if(!groups.has(key))groups.set(key,[]);
-                groups.get(key).push(item);
-            };
-            (allRegistrations||[]).forEach(item=>{
-                const file=smartCleanFileNumber(item.fileNumber);
-                const name7=smartName7(item.fullName);
-                if(file)add('F:'+file,item);
-                else if(name7)add('N:'+name7,item);
-            });
-            return {groups,duplicateFile,duplicateName};
-        }
-
-        function smartBuildUnifiedIndex(){
-            const index={
-                version:SMART_MATCH_VERSION,
-                byFile:new Map(),
-                byName7:new Map(),
-                numberByKey:new Map(),
-                keyByNumber:new Map(),
-                collisions:[],
-                registrations:new Map(),
-                imported:new Map(),
-                nextNumber:1
-            };
-            const regRows=Array.isArray(allRegistrations)?allRegistrations:[];
-            const importedRows=Array.isArray(importedExcelRows)?importedExcelRows:[];
-            const importedHeaders=importedExcelHeaders();
-            const keyCandidates=[];
-            regRows.forEach((item,i)=>{
-                const file=smartCleanFileNumber(item.fileNumber);
-                const name7=smartName7(item.fullName);
-                if(file)keyCandidates.push({priority:0,key:'F:'+file,type:'file',id:item.id,row:i,item});
-                else if(name7)keyCandidates.push({priority:1,key:'N:'+name7,type:'name',id:item.id,row:i,item});
-            });
-            importedRows.forEach((row,i)=>{
-                const file=smartRowFile(row,importedHeaders);
-                const name=smartRowName(row,importedHeaders);
-                const name7=smartName7(name);
-                if(file)keyCandidates.push({priority:0,key:'F:'+file,type:'file',row:i,rowData:row});
-                else if(name7)keyCandidates.push({priority:1,key:'N:'+name7,type:'name',row:i,rowData:row});
-            });
-            keyCandidates.sort((a,b)=>a.priority-b.priority||a.key.localeCompare(b.key,'en'));
-            const seen=new Set();
-            keyCandidates.forEach(entry=>{
-                if(!entry.key||seen.has(entry.key))return;
-                seen.add(entry.key);
-                index.numberByKey.set(entry.key,index.nextNumber);
-                index.keyByNumber.set(index.nextNumber,entry.key);
-                index.nextNumber++;
-            });
-            regRows.forEach(item=>{
-                const key=smartMatchKey(item);
-                const no=key?index.numberByKey.get(key):null;
-                index.registrations.set(item.id,{number:no||'',key,name7:smartName7(item.fullName),file:smartCleanFileNumber(item.fileNumber)});
-                if(key?.startsWith('F:'))index.byFile.set(key.slice(2),item);
-                if(key?.startsWith('N:'))index.byName7.set(key.slice(2),item);
-            });
-            importedRows.forEach((row,i)=>{
-                const file=smartRowFile(row,importedHeaders);
-                const name=smartRowName(row,importedHeaders);
-                const key=smartMatchKeyFromValues(file,name);
-                const no=key?index.numberByKey.get(key):null;
-                index.imported.set(i,{number:no||'',key,name7:smartName7(name),file});
-            });
-            return index;
-        }
-
-        function smartEnsureIndexes(){
-            smartMatchIndex=smartBuildUnifiedIndex();
-            return smartMatchIndex;
-        }
-
-        function smartUnifiedNumberForRegistration(item,index){
-            const idx=smartEnsureIndexes();
-            const meta=idx.registrations.get(item?.id);
-            if(meta?.number)return meta.number;
-            const pos=Math.max(0,(index||0))+1;
-            return pos;
-        }
-
-        function smartMetaForImported(rowIndex){
-            const idx=smartEnsureIndexes();
-            return idx.imported.get(rowIndex)||{number:'',key:'',name7:'',file:''};
-        }
-
-        function smartFindRegisteredMatch(row,headers){
-            const file=smartRowFile(row,headers);
-            if(file){
-                const found=(allRegistrations||[]).find(x=>smartCleanFileNumber(x.fileNumber)===file);
-                if(found)return {item:found,type:'file',key:'F:'+file};
-            }
-            const name7=smartName7(smartRowName(row,headers));
-            if(name7){
-                const found=(allRegistrations||[]).find(x=>smartName7(x.fullName)===name7);
-                if(found)return {item:found,type:'name',key:'N:'+name7};
-            }
-            return {item:null,type:'none',key:file?'F:'+file:(name7?'N:'+name7:'')};
-        }
-
-        function smartMatchType(row,headers){
-            const file=smartRowFile(row,headers);
-            const match=smartFindRegisteredMatch(row,headers);
-            if(match.item&&file&&smartCleanFileNumber(match.item.fileNumber)===file)return 'file';
-            if(match.item)return 'name';
-            return 'none';
-        }
-
-        function smartApplyImportedMetadata(){
-            const headers=importedExcelHeaders();
-            if(!headers.length)return;
-            smartEnsureIndexes();
-            importedExcelRows=(importedExcelRows||[]).map((row,i)=>{
-                const x={...row};
-                const file=smartRowFile(x,headers);
-                const name=smartRowName(x,headers);
-                const name7=smartName7(name);
-                const key=smartMatchKeyFromValues(file,name);
-                const meta=smartMetaForImported(i);
-                x['Бирдиктүү №']=meta.number||'';
-                x['Фамилия + имя (7)']=name7;
-                x['Салыштыруу ачкычы']=key;
-                x['Дал келүү']=smartMatchType(x,headers);
-                if(!file && name7)x['Файл № (авто 7)']=name7;
-                return x;
-            });
-        }
-
-        function smartBuildReport(){
-            smartEnsureIndexes();
-            const headers=importedExcelHeaders();
-            const report={
-                version:SMART_MATCH_VERSION,
-                importedRows:(importedExcelRows||[]).length,
-                registeredRows:(allRegistrations||[]).length,
-                fileMatches:0,
-                nameMatches:0,
-                noMatches:0,
-                duplicateFiles:0,
-                duplicateNames:0,
-                missingFiles:0,
-                generatedName7:0,
-                rows:[]
-            };
-            const fileSeen=new Map();
-            const nameSeen=new Map();
-            (allRegistrations||[]).forEach(item=>{
-                const f=smartCleanFileNumber(item.fileNumber);
-                const n=smartName7(item.fullName);
-                if(f)fileSeen.set(f,(fileSeen.get(f)||0)+1);
-                if(n)nameSeen.set(n,(nameSeen.get(n)||0)+1);
-            });
-            report.duplicateFiles=[...fileSeen.values()].filter(v=>v>1).reduce((a,v)=>a+v,0);
-            report.duplicateNames=[...nameSeen.values()].filter(v=>v>1).reduce((a,v)=>a+v,0);
-            (importedExcelRows||[]).forEach((row,i)=>{
-                const file=smartRowFile(row,headers);
-                const name=smartRowName(row,headers);
-                if(!file)report.missingFiles++;
-                const type=smartMatchType(row,headers);
-                if(type==='file')report.fileMatches++;
-                else if(type==='name')report.nameMatches++;
-                else report.noMatches++;
-                if(!file&&smartName7(name))report.generatedName7++;
-                const meta=smartMetaForImported(i);
-                report.rows.push({row:i+1,number:meta.number,file,name,name7:smartName7(name),type});
-            });
-            smartMatchReport=report;
-            return report;
-        }
-
-        function smartRenderSummary(){
-            const box=document.getElementById('smartImportSummary');
-            if(!box)return;
-            if(!importedExcelRows.length){box.innerHTML='';return;}
-            const r=smartBuildReport();
-            box.innerHTML=`
-                <div class="smart-match-panel">
-                    <div class="smart-match-title">⚡ Акылдуу Excel салыштыруу <span style="font-size:10px;color:var(--text-sub)">v${SMART_MATCH_VERSION}</span></div>
-                    <div class="smart-match-grid">
-                        <div class="smart-match-stat"><b>${r.fileMatches}</b><span>Файл № дал келди</span></div>
-                        <div class="smart-match-stat"><b>${r.nameMatches}</b><span>7 тамга дал келди</span></div>
-                        <div class="smart-match-stat"><b>${r.noMatches}</b><span>Дал келбеди</span></div>
-                        <div class="smart-match-stat"><b>${r.missingFiles}</b><span>Файл № жок</span></div>
-                    </div>
-                    <div class="smart-help">Файл № биринчи орунда текшерилет. Файл № жок болсо Фамилия + Имянын биринчи 7 тамгасы автоматтык ачкыч болуп колдонулат. Бир ачкычка бир гана бирдиктүү № берилет.</div>
-                </div>`;
-        }
-
-        function smartReconcileAll(showNotice=true){
-            try{
-                smartEnsureIndexes();
-                smartApplyImportedMetadata();
-                persistImportedExcel();
-                smartEnsureIndexes();
-                renderComparisonExcel();
-                renderData(currentFilteredRegistrations);
-                renderAnalytics();
-                smartRenderSummary();
-                if(showNotice)showQuickNotice('✓','№ жана 7 тамга боюнча автоматтык салыштырылды');
-                return true;
-            }catch(e){
-                console.error('Smart reconcile error',e);
-                showCenterNotice('❌','Ката','Excel салыштыруу учурунда ката кетти.');
-                return false;
-            }
-        }
-
-        async function smartExportImportedExcel(){
-            if(!window.XLSX){showCenterNotice('❌','Ката','Excel модулу жүктөлгөн жок.');return;}
-            if(!importedExcelRows.length){showCenterNotice('ℹ️','Excel жок','Алгач Excel жүктөңүз.');return;}
-            smartReconcileAll(false);
-            const rows=importedExcelRows.map((r,i)=>{
-                const x={};
-                Object.keys(r).forEach(k=>x[k]=r[k]);
-                const meta=smartMetaForImported(i);
-                x['Бирдиктүү №']=meta.number||x['Бирдиктүү №']||'';
-                x['Фамилия + имя (7)']=x['Фамилия + имя (7)']||smartName7(smartRowName(r,importedExcelHeaders()));
-                return x;
-            });
-            const ws=XLSX.utils.json_to_sheet(rows);
-            ws['!cols']=Object.keys(rows[0]||{}).map(()=>({wch:18}));
-            const wb=XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb,ws,'Excel жүктөө');
-            const out=XLSX.write(wb,{bookType:'xlsx',type:'array'});
-            const blob=new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-            const ok=await saveBlobWithPicker(blob,'Байту_закат_Excel_салыштыруу.xlsx','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            if(ok)showCenterNotice('✓','Excel даяр','Бирдиктүү № жана 7 тамга менен кайра сакталды.');
-        }
-
-        function smartShowMatchReport(){
-            const r=smartBuildReport();
-            const text=[
-                `Жүктөлгөн Excel: ${r.importedRows}`,
-                `Сайттагы катталгандар: ${r.registeredRows}`,
-                `Файл № боюнча дал келүү: ${r.fileMatches}`,
-                `7 тамга боюнча дал келүү: ${r.nameMatches}`,
-                `Дал келбеген: ${r.noMatches}`,
-                `Файл № жок: ${r.missingFiles}`,
-                `Кайталанган Файл № саптары: ${r.duplicateFiles}`,
-                `Кайталанган 7 тамга: ${r.duplicateNames}`
-            ].join('\\n');
-            showCenterNotice('📊','Салыштыруу отчёту',text);
-        }
-
-        function smartRenderImportedRowNumber(rowIndex){
-            const meta=smartMetaForImported(rowIndex);
-            return meta.number?`<span class="unified-no-pill">${escapeHtml(meta.number)}</span>`:'—';
-        }
-
-        function smartBuildImportedHeaderHtml(headers){
-            return `<th class="smart-unified-head">Бирдиктүү №</th><th class="smart-name7-head">Фамилия + имя (7)</th>${headers.map(h=>`<th class="excel-header-edit" contenteditable="true" data-header="${escapeHtml(h)}" onblur="renameImportedColumn(this.dataset.header, this.innerText)">${escapeHtml(h)}</th>`).join('')}<th>Сүрөт</th><th>Аракеттер</th>`;
-        }
-
-        function smartBuildImportedRowHtml(row,i,headers){
-            const meta=smartMetaForImported(i);
-            const type=smartMatchType(row,headers);
-            const match=smartFindRegisteredMatch(row,headers);
-            const file=smartRowFile(row,headers);
-            const name=smartRowName(row,headers);
-            const name7=smartName7(name);
-            const phoneKey=smartPhoneColumn(headers);
-            const phone=phoneKey?smartText(row[phoneKey]):(match.item?.phone||'');
-            const p1=match.item?.photo1||'';
-            const p2=match.item?.photo2||'';
-            const cls=type==='file'?'match-row-file':type==='name'?'match-row-name':'match-row-none';
-            const badge=type==='file'?'<span class="smart-match-badge file">Файл №</span>':type==='name'?'<span class="smart-match-badge name">7 тамга</span>':'<span class="smart-match-badge none">Жок</span>';
-            const thumb=p1?`<img class="imported-photo-thumb" src="${escapeHtml(p1)}" alt="Сүрөт" onclick="event.stopPropagation();openImageViewer('${escapeQuotes(p1)}')">`:'—';
-            const wa=phone?`<a class="whatsapp-small" title="WhatsApp" aria-label="WhatsApp" target="_blank" rel="noopener" href="${whatsappUrlWithPhotos(phone,name,file||name7,p1,p2)}" onclick="event.stopPropagation()">${iconSvg('whatsapp')}</a>`:'—';
-            let cells=`<tr class="${cls}"><td class="unified-no-cell">${smartRenderImportedRowNumber(i)}</td><td class="name7-cell">${escapeHtml(name7||'—')}<br>${badge}</td>`;
-            headers.forEach(h=>{
-                const value=String(row[h]??'');
-                cells+=`<td class="excel-editable" contenteditable="true" data-row="${i}" data-col="${escapeHtml(h)}" onblur="saveImportedCell(${i}, this.dataset.col, this.innerText)">${escapeHtml(value)}</td>`;
-            });
-            cells+=`<td style="text-align:center;vertical-align:middle;">${thumb}</td><td class="imported-action-cell">${wa}</td></tr>`;
-            return cells;
-        }
-
-        function renderComparisonExcel(){
-            const box=document.getElementById('comparisonExcelResult'); if(!box)return;
-            updateImportedExcelControls();
-            if(!importedExcelRows.length){box.innerHTML='';smartRenderSummary();return;}
-            smartEnsureIndexes();
-            const headers=importedExcelHeaders().filter(h=>!['Бирдиктүү №','Фамилия + имя (7)','Салыштыруу ачкычы','Дал келүү','Файл № (авто 7)'].includes(h));
-            const searchText=(document.getElementById('searchInput')?.value||'').toLowerCase().trim();
-            const rows=[...importedExcelRows].map((r,i)=>({r,i})).filter(({r})=>{
-                if(!searchText)return true;
-                return Object.values(r||{}).some(v=>String(v??'').toLowerCase().includes(searchText));
-            }).sort((a,b)=>Number(smartMetaForImported(a.i).number||999999)-Number(smartMetaForImported(b.i).number||999999));
-            let html='<div class="excel-horizontal-scroll" id="comparisonExcelTopScroll"><div class="excel-horizontal-scroll-inner"></div></div><div class="excel-table-container" id="comparisonExcelTableScroll"><table class="excel-import-table"><thead><tr>'+smartBuildImportedHeaderHtml(headers)+'</tr></thead><tbody>';
-            rows.forEach(({r,i})=>{html+=smartBuildImportedRowHtml(r,i,headers);});
-            box.innerHTML=html+'</tbody></table></div>';
-            setupAllExcelScrolls();
-            smartRenderSummary();
-        }
-
-        function smartPatchRegisteredExcelNumberCells(){
-            const body=document.getElementById('excelTableBody');
-            if(!body)return;
-            const rows=body.querySelectorAll('tr');
-            rows.forEach((tr,i)=>{
-                const item=currentFilteredRegistrations?.[i];
-                if(!item)return;
-                const first=tr.querySelector('td');
-                if(first){
-                    first.classList.add('unified-no-cell');
-                    first.innerHTML=`<span class="unified-no-pill">${escapeHtml(String(smartUnifiedNumberForRegistration(item,i)))}</span>`;
-                }
-            });
-        }
-
-        function smartPatchRenderData(){
-            const original=window.renderData;
-            if(typeof original!=='function'||original.__smartWrapped)return;
-            const wrapped=function(data){
-                original(data);
-                setTimeout(()=>smartPatchRegisteredExcelNumberCells(),0);
-            };
-            wrapped.__smartWrapped=true;
-            window.renderData=wrapped;
-        }
-
-        function smartPersistState(){
-            try{
-                const state={
-                    version:SMART_MATCH_VERSION,
-                    importedRows:importedExcelRows||[],
-                    timestamp:Date.now()
-                };
-                localStorage.setItem(SMART_STORAGE_KEY,JSON.stringify(state));
-            }catch(e){console.warn('Smart state save failed',e);}
-        }
-
-        function smartRestoreState(){
-            try{
-                const raw=localStorage.getItem(SMART_STORAGE_KEY);
-                if(!raw)return;
-                const state=JSON.parse(raw);
-                if(!state||!Array.isArray(state.importedRows)||!state.importedRows.length)return;
-                if(!Array.isArray(importedExcelRows)||!importedExcelRows.length){
-                    importedExcelRows=state.importedRows;
-                    persistImportedExcel();
-                }
-            }catch(e){console.warn('Smart state restore failed',e);}
-        }
-
-        function smartInstallToolbar(){
-            const host=document.getElementById('smartImportControls');
-            if(!host)return;
-            if(!document.getElementById('smartFilterBar')){
-                const bar=document.createElement('div');
-                bar.id='smartFilterBar';
-                bar.className='smart-filter-bar';
-                bar.innerHTML=`
-                    <button class="smart-filter-chip active" data-smart-filter="all">Баары</button>
-                    <button class="smart-filter-chip" data-smart-filter="file">Файл №</button>
-                    <button class="smart-filter-chip" data-smart-filter="name">7 тамга</button>
-                    <button class="smart-filter-chip" data-smart-filter="none">Дал келген жок</button>`;
-                host.parentNode.insertBefore(bar,host.nextSibling);
-                bar.querySelectorAll('[data-smart-filter]').forEach(btn=>btn.addEventListener('click',()=>{
-                    bar.querySelectorAll('.smart-filter-chip').forEach(x=>x.classList.remove('active'));
-                    btn.classList.add('active');
-                    smartApplyVisualFilter(btn.dataset.smartFilter);
-                }));
-            }
-        }
-
-        function smartApplyVisualFilter(type){
-            document.querySelectorAll('#comparisonExcelResult tbody tr').forEach(tr=>{
-                if(type==='all'){tr.style.display='';return;}
-                const hasFile=tr.classList.contains('match-row-file');
-                const hasName=tr.classList.contains('match-row-name');
-                const hasNone=tr.classList.contains('match-row-none');
-                const ok=(type==='file'&&hasFile)||(type==='name'&&hasName)||(type==='none'&&hasNone);
-                tr.style.display=ok?'':'none';
-            });
-        }
-
-        function smartAddExportButtonToImportedHead(){
-            const head=document.querySelector('#folderViewImportedExcel .excel-import-actions');
-            if(!head||document.getElementById('smartImportedDownloadBtn'))return;
-            const b=document.createElement('button');
-            b.id='smartImportedDownloadBtn';
-            b.className='btn-action btn-action-download compact-download-btn';
-            b.type='button';
-            b.textContent='↓ Даяр Excel скачать';
-            b.onclick=smartExportImportedExcel;
-            head.appendChild(b);
-        }
-
-        function smartObserveImportedView(){
-            const target=document.getElementById('folderViewImportedExcel');
-            if(!target||typeof MutationObserver==='undefined')return;
-            const observer=new MutationObserver(()=>{smartInstallToolbar();smartAddExportButtonToImportedHead();});
-            observer.observe(target,{childList:true,subtree:true});
-        }
-
-        function smartBoot(){
-            try{
-                smartRestoreState();
-                smartInstallToolbar();
-                smartAddExportButtonToImportedHead();
-                smartObserveImportedView();
-                smartPatchRenderData();
-                if(importedExcelRows.length){
-                    setTimeout(()=>{smartReconcileAll(false);},350);
-                }
-            }catch(e){console.warn('Smart boot error',e);}
-        }
-
-        /* saveImportedCell'ди күчөтөбүз: өзгөртүү болгондо № дароо кайра эсептелет. */
-        const _baitOriginalSaveImportedCell=window.saveImportedCell;
-        window.saveImportedCell=function(rowIndex,col,value){
-            if(typeof _baitOriginalSaveImportedCell==='function'){
-                _baitOriginalSaveImportedCell(rowIndex,col,value);
-            }
-            try{
-                if(importedExcelRows[rowIndex]){
-                    importedExcelRows[rowIndex][col]=smartText(value);
-                    smartReconcileAll(false);
-                    smartPersistState();
-                }
-            }catch(e){console.warn('Smart cell sync failed',e);}
-        };
-
-        /* Excel жүктөлгөндө автоматтык салыштыруу. */
-
-        const _baitOriginalPersistImportedExcel=window.persistImportedExcel;
-        window.persistImportedExcel=function(){
-            if(typeof _baitOriginalPersistImportedExcel==='function')_baitOriginalPersistImportedExcel();
-            smartPersistState();
-        };
-
-        const _baitOriginalHandleComparisonExcel=window.handleComparisonExcel;
-        window.handleComparisonExcel=async function(file){
-            const result=await _baitOriginalHandleComparisonExcel(file);
-            try{
-                smartReconcileAll(false);
-                smartPersistState();
-                smartInstallToolbar();
-                smartAddExportButtonToImportedHead();
-            }catch(e){console.warn('Smart import reconcile failed',e);}
-            return result;
-        };
-
-        document.addEventListener('DOMContentLoaded',()=>{
-            setTimeout(smartBoot,500);
-            setTimeout(smartInstallToolbar,1000);
-            setTimeout(smartAddExportButtonToImportedHead,1200);
-        });
-
-        /* Lightweight internal helpers: the Smart Match engine above is intentionally kept small. */
-        
-
-        /* Ultra UI/diagnostic helpers */
-        function smartSafeJson(value){
-            try{return JSON.stringify(value);}catch(e){return '{}';}
-        }
-        function smartNumber(value){
-            const n=Number(value);
-            return Number.isFinite(n)?n:0;
-        }
-        function smartArray(value){return Array.isArray(value)?value:[];}
-        function smartObject(value){return value&&typeof value==='object'?value:{};}
-        function smartUnique(values){return [...new Set(smartArray(values))];}
-        function smartClamp(value,min,max){return Math.min(max,Math.max(min,smartNumber(value)));}
-        function smartDelay(ms){return new Promise(resolve=>setTimeout(resolve,Math.max(0,smartNumber(ms))));}
-        function smartDateStamp(value){try{const d=new Date(value);return isNaN(d)?'':d.toISOString();}catch(e){return '';}}
-        function smartMakeId(prefix='bait'){return prefix+'_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,9);}
-        function smartCopyText(value){
-            const text=String(value??'');
-            if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(text);
-            const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
-            document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}finally{ta.remove();}
-            return Promise.resolve();
-        }
-        function smartToast(message){
-            let el=document.getElementById('baitSmartToast');
-            if(!el){el=document.createElement('div');el.id='baitSmartToast';el.className='smart-toast';document.body.appendChild(el);}
-            el.textContent=String(message||'');el.classList.add('open');
-            clearTimeout(smartToast.timer);smartToast.timer=setTimeout(()=>el.classList.remove('open'),2200);
-        }
-        window.BaitUltraToolkit=BaitUltraToolkit;
-        window.smartName7=smartName7;
-        window.smartReconcileAll=smartReconcileAll;
-        window.smartExportImportedExcel=smartExportImportedExcel;
-        window.smartShowMatchReport=smartShowMatchReport;
-
     </script>
 <script>document.addEventListener("DOMContentLoaded",()=>{setTimeout(setupAllExcelScrolls,300);});</script>
 </body>
