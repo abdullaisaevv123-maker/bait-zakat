@@ -1655,12 +1655,21 @@
 
             // ЭСКИ ВЕРСИЯДАГЫ 650px / JPEG 0.52 КЫСУУ АЛЫП САЛЫНДЫ.
             // Камерадан келген сүрөт толук canvas өлчөмүндө, сапат 1.0 менен гана коддолот.
+            // Телефондун өтө чоң сүрөттөрүн түз бойдон Base64 кылып сактоо
+            // браузерди оорлотуп, Cloudinary upload'ту үзгүлтүккө учуратышы мүмкүн.
+            // Ошондуктан сапатты сактап, бирок файлды коопсуз өлчөмгө келтиребиз.
             const canvas = document.createElement('canvas');
-            canvas.width = img.naturalWidth || img.width;
-            canvas.height = img.naturalHeight || img.height;
+            const maxSide = 2400;
+            const sourceW = img.naturalWidth || img.width;
+            const sourceH = img.naturalHeight || img.height;
+            const scale = Math.min(1, maxSide / Math.max(sourceW, sourceH));
+            canvas.width = Math.max(1, Math.round(sourceW * scale));
+            canvas.height = Math.max(1, Math.round(sourceH * scale));
             const ctx = canvas.getContext('2d', { alpha: false });
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            const originalQualityJpeg = canvas.toDataURL('image/jpeg', 1.0);
+            const originalQualityJpeg = canvas.toDataURL('image/jpeg', 0.90);
             capturedPhotos[slotIndex] = originalQualityJpeg;
 
             const card = document.getElementById('photoCard' + slotIndex);
@@ -1777,9 +1786,13 @@
                 function getNextCloudinaryAccount() {
                     let index = parseInt(localStorage.getItem(CLOUDINARY_ROTATION_KEY) || '0', 10);
                     if (!Number.isFinite(index) || index < 0) index = 0;
-                    const account = CLOUDINARY_ACCOUNTS[index % CLOUDINARY_ACCOUNTS.length];
-                    localStorage.setItem(CLOUDINARY_ROTATION_KEY, String((index + 1) % CLOUDINARY_ACCOUNTS.length));
-                    return account;
+                    return CLOUDINARY_ACCOUNTS[index % CLOUDINARY_ACCOUNTS.length];
+                }
+
+                function rotateCloudinaryAccount(account) {
+                    const index = CLOUDINARY_ACCOUNTS.findIndex(a => a.id === account.id);
+                    const next = index >= 0 ? (index + 1) % CLOUDINARY_ACCOUNTS.length : 0;
+                    localStorage.setItem(CLOUDINARY_ROTATION_KEY, String(next));
                 }
 
                 async function uploadToCloudinary(dataUrl, account, slot) {
@@ -1811,19 +1824,41 @@
                     };
                 }
 
-                // Эки сүрөт бир эле Cloudinary аккаунтка кетет, кийинки каттоо кийинки аккаунттан башталат.
-                const selectedCloudinary = getNextCloudinaryAccount();
-                let cloudinaryPhoto1, cloudinaryPhoto2;
-                try {
-                    btn.innerHTML = `<span class="spinner spinner-dark"></span> Cloudinary'ге сүрөттөр жүктөлүүдө...`;
-                    [cloudinaryPhoto1, cloudinaryPhoto2] = await Promise.all([
-                        uploadToCloudinary(capturedPhotos[1], selectedCloudinary, 1),
-                        uploadToCloudinary(capturedPhotos[2], selectedCloudinary, 2)
-                    ]);
-                    lastCloudinaryUpload = selectedCloudinary;
-                } catch (cloudinaryError) {
-                    console.error('Cloudinary upload error:', cloudinaryError);
-                    throw cloudinaryError;
+                // Эки сүрөт бир эле аккаунтка жүктөлөт. Эгер ошол аккаунт убактылуу
+                // ката берсе/лимитке жетсе, кийинки Cloudinary автоматтык текшерилет.
+                let selectedCloudinary = getNextCloudinaryAccount();
+                let cloudinaryPhoto1 = null, cloudinaryPhoto2 = null;
+                let lastCloudinaryError = null;
+                const triedAccounts = new Set();
+
+                for (let attempt = 0; attempt < CLOUDINARY_ACCOUNTS.length; attempt++) {
+                    if (triedAccounts.has(selectedCloudinary.id)) break;
+                    triedAccounts.add(selectedCloudinary.id);
+                    try {
+                        btn.innerHTML = `<span class="spinner spinner-dark"></span> Cloudinary ${attempt + 1}/${CLOUDINARY_ACCOUNTS.length} жүктөлүүдө...`;
+                        // Биринчисин ийгиликтүү жүктөп, анан экинчисин жүктөйбүз.
+                        // Promise.all'га караганда бул режим ката чыкканда кайсы сүрөт/аккаунт
+                        // көйгөй жаратканын так кармайт жана кайра аракет кылууга ыңгайлуу.
+                        cloudinaryPhoto1 = await uploadToCloudinary(capturedPhotos[1], selectedCloudinary, 1);
+                        cloudinaryPhoto2 = await uploadToCloudinary(capturedPhotos[2], selectedCloudinary, 2);
+                        lastCloudinaryUpload = selectedCloudinary;
+                        // Ушул аккаунт ийгиликтүү иштегендиктен кийинки каттоо кийинки аккаунттан башталат.
+                        rotateCloudinaryAccount(selectedCloudinary);
+                        lastCloudinaryError = null;
+                        break;
+                    } catch (cloudinaryError) {
+                        lastCloudinaryError = cloudinaryError;
+                        console.error(`Cloudinary ${selectedCloudinary.label} upload error:`, cloudinaryError);
+                        const currentIndex = CLOUDINARY_ACCOUNTS.findIndex(a => a.id === selectedCloudinary.id);
+                        selectedCloudinary = CLOUDINARY_ACCOUNTS[(currentIndex + 1) % CLOUDINARY_ACCOUNTS.length];
+                        // Кийинки аккаунтка өтүүдөн мурда кичине тыныгуу — rate-limit/CORS убактылуу
+                        // көйгөйлөрүндө кайра дароо басып калбоо үчүн.
+                        await new Promise(r => setTimeout(r, 350));
+                    }
+                }
+
+                if (!cloudinaryPhoto1 || !cloudinaryPhoto2) {
+                    throw lastCloudinaryError || new Error('Бардык Cloudinary аккаунттарында жүктөө ишке ашкан жок.');
                 }
 
                 const photo1Url = cloudinaryPhoto1.url;
@@ -2390,7 +2425,14 @@
             }
 
             let cardsHtml="", excelHtml="";
-            const orderedList=[...dataList].sort((a,b)=>Number(selectedIds.has(b.id))-Number(selectedIds.has(a.id)));
+            // Файл № жоктор дайыма эң жогору турат. Андан кийин файл № барлар.
+            // Эки топтун ичинде мурдагы тандоо/тизмектин тартиби сакталат.
+            const orderedList=[...dataList].sort((a,b)=>{
+                const aHas=String(a.fileNumber||'').trim() !== '';
+                const bHas=String(b.fileNumber||'').trim() !== '';
+                if(aHas !== bHas) return aHas ? 1 : -1;
+                return Number(selectedIds.has(b.id))-Number(selectedIds.has(a.id));
+            });
             orderedList.forEach((item,index)=>{
                 let dateStr=translations[currentLang].newItem;
                 if(item.createdAt && item.createdAt.toDate){
