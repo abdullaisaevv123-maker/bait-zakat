@@ -829,6 +829,7 @@
                     <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;">
                         <button class="btn-action btn-action-copy" onclick="sortDataByName()" style="font-size:12px; padding:6px 12px;">🔤 Алфавит боюнча</button>
                         <button class="btn-action btn-action-download" onclick="downloadExcelFile()" style="font-size:12px; padding:6px 12px;">📊 Excel скачать</button>
+                         <button class="btn-action btn-action-download" onclick="downloadAllRegisteredPhotos()" style="font-size:12px; padding:6px 12px;">☁️ Бардык сүрөттөр</button>
                     </div>
                 </div>
                 <div class="excel-horizontal-scroll" id="registeredExcelTopScroll"><div class="excel-horizontal-scroll-inner" id="registeredExcelTopScrollInner"></div></div>
@@ -2063,22 +2064,21 @@
                     return tb - ta;
                 });
 
-                // Cloudinary сүрөттөрүн толук жүктөп бүткөнгө чейин күтүп,
-                // андан кийин тизмени чыгарабыз. Бир сүрөт бузулса калганына тоскоол болбойт.
-                const photoUrls = [];
-                allRegistrations.forEach(item => {
-                    if (item.photo1) photoUrls.push(item.photo1);
-                    if (item.photo2) photoUrls.push(item.photo2);
-                });
-
-                const uniqueUrls = [...new Set(photoUrls)];
-                await Promise.all(uniqueUrls.map(src => preloadCloudinaryImage(src)));
-
+                /*
+                 * Cloudinary сүрөттөрүн бул жерде алдын ала 580 даана жүктөбөйбүз.
+                 * 290 бала × 2 сүрөт = 580 request болуп, браузерди/телефонду
+                 * оорлотуп, сайттын ачылбай калышына себеп болушу мүмкүн.
+                 *
+                 * Firestore'дон бардык балдардын маалыматтарын алабыз,
+                 * сүрөттөр болсо экранда lazy-load менен гана ачылат.
+                 * Архив/скачать функциясы өзүнчө 5 баладан батч менен иштейт.
+                 */
                 registrationsPageCursor = null;
                 registrationsHasMore = false;
                 registrationsPageLoading = false;
 
                 applyFilters();
+                setupLazyCloudinaryImages();
 
                 const loading = document.getElementById('loadMoreLoading');
                 if (loading) loading.style.display = 'none';
@@ -2101,6 +2101,39 @@
                     listContainer.innerHTML = `<div class="glass-box" style="color:var(--danger-red);text-align:center;padding:25px;">❌ Firebase катасы: ${escapeHtml(error.code || error.message || 'unknown')}</div>`;
                     excelTableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--danger-red);padding:25px;">❌ Firebase катасы: ${escapeHtml(error.code || error.message || 'unknown')}</td></tr>`;
                 }
+            }
+        }
+
+        // Cloudinary сүрөттөрүн экранга жакындаганда гана жүктөйбүз.
+        // Бул 290 бала × 2 сүрөттү бир убакта тартып, сайтты оорлотпойт.
+        let cloudinaryImageObserver = null;
+
+        function setupLazyCloudinaryImages(){
+            const images = document.querySelectorAll('img[data-cloudinary-src]');
+            if(!images.length) return;
+
+            if('IntersectionObserver' in window){
+                if(!cloudinaryImageObserver){
+                    cloudinaryImageObserver = new IntersectionObserver((entries, observer)=>{
+                        entries.forEach(entry=>{
+                            if(!entry.isIntersecting) return;
+                            const img=entry.target;
+                            const src=img.getAttribute('data-cloudinary-src');
+                            if(src && !img.getAttribute('src')){
+                                img.src=src;
+                            }
+                            observer.unobserve(img);
+                        });
+                    }, {rootMargin:'700px 0px'});
+                }
+                images.forEach(img=>{
+                    if(!img.getAttribute('src')) cloudinaryImageObserver.observe(img);
+                });
+            }else{
+                images.forEach(img=>{
+                    const src=img.getAttribute('data-cloudinary-src');
+                    if(src && !img.getAttribute('src')) img.src=src;
+                });
             }
         }
 
@@ -2464,8 +2497,8 @@
                         </div>
                         <div class="list-header"><div></div><div class="card-meta"><div class="list-date card-date-large">${dateStr}</div>${getCloudinarySummary(item)?`<div style="font-size:11px;color:var(--accent-glow);margin-top:4px;">☁️ ${escapeHtml(getCloudinarySummary(item))}</div>`:''}</div></div>
                         <div class="large-thumb-group">
-                            ${item.photo1?`<img src="${escapeHtml(item.photo1)}" loading="eager" decoding="async" alt="Фото 1" onerror="this.style.display='none';this.nextElementSibling?.classList.remove('photo-hidden');" onclick="event.stopPropagation();openImageViewer('${escapeQuotes(item.photo1)}')">`:'<div class="empty-state">Сүрөт 1 жок</div>'}
-                            ${item.photo2?`<img src="${escapeHtml(item.photo2)}" loading="eager" decoding="async" alt="Фото 2" onerror="this.style.display='none';this.nextElementSibling?.classList.remove('photo-hidden');" onclick="event.stopPropagation();openImageViewer('${escapeQuotes(item.photo2)}')">`:'<div class="empty-state">Сүрөт 2 жок</div>'}
+                            ${item.photo1?`<img data-cloudinary-src="${escapeHtml(item.photo1)}" loading="lazy" decoding="async" alt="Фото 1" style="background:#0b132b;min-height:120px;" onerror="this.style.display='none';" onclick="event.stopPropagation();openImageViewer('${escapeQuotes(item.photo1)}')">`:'<div class="empty-state">Сүрөт 1 жок</div>'}
+                            ${item.photo2?`<img data-cloudinary-src="${escapeHtml(item.photo2)}" loading="lazy" decoding="async" alt="Фото 2" style="background:#0b132b;min-height:120px;" onerror="this.style.display='none';" onclick="event.stopPropagation();openImageViewer('${escapeQuotes(item.photo2)}')">`:'<div class="empty-state">Сүрөт 2 жок</div>'}
                         </div>
                         <div class="item-actions">${actionButtons}</div>
                     </div>`;
@@ -2496,6 +2529,7 @@
             excelTableBody.innerHTML=excelHtml;
             updateSelectionToolbar();
             setupAllExcelScrolls();
+            setupLazyCloudinaryImages();
         }
 
         function iconSvg(type){
@@ -2860,62 +2894,221 @@
             if(item) await downloadPhotosAsZip([item]);
         }
 
+        // Бир сүрөттү Cloudinary'ден туруктуу алып берүү.
+        // 3 аккаунттун URL'дери Firestore'до сакталгандыктан, бул жерде
+        // кайсы Cloudinary экенин кайра издөөнүн кереги жок.
+        async function fetchCloudinaryBlob(src, retries=3){
+            let lastError=null;
+            for(let attempt=1; attempt<=retries; attempt++){
+                try{
+                    const response=await withTimeout(
+                        fetch(src, {cache:'force-cache'}),
+                        30000,
+                        'cloudinary-download-timeout'
+                    );
+                    if(!response.ok) throw new Error(`HTTP ${response.status}`);
+                    const blob=await response.blob();
+                    if(!blob || !blob.size) throw new Error('Бош сүрөт');
+                    return blob;
+                }catch(e){
+                    lastError=e;
+                    if(attempt<retries){
+                        await new Promise(r=>setTimeout(r,700*attempt));
+                    }
+                }
+            }
+            throw lastError || new Error('Cloudinary сүрөтү жүктөлгөн жок');
+        }
+
+        async function blobToJpeg(blob){
+            const imageUrl=URL.createObjectURL(blob);
+            try{
+                const image=await new Promise((resolve,reject)=>{
+                    const im=new Image();
+                    im.onload=()=>resolve(im);
+                    im.onerror=()=>reject(new Error('Сүрөттү ачуу мүмкүн болгон жок'));
+                    im.src=imageUrl;
+                });
+                const canvas=document.createElement('canvas');
+                canvas.width=image.naturalWidth||image.width;
+                canvas.height=image.naturalHeight||image.height;
+                if(!canvas.width || !canvas.height) throw new Error('Сүрөт өлчөмү жок');
+                const ctx=canvas.getContext('2d',{alpha:false});
+                ctx.drawImage(image,0,0,canvas.width,canvas.height);
+                return await new Promise((resolve,reject)=>{
+                    canvas.toBlob(
+                        b=>b?resolve(b):reject(new Error('JPEG түзүлгөн жок')),
+                        'image/jpeg',
+                        0.95
+                    );
+                });
+            }finally{
+                URL.revokeObjectURL(imageUrl);
+            }
+        }
+
+        // 5 БАЛАДАН бир батч.
+        // 3 Cloudinary аккаунттан келген URL'дер аралаш болсо да иштейт.
+        // Бир батчта эң көп 5 баланын 10 сүрөтү иштетилет.
+        async function downloadPhotoBatch(items, zip, progressCallback){
+            let count=0;
+            const concurrency=5;
+            let cursor=0;
+
+            async function worker(){
+                while(true){
+                    const index=cursor++;
+                    if(index>=items.length) return;
+                    const item=items[index];
+                    const folderName=String(item.fileNumber || item.id || `child_${index+1}`)
+                        .trim().replace(/[\\/:*?"<>|]/g,'_');
+                    const folder=zip.folder(folderName);
+
+                    for(const [key,label] of [['photo1','1_белинен'],['photo2','2_толук_бою']]){
+                        const src=item[key];
+                        if(!src) continue;
+                        try{
+                            const blob=await fetchCloudinaryBlob(src,3);
+                            const jpegBlob=await blobToJpeg(blob);
+                            folder.file(`${label}.jpg`,jpegBlob);
+                            count++;
+                            if(progressCallback) progressCallback(count);
+                        }catch(e){
+                            console.error('Cloudinary сүрөт жүктөөдө ката:', {
+                                child:item.fullName,
+                                fileNumber:item.fileNumber,
+                                photo:key,
+                                error:e
+                            });
+                        }
+                    }
+                }
+            }
+
+            const workers=[];
+            for(let i=0;i<Math.min(concurrency,items.length);i++) workers.push(worker());
+            await Promise.all(workers);
+            return count;
+        }
+
+        async function downloadPhotosById(id){
+            const item=allRegistrations.find(x=>x.id===id);
+            if(item) await downloadPhotosAsZip([item]);
+        }
+
         async function downloadPhotosAsZip(items){
             if(!window.JSZip){
                 showCenterNotice('❌','Ката','Сүрөт жүктөө модулу жүктөлгөн жок.');
                 return;
             }
-            const missingFile=items.find(item=>!String(item.fileNumber||'').trim());
-            if(missingFile){
-                showCenterNotice('⚠️','Файл № керек','Сүрөттү сактоо үчүн файл № жазылышы керек.');
-                return;
-            }
-            const zip=new JSZip();
-            let count=0;
-            for(const item of items){
-                const folderName=String(item.fileNumber).trim().replace(/[\\/:*?"<>|]/g,'_');
-                const folder=zip.folder(folderName);
-                for(const [key,label] of [['photo1','1_белинен'],['photo2','2_толук_бою']]){
-                    const src=item[key];
-                    if(!src)continue;
-                    try{
-                        const resp=await fetch(src);
-                        if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
-                        const blob=await resp.blob();
 
-                        // Cloudinary кээде WebP/AVIF кайтарышы мүмкүн.
-                        // Ошондуктан ZIP ичинде кеңейтүүсү гана эмес, өзү да чыныгы JPEG болот.
-                        const imageUrl=URL.createObjectURL(blob);
-                        try{
-                            const image=await new Promise((resolve,reject)=>{
-                                const im=new Image();
-                                im.onload=()=>resolve(im);
-                                im.onerror=()=>reject(new Error('Сүрөттү ачуу мүмкүн болгон жок'));
-                                im.src=imageUrl;
-                            });
-                            const canvas=document.createElement('canvas');
-                            canvas.width=image.naturalWidth||image.width;
-                            canvas.height=image.naturalHeight||image.height;
-                            const ctx=canvas.getContext('2d',{alpha:false});
-                            ctx.drawImage(image,0,0,canvas.width,canvas.height);
-                            const jpegBlob=await new Promise((resolve,reject)=>{
-                                canvas.toBlob(b=>b?resolve(b):reject(new Error('JPEG түзүлгөн жок')),'image/jpeg',0.95);
-                            });
-                            folder.file(`${label}.jpg`,jpegBlob);
-                        } finally {
-                            URL.revokeObjectURL(imageUrl);
-                        }
-                        count++;
-                    }catch(e){ console.error('Сүрөт жүктөөдө ката:',e); }
-                }
-            }
-            if(!count){
+            const validItems=(items||[]).filter(x=>x && (x.photo1||x.photo2));
+            if(!validItems.length){
                 showCenterNotice('ℹ️','Сүрөт жок','Жүктөй турган сүрөт табылган жок.');
                 return;
             }
-            const blob=await zip.generateAsync({type:'blob'});
-            const ok=await saveBlobWithPicker(blob,'Байту_закат_сүрөттөр.zip','application/zip');
-            if(ok) showCenterNotice('✓','Сүрөттөр даяр',`${count} сүрөт файл номери боюнча папкаларга салынды.`);
+
+            const missingFile=validItems.find(item=>!String(item.fileNumber||'').trim());
+            if(missingFile){
+                showCenterNotice(
+                    '⚠️',
+                    'Файл № керек',
+                    `«${missingFile.fullName||'Бала'}» үчүн Файл № жазылган эмес.`
+                );
+                return;
+            }
+
+            /*
+             * Эски версияда сүрөттөр бирден fetch болуп, чоң тизмеде браузер
+             * көпкө чейин күтүп калчу. Эми 5 баладан батч менен иштейбиз.
+             * 3 Cloudinary'ден келген сүрөттөрдүн URL'дери бирдей алгоритм
+             * аркылуу алынат. Ката чыккан сүрөт бүт архивди токтотпойт.
+             */
+            const BATCH_SIZE=5;
+            const zip=new JSZip();
+            let totalDownloaded=0;
+            const totalPhotos=validItems.reduce((n,x)=>
+                n+(x.photo1?1:0)+(x.photo2?1:0),0);
+
+            showCenterNotice(
+                '☁️',
+                'Сүрөттөр жүктөлүүдө',
+                `0 / ${totalPhotos} сүрөт · ${validItems.length} бала`
+            );
+
+            for(let i=0;i<validItems.length;i+=BATCH_SIZE){
+                const batch=validItems.slice(i,i+BATCH_SIZE);
+                const before=totalDownloaded;
+
+                totalDownloaded += await downloadPhotoBatch(
+                    batch,
+                    zip,
+                    () => {
+                        const text=`${totalDownloaded} / ${totalPhotos} сүрөт`;
+                        const titleEl=document.getElementById('centerNoticeTitle');
+                        const textEl=document.getElementById('centerNoticeText');
+                        if(titleEl) titleEl.textContent='Сүрөттөр жүктөлүүдө';
+                        if(textEl) textEl.textContent=`${text} · ${validItems.length} бала`;
+                    }
+                );
+
+                // Батч бүткөн сайын UI дем алсын.
+                await new Promise(r=>setTimeout(r,50));
+
+                if(totalDownloaded===before){
+                    console.warn('Бул батчтан сүрөт алынган жок:', batch.map(x=>x.fullName));
+                }
+            }
+
+            if(!totalDownloaded){
+                showCenterNotice('❌','Сүрөт жок','Cloudinary сүрөттөрүн жүктөө мүмкүн болгон жок.');
+                return;
+            }
+
+            showCenterNotice('⏳','Архив даярдалууда',`${totalDownloaded} сүрөт ZIP'ке салынууда...`);
+            const blob=await zip.generateAsync({
+                type:'blob',
+                compression:'STORE',
+                streamFiles:true
+            });
+
+            const ok=await saveBlobWithPicker(
+                blob,
+                'Байту_закат_сүрөттөр.zip',
+                'application/zip'
+            );
+
+            if(ok){
+                showCenterNotice(
+                    '✓',
+                    'Сүрөттөр даяр',
+                    `${totalDownloaded} сүрөт ${validItems.length} баланын папкаларына салынды.`
+                );
+            }
+        }
+
+        // Бардык катталган балдардын (мисалы 290 баланын) 2 сүрөтүн толук жүктөө.
+        // 5 баладан батч менен иштейт, ошондуктан сайт 580 сүрөттү бир учурда
+        // ачып/жүктөп браузерди тоңдурбайт.
+        async function downloadAllRegisteredPhotos(){
+            if(!allRegistrations.length){
+                showCenterNotice('ℹ️','Маалымат жок','Алгач Катталгандар тизмесин жүктөңүз.');
+                return;
+            }
+
+            const items=allRegistrations.filter(x=>x.photo1||x.photo2);
+            const missing=items.filter(x=>!String(x.fileNumber||'').trim());
+
+            if(missing.length){
+                showCenterNotice(
+                    '⚠️',
+                    'Файл № жетишсиз',
+                    `${missing.length} балада Файл № жок. Алгач Файл № толтуруңуз.`
+                );
+                return;
+            }
+
+            await downloadPhotosAsZip(items);
         }
 
         // БАРАКЧА ЖАҢЫЛАНГАНДА (F5 / Ctrl+R) УШУЛ ЭЛЕ БЕТТЕ КАЛУУ.
