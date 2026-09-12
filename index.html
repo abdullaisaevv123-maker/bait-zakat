@@ -1406,7 +1406,11 @@
                 return;
             }
 
-            const candidates=allRegistrations.filter(cloudinaryMigrationSource);
+            // Бир басканда эң көп 10 БАЛА гана көчүрүлөт.
+            // Ийгиликтүү көчүрүлгөндөр кийинки басууда candidates тизмесинен автоматтык түрдө чыгат.
+            const allCandidates=allRegistrations.filter(cloudinaryMigrationSource);
+            const candidates=allCandidates.slice(0,10);
+
             if(!candidates.length){
                 setCloudinaryMigrationStatus('✓ Cloudinary 1ден көчүрүлө турган сүрөт табылган жок. Баары Cloudinary 4тө болушу мүмкүн.',true);
                 return;
@@ -1417,8 +1421,12 @@
             if(btn){btn.disabled=true;btn.style.opacity='.65';}
 
             let done=0, photosDone=0, errors=0;
-            const total=candidates.reduce((n,item)=>n+(item.photo1?1:0)+(item.photo2?1:0),0);
-            setCloudinaryMigrationStatus(`⏳ Башталды: ${candidates.length} бала, ${total} сүрөт. 0/${total}`);
+            const batchTotal=candidates.reduce((n,item)=>n+(item.photo1?1:0)+(item.photo2?1:0),0);
+            const remainingBefore=allCandidates.length;
+
+            setCloudinaryMigrationStatus(
+                `⏳ Бул басууда ${candidates.length} бала көчүрүлөт. Жалпы калган: ${remainingBefore} бала, ${batchTotal} сүрөт.`
+            );
 
             try{
                 for(const item of candidates){
@@ -1426,20 +1434,28 @@
                     let photo2=item.photo2||null;
                     let c1=(item.cloudinary && typeof item.cloudinary==='object')?{...item.cloudinary}:{};
                     let changed=false;
+                    let itemErrors=0;
 
                     for(const key of ['photo1','photo2']){
                         const source=item[key];
                         if(!source){ continue; }
+
                         if(isCloudinary4Url(source)){
                             done++;
                             photosDone++;
                             continue;
                         }
+
                         try{
-                            setCloudinaryMigrationStatus(`⏳ ${item.fullName||item.id}: ${key==='photo1'?'1-сүрөт':'2-сүрөт'} көчүрүлүүдө… ${done}/${total}`);
-                            const result=await migrateOneCloudinaryImage(source,done,total);
+                            setCloudinaryMigrationStatus(
+                                `⏳ ${item.fullName||item.id}: ${key==='photo1'?'1-сүрөт':'2-сүрөт'} көчүрүлүүдө… ${done}/${batchTotal}`
+                            );
+
+                            const result=await migrateOneCloudinaryImage(source,done,batchTotal);
+
                             if(result && result.url){
                                 if(key==='photo1') photo1=result.url; else photo2=result.url;
+
                                 c1[key]={
                                     publicId:result.publicId,
                                     resourceType:result.resourceType,
@@ -1451,14 +1467,20 @@
                                 };
                                 changed=true;
                             }
+
                             done++;
                             photosDone++;
-                            setCloudinaryMigrationStatus(`⏳ Көчүрүлдү: ${done}/${total}`);
+                            setCloudinaryMigrationStatus(
+                                `⏳ Көчүрүлүүдө: ${done}/${batchTotal} сүрөт, ${candidates.length} баланын ичинен`
+                            );
                         }catch(err){
                             done++;
                             errors++;
+                            itemErrors++;
                             console.error('Cloudinary 1 → 4 migration error',item, key, err);
-                            setCloudinaryMigrationStatus(`⚠️ ${done}/${total}: ${item.fullName||item.id} — ${key} көчпөй калды. Калгандары уланат.`);
+                            setCloudinaryMigrationStatus(
+                                `⚠️ ${item.fullName||item.id} — ${key} көчпөй калды. Калган сүрөттөр уланат.`
+                            );
                         }
                     }
 
@@ -1477,29 +1499,49 @@
                             photoStorage:'cloudinary',
                             cloudinary:c1
                         };
+
                         await db.collection('registrations').doc(item.id).update(updateData);
 
                         item.photo1=photo1;
                         item.photo2=photo2;
                         item.cloudinary=c1;
                     }
+
+                    if(itemErrors===0 && changed){
+                        // Бул бала толук иштетилди.
+                    }
                 }
 
                 localStorage.setItem(CLOUDINARY_MIGRATION_KEY,new Date().toISOString());
                 applyFilters();
                 setupLazyCloudinaryImages();
-                const msg=errors
-                    ? `⚠️ Аяктады. ${photosDone}/${total} сүрөт көчүрүлдү. ${errors} сүрөттө ката болду. Кайра бассаңыз, калганын улантат.`
-                    : `✓ Даяр! ${photosDone}/${total} сүрөт Cloudinary 4 — pamyat4кө көчүрүлдү. Firebase шилтемелери жаңыртылды.`;
+
+                // Firebase жаңыртылгандан кийин кайра эсептейбиз.
+                const remainingAfter=allRegistrations.filter(cloudinaryMigrationSource).length;
+
+                let msg;
+                if(errors){
+                    msg=`⚠️ Бул басуу аяктады: ${photosDone}/${batchTotal} сүрөт көчүрүлдү, ${errors} сүрөттө ката болду. `+
+                        `Калган: ${remainingAfter} бала. Кайра бассаңыз, кийинки 10 бала улантылат.`;
+                }else if(remainingAfter>0){
+                    msg=`✓ ${candidates.length} бала иштетилди, ${photosDone}/${batchTotal} сүрөт көчүрүлдү. `+
+                        `Калган: ${remainingAfter} бала. Кийинки 10 баланы көчүрүү үчүн баскычты кайра басыңыз.`;
+                }else{
+                    msg=`✓ Даяр! Cloudinary 1деги бардык сүрөттөр Cloudinary 4 — pamyat4кө көчүрүлдү. Firebase шилтемелери жаңыртылды.`;
+                }
+
                 setCloudinaryMigrationStatus(msg,!errors);
             }catch(err){
                 console.error('Cloudinary migration fatal error:',err);
-                setCloudinaryMigrationStatus(`❌ Миграция токтоду: ${escapeHtml(err.message||String(err))}`);
+                setCloudinaryMigrationStatus(
+                    `❌ Бул 10 балалык көчүрүү токтоду: ${escapeHtml(err.message||String(err))}. Кайра басып улантсаңыз болот.`
+                );
             }finally{
                 cloudinaryMigrationRunning=false;
                 if(btn){btn.disabled=false;btn.style.opacity='1';}
             }
         }
+
 
         function saveSettings() {
             const allowCopy = document.getElementById('settingCopyToggle').checked;
