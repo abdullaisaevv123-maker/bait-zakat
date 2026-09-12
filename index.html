@@ -931,8 +931,12 @@
 
                 <div class="setting-item" style="display:block;">
                     <div class="setting-info">☁️ Cloudinary сүрөт сактагычтары</div>
-                    <div class="setting-desc" style="margin-bottom:12px;">Жаңы сүрөттөр үч Cloudinary аккаунтка кезек менен сакталат. Firebase'деги эски маалыматтар өзгөрбөйт.</div>
+                    <div class="setting-desc" style="margin-bottom:12px;">Эски Cloudinary 1 архив катары калат. Жаңы сүрөттөр Cloudinary 2/3/4кө жүктөлөт. Cloudinary 1деги сүрөттөрдү Cloudinary 4кө көчүрүп, Firebase жазууларын автоматтык жаңыртуу үчүн төмөнкү баскычты колдонуңуз.</div>
                     <div id="cloudinarySettingsStatus" style="display:grid;gap:8px;"></div>
+                    <div style="margin-top:12px;padding:12px;border:1px solid rgba(91,192,190,.22);border-radius:14px;background:rgba(11,19,43,.48);">
+                        <button id="migrateCloudinaryBtn" class="primary-btn" type="button" onclick="migrateCloudinary1To4()" style="width:100%;">☁️ Cloudinary 1 → Cloudinary 4 көчүрүү</button>
+                        <div id="cloudinaryMigrationStatus" style="font-size:12px;color:var(--text-sub);margin-top:9px;text-align:center;line-height:1.5;">Эски сүрөттөрдү Cloudinary 4кө көчүрүп, сайттагы шилтемелерди жаңыртат.</div>
+                    </div>
                 </div>
 
                 <div style="margin-top: 20px;">
@@ -1116,17 +1120,23 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // === CLOUDINARY: 3 АККАУНТ, ЖАҢЫ СҮРӨТТӨР ҮЧҮН ===
-        // 1) oojjfj4c / pamyat2
-        // 2) tfjn735t / pamyat3
-        // 3) lubzzsqe / pamyat1
+        // === CLOUDINARY ===
+        // Cloudinary 1 — ЭСКИ архив. Жаңы сүрөт жүктөөгө ЭМИ КОЛДОНУЛБАЙТ.
+        // Cloudinary 2 — tfjn735t / pamyat3
+        // Cloudinary 3 — lubzzsqe / pamyat1
+        // Cloudinary 4 — kkyzagsu / pamyat4  ← ЖАҢЫ НЕГИЗГИ АККАУНТ
+        const LEGACY_CLOUDINARY_ACCOUNT = {
+            id: 'cloud1', label: 'Cloudinary 1 — pamyat2', cloudName: 'oojjfj4c', uploadPreset: 'pamyat2'
+        };
         const CLOUDINARY_ACCOUNTS = [
-            { id: 'cloud1', label: 'Cloudinary 1 — pamyat2', cloudName: 'oojjfj4c', uploadPreset: 'pamyat2' },
             { id: 'cloud2', label: 'Cloudinary 2 — pamyat3', cloudName: 'tfjn735t', uploadPreset: 'pamyat3' },
-            { id: 'cloud3', label: 'Cloudinary 3 — pamyat1', cloudName: 'lubzzsqe', uploadPreset: 'pamyat1' }
+            { id: 'cloud3', label: 'Cloudinary 3 — pamyat1', cloudName: 'lubzzsqe', uploadPreset: 'pamyat1' },
+            { id: 'cloud4', label: 'Cloudinary 4 — pamyat4', cloudName: 'kkyzagsu', uploadPreset: 'pamyat4' }
         ];
-        const CLOUDINARY_ROTATION_KEY = 'bait_cloudinary_rotation_index_v1';
+        const CLOUDINARY_ROTATION_KEY = 'bait_cloudinary_rotation_index_v2';
+        const CLOUDINARY_MIGRATION_KEY = 'bait_cloudinary_migration_v1';
         let lastCloudinaryUpload = null;
+        let cloudinaryMigrationRunning = false;
 
 
         let currentChildName = "";
@@ -1329,8 +1339,166 @@
         }
 
         function getCloudinarySummary(item){
-            if(!item || !item.cloudinary) return '';
-            return item.cloudinary.accountLabel || item.cloudinary.cloudName || '';
+            if(!item) return '';
+            const c=item.cloudinary || {};
+            const cloudName=String(c.cloudName || '').toLowerCase();
+            const accountId=String(c.accountId || '').toLowerCase();
+            if(accountId==='cloud4' || cloudName==='kkyzagsu' || c.migratedFrom==='cloud1') return 'Cloudinary 4 — pamyat4';
+            if(accountId==='cloud1' || cloudName==='oojjfj4c') return 'Cloudinary 1 — pamyat2';
+            return c.accountLabel || c.cloudName || '';
+        }
+
+        function isLegacyCloudinary1Url(url){
+            const u=String(url||'').trim().toLowerCase();
+            return !!u && (u.includes('res.cloudinary.com/oojjfj4c/') || u.includes('cloudinary.com/oojjfj4c/'));
+        }
+
+        function isCloudinary4Url(url){
+            return String(url||'').toLowerCase().includes('res.cloudinary.com/kkyzagsu/');
+        }
+
+        function cloudinaryMigrationSource(item){
+            const c=item && item.cloudinary ? item.cloudinary : {};
+            const legacyMeta = String(c.accountId||'').toLowerCase()==='cloud1' || String(c.cloudName||'').toLowerCase()==='oojjfj4c';
+            return legacyMeta || isLegacyCloudinary1Url(item?.photo1) || isLegacyCloudinary1Url(item?.photo2);
+        }
+
+        function setCloudinaryMigrationStatus(text, ok=false){
+            const el=document.getElementById('cloudinaryMigrationStatus');
+            if(el){ el.innerHTML=text; el.style.color=ok?'var(--accent-glow)':'var(--text-sub)'; }
+        }
+
+        async function migrateOneCloudinaryImage(sourceUrl, index, total){
+            if(!sourceUrl) return null;
+            if(isCloudinary4Url(sourceUrl)) return {url:sourceUrl, already:true};
+
+            // Cloudinary Upload API remote URL аркылуу эски сүрөттү жаңы аккаунтка түз көчүрө алат.
+            // API secret бул жерде КОЛДОНУЛБАЙТ — pamyat4 unsigned upload preset жетиштүү.
+            const endpoint=`https://api.cloudinary.com/v1_1/${encodeURIComponent('kkyzagsu')}/image/upload`;
+            const form=new FormData();
+            form.append('file', sourceUrl);
+            form.append('upload_preset','pamyat4');
+
+            const response=await withTimeout(fetch(endpoint,{method:'POST',body:form}),90000,'cloudinary-migration-timeout');
+            if(!response.ok){
+                const text=await response.text().catch(()=> '');
+                throw new Error(`Cloudinary 4 HTTP ${response.status}: ${text.slice(0,260)}`);
+            }
+            const result=await response.json();
+            if(!result.secure_url) throw new Error('Cloudinary 4 secure_url кайтарган жок.');
+            return {
+                url:result.secure_url,
+                publicId:result.public_id||null,
+                resourceType:result.resource_type||'image',
+                version:result.version||null,
+                bytes:result.bytes||null,
+                width:result.width||null,
+                height:result.height||null,
+                format:result.format||null,
+                already:false
+            };
+        }
+
+        async function migrateCloudinary1To4(){
+            if(cloudinaryMigrationRunning) return;
+            if(!window.firebase || !db){
+                setCloudinaryMigrationStatus('❌ Firebase даяр эмес.');
+                return;
+            }
+
+            const candidates=allRegistrations.filter(cloudinaryMigrationSource);
+            if(!candidates.length){
+                setCloudinaryMigrationStatus('✓ Cloudinary 1ден көчүрүлө турган сүрөт табылган жок. Баары Cloudinary 4тө болушу мүмкүн.',true);
+                return;
+            }
+
+            const btn=document.getElementById('migrateCloudinaryBtn');
+            cloudinaryMigrationRunning=true;
+            if(btn){btn.disabled=true;btn.style.opacity='.65';}
+
+            let done=0, photosDone=0, errors=0;
+            const total=candidates.reduce((n,item)=>n+(item.photo1?1:0)+(item.photo2?1:0),0);
+            setCloudinaryMigrationStatus(`⏳ Башталды: ${candidates.length} бала, ${total} сүрөт. 0/${total}`);
+
+            try{
+                for(const item of candidates){
+                    let photo1=item.photo1||null;
+                    let photo2=item.photo2||null;
+                    let c1=(item.cloudinary && typeof item.cloudinary==='object')?{...item.cloudinary}:{};
+                    let changed=false;
+
+                    for(const key of ['photo1','photo2']){
+                        const source=item[key];
+                        if(!source){ continue; }
+                        if(isCloudinary4Url(source)){
+                            done++;
+                            photosDone++;
+                            continue;
+                        }
+                        try{
+                            setCloudinaryMigrationStatus(`⏳ ${item.fullName||item.id}: ${key==='photo1'?'1-сүрөт':'2-сүрөт'} көчүрүлүүдө… ${done}/${total}`);
+                            const result=await migrateOneCloudinaryImage(source,done,total);
+                            if(result && result.url){
+                                if(key==='photo1') photo1=result.url; else photo2=result.url;
+                                c1[key]={
+                                    publicId:result.publicId,
+                                    resourceType:result.resourceType,
+                                    version:result.version,
+                                    bytes:result.bytes,
+                                    width:result.width,
+                                    height:result.height,
+                                    format:result.format
+                                };
+                                changed=true;
+                            }
+                            done++;
+                            photosDone++;
+                            setCloudinaryMigrationStatus(`⏳ Көчүрүлдү: ${done}/${total}`);
+                        }catch(err){
+                            done++;
+                            errors++;
+                            console.error('Cloudinary 1 → 4 migration error',item, key, err);
+                            setCloudinaryMigrationStatus(`⚠️ ${done}/${total}: ${item.fullName||item.id} — ${key} көчпөй калды. Калгандары уланат.`);
+                        }
+                    }
+
+                    if(changed){
+                        c1.accountId='cloud4';
+                        c1.accountLabel='Cloudinary 4 — pamyat4';
+                        c1.cloudName='kkyzagsu';
+                        c1.uploadPreset='pamyat4';
+                        c1.migratedFrom='cloud1';
+                        c1.migratedAt=new Date().toISOString();
+                        c1.migrationVersion=1;
+
+                        const updateData={
+                            photo1:photo1,
+                            photo2:photo2,
+                            photoStorage:'cloudinary',
+                            cloudinary:c1
+                        };
+                        await db.collection('registrations').doc(item.id).update(updateData);
+
+                        item.photo1=photo1;
+                        item.photo2=photo2;
+                        item.cloudinary=c1;
+                    }
+                }
+
+                localStorage.setItem(CLOUDINARY_MIGRATION_KEY,new Date().toISOString());
+                applyFilters();
+                setupLazyCloudinaryImages();
+                const msg=errors
+                    ? `⚠️ Аяктады. ${photosDone}/${total} сүрөт көчүрүлдү. ${errors} сүрөттө ката болду. Кайра бассаңыз, калганын улантат.`
+                    : `✓ Даяр! ${photosDone}/${total} сүрөт Cloudinary 4 — pamyat4кө көчүрүлдү. Firebase шилтемелери жаңыртылды.`;
+                setCloudinaryMigrationStatus(msg,!errors);
+            }catch(err){
+                console.error('Cloudinary migration fatal error:',err);
+                setCloudinaryMigrationStatus(`❌ Миграция токтоду: ${escapeHtml(err.message||String(err))}`);
+            }finally{
+                cloudinaryMigrationRunning=false;
+                if(btn){btn.disabled=false;btn.style.opacity='1';}
+            }
         }
 
         function saveSettings() {
@@ -2079,6 +2247,12 @@
 
                 applyFilters();
                 setupLazyCloudinaryImages();
+
+                // Эгер эски Cloudinary 1 жазуулары бар болсо, админге даяр абалды көрсөтөбүз.
+                const migrationStatus=document.getElementById('cloudinaryMigrationStatus');
+                if(migrationStatus && allRegistrations.some(cloudinaryMigrationSource)){
+                    migrationStatus.textContent='Cloudinary 1 архивинен сүрөттөр табылды. Көчүрүү баскычын басып, аларды Cloudinary 4кө өткөрүңүз.';
+                }
 
                 const loading = document.getElementById('loadMoreLoading');
                 if (loading) loading.style.display = 'none';
