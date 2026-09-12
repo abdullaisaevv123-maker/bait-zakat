@@ -1372,13 +1372,52 @@
             if(!sourceUrl) return null;
             if(isCloudinary4Url(sourceUrl)) return {url:sourceUrl, already:true};
 
-            // Cloudinary Upload API remote URL аркылуу эски сүрөттү жаңы аккаунтка түз көчүрө алат.
-            // API secret бул жерде КОЛДОНУЛБАЙТ — pamyat4 unsigned upload preset жетиштүү.
             const endpoint=`https://api.cloudinary.com/v1_1/${encodeURIComponent('kkyzagsu')}/image/upload`;
-            const form=new FormData();
-            form.append('file', sourceUrl);
-            form.append('upload_preset','pamyat4');
 
+            // Биринчи ыкма: эски Cloudinary сүрөтүн браузер аркылуу жүктөп,
+            // жаңы Cloudinary 4кө файл катары кайра жүктөйбүз.
+            // Бул remote-URL fetch каталарын кыйгап өтүүгө жардам берет.
+            try{
+                const sourceResponse=await withTimeout(fetch(sourceUrl,{
+                    method:'GET',
+                    mode:'cors',
+                    cache:'no-store'
+                }),90000,'cloudinary-source-timeout');
+
+                if(sourceResponse.ok){
+                    const blob=await sourceResponse.blob();
+                    if(blob && blob.size){
+                        const form=new FormData();
+                        form.append('file',blob,`migration_${Date.now()}_${index}.jpg`);
+                        form.append('upload_preset','pamyat4');
+                        const response=await withTimeout(fetch(endpoint,{method:'POST',body:form}),90000,'cloudinary-upload-timeout');
+                        if(response.ok){
+                            const result=await response.json();
+                            if(result.secure_url){
+                                return {
+                                    url:result.secure_url,
+                                    publicId:result.public_id||null,
+                                    resourceType:result.resource_type||'image',
+                                    version:result.version||null,
+                                    bytes:result.bytes||null,
+                                    width:result.width||null,
+                                    height:result.height||null,
+                                    format:result.format||null,
+                                    already:false
+                                };
+                            }
+                        }
+                    }
+                }
+            }catch(e){
+                console.warn('Cloudinary blob migration retry:',e);
+            }
+
+            // Экинчи ыкма: Cloudinary өзү source URL'ден көчүрүп көрсүн.
+            // Биринчи ыкма иштебей калганда автоматтык fallback.
+            const form=new FormData();
+            form.append('file',sourceUrl);
+            form.append('upload_preset','pamyat4');
             const response=await withTimeout(fetch(endpoint,{method:'POST',body:form}),90000,'cloudinary-migration-timeout');
             if(!response.ok){
                 const text=await response.text().catch(()=> '');
